@@ -33,6 +33,10 @@ version = "1.0-SNAPSHOT"
 
 repositories {
     jcenter()
+
+    maven {
+        url = uri("https://jitpack.io")
+    }
 }
 
 dependencies {
@@ -42,6 +46,12 @@ dependencies {
 
     implementation(group = "com.sparkjava", name = "spark-core", version = "2.9.1")
     implementation(group = "org.apache.velocity", name = "velocity-engine-core", version = "2.2")
+
+    // Yes, this is JDA
+    // We're running this PR https://github.com/DV8FromTheWorld/JDA/pull/1178
+    implementation(group = "com.github.dv8fromtheworld", name = "JDA", version = "68f4c4b") {
+        exclude(module = "opus-java")
+    }
 }
 
 configure<JavaPluginConvention> {

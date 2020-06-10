@@ -36,7 +36,8 @@ class Server(private val env: Dotenv) {
         get("/") {_, _ ->
             "Hello World" +
                 "<h1>Kotlin ${KotlinVersion.CURRENT}</h1>" +
-                "<h1>Spark 2.9.1</h1>"
+                "<h1>Spark 2.9.1</h1>" +
+                "<h1>User with ID:191231307290771456 is: ${jda.retrieveUserById("191231307290771456").complete()}</h1>"
         }
     }
 

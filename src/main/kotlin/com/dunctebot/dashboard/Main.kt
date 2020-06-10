@@ -25,11 +25,23 @@
 package com.dunctebot.dashboard
 
 import io.github.cdimascio.dotenv.dotenv
+import net.dv8tion.jda.api.JDA
+import net.dv8tion.jda.api.JDABuilder
+import net.dv8tion.jda.api.utils.MemberCachePolicy
+import net.dv8tion.jda.api.utils.cache.CacheFlag
 import org.slf4j.LoggerFactory
+import java.util.*
+
+lateinit var jda: JDA
 
 fun main() {
     val logger = LoggerFactory.getLogger("Main")
     val env = dotenv()
+
+    jda = JDABuilder.createRest(env["BOT_TOKEN"]!!)
+        .setMemberCachePolicy(MemberCachePolicy.NONE)
+        .disableCache(EnumSet.allOf(CacheFlag::class.java))
+        .build()
 
     Server(env)
 
