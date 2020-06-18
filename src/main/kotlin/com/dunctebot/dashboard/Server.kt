@@ -25,6 +25,8 @@
 package com.dunctebot.dashboard
 
 import io.github.cdimascio.dotenv.Dotenv
+import net.dv8tion.jda.api.requests.RestAction
+import net.dv8tion.jda.api.requests.Route
 import spark.Spark.*
 
 class Server(private val env: Dotenv) {
@@ -34,10 +36,13 @@ class Server(private val env: Dotenv) {
         ipAddress(env["SERVER_IP"])
 
         get("/") {_, _ ->
+            val route = Route.Users.GET_USER.compile("191231307290771456")
+            val toData = RestAction.makeAction(jda, route).complete().toData()
+
             "Hello World" +
                 "<h1>Kotlin ${KotlinVersion.CURRENT}</h1>" +
                 "<h1>Spark 2.9.1</h1>" +
-                "<h1>User with ID:191231307290771456 is: ${jda.retrieveUserById("191231307290771456").complete()}</h1>"
+                "<h1>User with ID:191231307290771456 is: ${toData}</h1>"
         }
     }
 

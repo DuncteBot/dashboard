@@ -61,6 +61,11 @@ configure<JavaPluginConvention> {
 }
 
 tasks {
+    compileKotlin {
+        kotlinOptions {
+            jvmTarget = "11"
+        }
+    }
     wrapper {
         gradleVersion = "6.1.1"
         distributionType = Wrapper.DistributionType.ALL
