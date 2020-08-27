@@ -24,26 +24,126 @@
 
 package com.dunctebot.dashboard
 
+import com.dunctebot.dashboard.controllers.RootController
+import com.dunctebot.dashboard.controllers.api.OtherAPi
+import com.dunctebot.dashboard.rendering.VelocityRenderer
+import com.dunctebot.dashboard.rendering.WebVariables
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.json.JsonMapper
+import com.jagrosh.jdautilities.oauth2.OAuth2Client
 import io.github.cdimascio.dotenv.Dotenv
+import spark.ModelAndView
 import spark.Spark.*
 
 class Server(private val env: Dotenv) {
+    private val mapper = JsonMapper()
+    private val engine = VelocityRenderer(env)
+    private val oAuth2Client = OAuth2Client.Builder()
+        .setClientId(env["OAUTH_CLIENT_ID"]!!.toLong())
+        .setClientSecret(env["OAUTH_CLIENT_SECRET"]!!)
+        /*.setOkHttpClient(
+            OkHttpClient.Builder()
+                // hack until JDA-Utils fixes the domain
+                .addInterceptor {
+                    var request = it.request()
+                    val httpUrl = request.url()
+
+                    if (httpUrl.host().contains("discordapp")){
+                        val newHttpUrl = httpUrl.newBuilder()
+                            .host("discord.com")
+                            .build()
+
+                        request = request.newBuilder()
+                            .url(newHttpUrl)
+                            .build()
+                    }
+
+                    it.proceed(request)
+                }
+                .build()
+        )*/
+        .build()
 
     init {
         port(env["SERVER_PORT"]!!.toInt())
         ipAddress(env["SERVER_IP"])
 
-        get("/") {_, _ ->
-            val user = jda.retrieveUserById("191231307290771456").complete()
+        if (env["IS_LOCAL"]!!.toBoolean()) {
+            val projectDir = System.getProperty("user.dir")
+            val staticDir = "/src/main/resources/public"
+            staticFiles.externalLocation(projectDir + staticDir)
+        } else {
+            staticFiles.location("/public")
+        }
 
-            "Hello World" +
-                "<h1>Kotlin ${KotlinVersion.CURRENT}</h1>" +
-                "<h1>Spark 2.9.1</h1>" +
-                "<h1>User with ID:191231307290771456 is: ${user.asTag}</h1>"
+        val responseTransformer: (Any) -> String = {
+            when (it) {
+                is JsonNode -> {
+                    mapper.writeValueAsString(it)
+                }
+                is ModelAndView -> {
+                    engine.render(it)
+                }
+                else -> {
+                    it.toString()
+                }
+            }
+        }
+
+        defaultResponseTransformer(responseTransformer)
+
+        get("/callback") { request, response ->
+            return@get RootController.callback(request, response, oAuth2Client)
+        }
+
+        get("/logout") { request, response ->
+            request.session().invalidate()
+
+            return@get response.redirect(HOMEPAGE)
+        }
+
+        path("/") {
+            before("") { request, response ->
+                return@before RootController.beforeRoot(request, response, oAuth2Client, env)
+            }
+
+            get("") { _, _ ->
+                return@get WebVariables()
+                    .put("title", "Dashboard")
+                    .toModelAndView("dashboard/index.vm")
+            }
+        }
+
+        path("/api") {
+            before("/*") { _, response ->
+                response.type("application/json")
+                response.header("Access-Control-Allow-Origin", "*")
+                response.header("Access-Control-Allow-Credentials", "true")
+                response.header("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE, PATCH")
+                response.header("Access-Control-Allow-Headers", "Content-Type, Accept, X-Requested-With, Authorization")
+                response.header("Access-Control-Max-Age", "3600")
+            }
+
+            options("/*") { _, _ ->
+                // Allow OPTIONS requests
+            }
+
+            get("/user-guilds") { request, response ->
+                return@get OtherAPi.getUserGuilds(request, response, oAuth2Client, mapper)
+            }
         }
     }
 
     fun shutdown() {
         awaitStop()
+    }
+
+    companion object {
+        const val FLASH_MESSAGE = "FLASH_MESSAGE"
+        const val OLD_PAGE = "OLD_PAGE"
+        const val SESSION_ID = "sessionId"
+        const val USER_ID = "USER_SESSION"
+        const val GUILD_ID = ":guildid"
+        const val HOMEPAGE = "https://dunctebot.com/"
     }
 }

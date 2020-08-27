@@ -25,7 +25,7 @@
 plugins {
     java
     application
-    kotlin("jvm") version "1.3.72"
+    kotlin("jvm") version "1.4.0"
 }
 
 group = "com.dunctebot"
@@ -47,6 +47,11 @@ dependencies {
     implementation(group = "com.sparkjava", name = "spark-core", version = "2.9.1")
     implementation(group = "org.apache.velocity", name = "velocity-engine-core", version = "2.2")
 
+    implementation(group = "com.github.ben-manes.caffeine", name = "caffeine", version = "2.8.5")
+
+    implementation(group = "com.fasterxml.jackson.core", name = "jackson-databind", version = "2.10.1")
+
+    implementation(group = "com.jagrosh", name = "jda-utilities-oauth2", version = "3.0.4")
     implementation(group = "net.dv8tion", name = "JDA", version = "4.2.0_198") {
         exclude(module = "opus-java")
     }
