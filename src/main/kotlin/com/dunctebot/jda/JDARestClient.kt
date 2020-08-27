@@ -22,8 +22,29 @@
  * SOFTWARE.
  */
 
-package com.dunctebot.discord.api
+package com.dunctebot.jda
 
-interface DiscordClient {
-    //
+import net.dv8tion.jda.internal.JDAImpl
+import net.dv8tion.jda.internal.utils.config.AuthorizationConfig
+import net.dv8tion.jda.internal.utils.config.MetaConfig
+import net.dv8tion.jda.internal.utils.config.SessionConfig
+import net.dv8tion.jda.internal.utils.config.ThreadingConfig
+
+/**
+ * Custom jda rest client that allows for rest-only usage of JDA
+ *
+ * This class has been inspired by GivawayBot and all credit goes to them https://github.com/jagrosh/GiveawayBot
+ */
+class JDARestClient {
+    private val jda: JDAImpl
+
+    constructor(token: String) {
+        val authConfig = AuthorizationConfig(token)
+        val sessionConfig = SessionConfig.getDefault()
+        val threadConfig = ThreadingConfig.getDefault()
+        val metaConfig = MetaConfig.getDefault()
+
+        jda = JDAImpl(authConfig, sessionConfig, threadConfig, metaConfig)
+    }
+
 }

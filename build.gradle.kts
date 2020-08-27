@@ -47,6 +47,10 @@ dependencies {
     implementation(group = "com.sparkjava", name = "spark-core", version = "2.9.1")
     implementation(group = "org.apache.velocity", name = "velocity-engine-core", version = "2.2")
 
+    implementation(group = "net.dv8tion", name = "JDA", version = "4.2.0_198") {
+        exclude(module = "opus-java")
+    }
+
     // Yes, this is JDA
     // We're running this PR https://github.com/DV8FromTheWorld/JDA/pull/1178
     // but it is broken atm

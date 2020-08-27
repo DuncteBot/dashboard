@@ -24,17 +24,20 @@
 
 package com.dunctebot.dashboard
 
-import com.dunctebot.discord.api.oauth.Scope
+import com.dunctebot.jda.JDARestClient
 import io.github.cdimascio.dotenv.dotenv
+import net.dv8tion.jda.api.JDA
 import org.slf4j.LoggerFactory
+
+lateinit var jda: JDARestClient
 
 fun main() {
     val logger = LoggerFactory.getLogger("Main")
     val env = dotenv()
 
-    Server(env)
+    jda = JDARestClient(env["token"]!!)
 
-    Scope.from("bla")
+    Server(env)
 
     logger.info("Application ready: http://{}:{}/", env["SERVER_IP"], env["SERVER_PORT"])
 }
