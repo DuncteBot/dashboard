@@ -22,26 +22,10 @@
  * SOFTWARE.
  */
 
-package com.dunctebot.dashboard
+package com.dunctebot.discord.entities
 
-import io.github.cdimascio.dotenv.Dotenv
-import spark.Spark.*
+interface ISnowflake {
 
-class Server(private val env: Dotenv) {
-
-    init {
-        port(env["SERVER_PORT"]!!.toInt())
-        ipAddress(env["SERVER_IP"])
-
-        get("/") {_, _ ->
-            "Hello World" +
-                "<h1>Kotlin ${KotlinVersion.CURRENT}</h1>" +
-                "<h1>Spark 2.9.1</h1>" +
-                "<h1>User with ID:191231307290771456 is: </h1>"
-        }
-    }
-
-    fun shutdown() {
-        awaitStop()
-    }
+    val id: String
+    val idLong: Long
 }

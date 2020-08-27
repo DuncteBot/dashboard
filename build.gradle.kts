@@ -49,9 +49,10 @@ dependencies {
 
     // Yes, this is JDA
     // We're running this PR https://github.com/DV8FromTheWorld/JDA/pull/1178
-    implementation(group = "com.github.dv8fromtheworld", name = "JDA", version = "68f4c4b") {
+    // but it is broken atm
+    /*implementation(group = "com.github.dv8fromtheworld", name = "JDA", version = "68f4c4b") {
         exclude(module = "opus-java")
-    }
+    }*/
 }
 
 configure<JavaPluginConvention> {
