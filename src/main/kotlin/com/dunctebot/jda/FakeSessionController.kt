@@ -22,43 +22,34 @@
  * SOFTWARE.
  */
 
-package com.dunctebot.dashboard
+package com.dunctebot.jda
 
-import com.dunctebot.dashboard.controllers.GuildController
-import com.dunctebot.dashboard.controllers.api.OtherAPi
-import com.dunctebot.jda.JDARestClient
-import io.github.cdimascio.dotenv.dotenv
-import org.slf4j.LoggerFactory
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
+import net.dv8tion.jda.api.JDA
+import net.dv8tion.jda.api.utils.SessionController
+import net.dv8tion.jda.internal.utils.tuple.Pair
 
-lateinit var jda: JDARestClient
+class FakeSessionController : SessionController {
+    private var globalRateLimit = 0L
 
-private val systemPool = Executors.newScheduledThreadPool(4) { Thread(it, "Bot-Service-Thread") }
+    override fun appendSession(node: SessionController.SessionConnectNode) {
+        // do nothing
+    }
 
-fun main() {
-    val logger = LoggerFactory.getLogger("Main")
-    val env = dotenv()
+    override fun removeSession(node: SessionController.SessionConnectNode) {
+        TODO("Not yet implemented")
+    }
 
-    jda = JDARestClient(env["BOT_TOKEN"]!!)
+    override fun getGlobalRatelimit(): Long  = globalRateLimit
 
-    Server(env)
+    override fun setGlobalRatelimit(ratelimit: Long) {
+        globalRateLimit = ratelimit
+    }
 
-    // start cleaners
-    // clean the hashes pool every hour
-    systemPool.scheduleAtFixedRate(
-        GuildController.guildHashes::cleanUp,
-        1,
-        1,
-        TimeUnit.HOURS
-    )
-    // Clean the guilds pool every 30 minutes
-    systemPool.scheduleAtFixedRate(
-        OtherAPi.guildsRequests::cleanUp,
-        30,
-        30,
-        TimeUnit.MINUTES
-    )
+    override fun getGateway(api: JDA): String {
+        TODO("Not yet implemented")
+    }
 
-    logger.info("Application ready: http://{}:{}/", env["SERVER_IP"], env["SERVER_PORT"])
+    override fun getGatewayBot(api: JDA): Pair<String, Int> {
+        TODO("Not yet implemented")
+    }
 }

@@ -24,6 +24,7 @@
 
 package com.dunctebot.dashboard
 
+import com.dunctebot.dashboard.controllers.GuildController
 import com.dunctebot.dashboard.controllers.RootController
 import com.dunctebot.dashboard.controllers.api.OtherAPi
 import com.dunctebot.dashboard.rendering.VelocityRenderer
@@ -92,6 +93,12 @@ class Server(private val env: Dotenv) {
 
         defaultResponseTransformer(responseTransformer)
 
+        // Non settings related routes
+        get("/roles/:hash") { request, response ->
+            return@get GuildController.showGuildRoles(request, response)
+        }
+
+        // settings related routes
         get("/callback") { request, response ->
             return@get RootController.callback(request, response, oAuth2Client)
         }

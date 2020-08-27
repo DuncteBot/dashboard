@@ -44,8 +44,8 @@ eventBus.once('loaded', () => {
                 let members = 'Bot not in server';
                 let settingsLink = `<a href="https://discord.com/oauth2/authorize?client_id=210363111729790977&scope=bot&permissions=1609952470&guild_id=${guild.id}" target="_blank">Invite Bot</a>`;
 
-                if (guild.in_server) {
-                    members = '';
+                if (guild.members > -1) {
+                    members = `${guild.members} members`;
                     settingsLink = `<a href="/server/${guild.id}/">Edit settings</a>`;
                 }
 

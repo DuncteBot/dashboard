@@ -27,6 +27,7 @@ package com.dunctebot.dashboard.controllers.api
 import com.dunctebot.dashboard.Server.Companion.SESSION_ID
 import com.dunctebot.dashboard.Server.Companion.USER_ID
 import com.dunctebot.dashboard.getSession
+import com.dunctebot.dashboard.jda
 import com.dunctebot.dashboard.userId
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.json.JsonMapper
@@ -41,16 +42,12 @@ import java.util.concurrent.ThreadLocalRandom
 import java.util.concurrent.TimeUnit
 
 object OtherAPi {
-    private val guildsRequests = Caffeine.newBuilder()
+    val guildsRequests = Caffeine.newBuilder()
         .expireAfterWrite(5, TimeUnit.MINUTES)
         .build<String, List<OAuth2Guild>>()
 
     fun getUserGuilds(request: Request, response: Response, oAuth2Client: OAuth2Client, mapper: JsonMapper): Any {
         val attributes = request.session().attributes()
-
-        // Since we're not accessing the cache we need to call this method manually
-        // All this does is remove expired entries from the cache
-        guildsRequests.cleanUp()
 
         // We need to make sure that we are logged in and have a user id
         // If we don't have either of them we will return an error message
@@ -87,7 +84,6 @@ object OtherAPi {
     }
 
     private fun guildToJson(guild: OAuth2Guild, mapper: JsonMapper): JsonNode {
-
         // Get guild id or random default avatar url
         val icon = if (!guild.iconUrl.isNullOrEmpty()) {
             guild.iconUrl
@@ -96,12 +92,14 @@ object OtherAPi {
             "https://cdn.discordapp.com/embed/avatars/$number.png"
         }
 
+        val memberCount = jda.fakeJDA.getGuildById(guild.idLong)?.memberCount ?: -1
+
         return mapper.createObjectNode()
             .put("name", guild.name)
             .put("iconId", guild.iconId)
             .put("iconUrl", icon)
             .put("owner", guild.isOwner)
-            .put("in_server", false)
+            .put("members", memberCount)
             .put("id", guild.id)
     }
 }
