@@ -22,49 +22,11 @@
  * SOFTWARE.
  */
 
-package com.dunctebot.discord.entities
+package com.dunctebot.discord.api.rest.actions
 
-import com.dunctebot.discord.DiscordClient
+import com.dunctebot.discord.internal.rest.Method
+import com.dunctebot.discord.internal.oauth.OAuth2ClientImpl
 
-interface User : ISnowflake {
-    val name: String
+open class Oauth2Action<T>(protected val client: OAuth2ClientImpl, protected val method: Method, protected val url: String) {
 
-    val discriminator: String
-
-    val avatarId: String?
-
-    val avatarUrl: String?
-        get() = if (avatarId == null) null else {
-            val extension = if (avatarId!!.startsWith("a_")) "gif" else "png"
-            AVATAR_URL.format(id, avatarId, extension)
-        }
-
-    val defaultAvatarId: String
-
-    val defaultAvatarUrl: String
-        get() = DEFAULT_AVATAR_URL.format(id, defaultAvatarId)
-
-    val effectiveAvatarUrl: String
-        get() = if (avatarId == null) defaultAvatarUrl else avatarUrl!!
-
-    val tag: String
-
-    val hasPrivateChannel: Boolean
-
-    // todo: open private channel
-
-    // todo: get mutual guilds
-
-    val bot: Boolean
-
-    val client: DiscordClient
-
-    // todo: flags
-
-    val flagsRaw: Int
-
-    companion object {
-        const val AVATAR_URL = "https://cdn.discordapp.com/avatars/%s/%s.%s"
-        const val DEFAULT_AVATAR_URL = "https://cdn.discordapp.com/embed/avatars/%s.png"
-    }
 }

@@ -22,19 +22,11 @@
  * SOFTWARE.
  */
 
-package com.dunctebot.dashboard
+package com.dunctebot.discord.api.oauth.session
 
-import com.dunctebot.discord.api.oauth.Scope
-import io.github.cdimascio.dotenv.dotenv
-import org.slf4j.LoggerFactory
+interface SessionController<T : Session> {
 
-fun main() {
-    val logger = LoggerFactory.getLogger("Main")
-    val env = dotenv()
+    fun getSession(identifier: String): T?
 
-    Server(env)
-
-    Scope.from("bla")
-
-    logger.info("Application ready: http://{}:{}/", env["SERVER_IP"], env["SERVER_PORT"])
+    fun createSession(info: SessionInfo): T
 }

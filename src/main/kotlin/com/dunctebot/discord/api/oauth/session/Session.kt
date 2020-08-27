@@ -22,8 +22,15 @@
  * SOFTWARE.
  */
 
-package com.dunctebot.discord.entities.impl
+package com.dunctebot.discord.api.oauth.session
 
-class UserImpl {
-    // todo
+import com.dunctebot.discord.api.oauth.Scope
+import java.time.OffsetDateTime
+
+interface Session {
+    val accessToken: String
+    val refreshToken: String
+    val scopes: List<Scope>
+    val tokenType: String
+    val expiration: OffsetDateTime
 }

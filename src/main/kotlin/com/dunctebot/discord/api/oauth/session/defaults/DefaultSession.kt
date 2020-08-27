@@ -22,19 +22,20 @@
  * SOFTWARE.
  */
 
-package com.dunctebot.dashboard
+package com.dunctebot.discord.api.oauth.session.defaults
 
 import com.dunctebot.discord.api.oauth.Scope
-import io.github.cdimascio.dotenv.dotenv
-import org.slf4j.LoggerFactory
+import com.dunctebot.discord.api.oauth.session.Session
+import com.dunctebot.discord.api.oauth.session.SessionInfo
+import java.time.OffsetDateTime
 
-fun main() {
-    val logger = LoggerFactory.getLogger("Main")
-    val env = dotenv()
-
-    Server(env)
-
-    Scope.from("bla")
-
-    logger.info("Application ready: http://{}:{}/", env["SERVER_IP"], env["SERVER_PORT"])
+class DefaultSession(
+    override val accessToken: String,
+    override val refreshToken: String,
+    override val tokenType: String,
+    override val expiration: OffsetDateTime,
+    override val scopes: List<Scope>
+) : Session {
+    constructor(info: SessionInfo):
+        this(info.accessToken, info.refreshToken, info.tokenType, info.expiration, info.scopes)
 }

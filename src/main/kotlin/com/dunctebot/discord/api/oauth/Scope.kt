@@ -22,19 +22,33 @@
  * SOFTWARE.
  */
 
-package com.dunctebot.dashboard
+package com.dunctebot.discord.api.oauth
 
-import com.dunctebot.discord.api.oauth.Scope
-import io.github.cdimascio.dotenv.dotenv
-import org.slf4j.LoggerFactory
+enum class Scope(val scope: String) {
+    BOT("bot"),
+    CONNECTIONS("connections"),
+    EMAIL("email"),
+    IDENTIFY("identify"),
+    GUILDS("guilds"),
+    GUILDS_JOIN("guilds.join"),
+    GDM_JOIN("gdm.join"),
+    MESSAGES_READ("messages.read"),
+    RPC("rpc"),
+    RPC_API("rpc.api"),
+    RPC_NOTIFICATIONS_READ("rpc.notifications.read"),
+    WEBHOOK_INCOMING("webhook.incoming"),
+    UNKNOWN("");
 
-fun main() {
-    val logger = LoggerFactory.getLogger("Main")
-    val env = dotenv()
+    companion object {
+        @JvmStatic
+        fun join(bySpace: Boolean = false, vararg scopes: Scope): String {
+            val separator = if (bySpace) " " else "%20"
+            return scopes.joinToString(separator = separator, transform = Scope::scope)
+        }
 
-    Server(env)
-
-    Scope.from("bla")
-
-    logger.info("Application ready: http://{}:{}/", env["SERVER_IP"], env["SERVER_PORT"])
+        @JvmStatic
+        fun from(scope: String): Scope {
+            return values().find { it.scope == scope.toLowerCase() } ?: UNKNOWN
+        }
+    }
 }

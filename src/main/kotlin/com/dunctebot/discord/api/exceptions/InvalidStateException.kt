@@ -22,19 +22,6 @@
  * SOFTWARE.
  */
 
-package com.dunctebot.dashboard
+package com.dunctebot.discord.api.exceptions
 
-import com.dunctebot.discord.api.oauth.Scope
-import io.github.cdimascio.dotenv.dotenv
-import org.slf4j.LoggerFactory
-
-fun main() {
-    val logger = LoggerFactory.getLogger("Main")
-    val env = dotenv()
-
-    Server(env)
-
-    Scope.from("bla")
-
-    logger.info("Application ready: http://{}:{}/", env["SERVER_IP"], env["SERVER_PORT"])
-}
+class InvalidStateException(message: String) : Exception(message)

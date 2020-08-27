@@ -22,19 +22,16 @@
  * SOFTWARE.
  */
 
-package com.dunctebot.dashboard
+package com.dunctebot.discord.api.oauth.session
 
 import com.dunctebot.discord.api.oauth.Scope
-import io.github.cdimascio.dotenv.dotenv
-import org.slf4j.LoggerFactory
+import java.time.OffsetDateTime
 
-fun main() {
-    val logger = LoggerFactory.getLogger("Main")
-    val env = dotenv()
-
-    Server(env)
-
-    Scope.from("bla")
-
-    logger.info("Application ready: http://{}:{}/", env["SERVER_IP"], env["SERVER_PORT"])
-}
+data class SessionInfo(
+    val identifier: String,
+    val accessToken: String,
+    val refreshToken: String,
+    val tokenType: String,
+    val expiration: OffsetDateTime,
+    val scopes: List<Scope>
+)

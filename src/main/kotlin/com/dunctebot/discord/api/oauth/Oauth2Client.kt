@@ -22,19 +22,33 @@
  * SOFTWARE.
  */
 
-package com.dunctebot.dashboard
+package com.dunctebot.discord.api.oauth
 
-import com.dunctebot.discord.api.oauth.Scope
-import io.github.cdimascio.dotenv.dotenv
-import org.slf4j.LoggerFactory
+import com.dunctebot.discord.api.entities.Guild
+import com.dunctebot.discord.api.entities.User
+import com.dunctebot.discord.api.exceptions.InvalidStateException
+import com.dunctebot.discord.api.oauth.session.Session
+import com.dunctebot.discord.api.oauth.session.SessionController
+import com.dunctebot.discord.api.oauth.state.StateController
+import com.dunctebot.discord.api.rest.actions.Oauth2Action
 
-fun main() {
-    val logger = LoggerFactory.getLogger("Main")
-    val env = dotenv()
+interface Oauth2Client {
+    val id: Long
+    val secret: String
+    val stateController: StateController
+    val sessionController: SessionController<Session>
 
-    Server(env)
+    fun generateAuthorizationURL(redirectUri: String, vararg scopes: Scope): String
 
-    Scope.from("bla")
+    @Throws(InvalidStateException::class)
+    fun startSession(code: String, state: String, identifier: String, vararg scopes: Scope): Oauth2Action<Session>
 
-    logger.info("Application ready: http://{}:{}/", env["SERVER_IP"], env["SERVER_PORT"])
+    // TODO: find out if we want to use the same user object
+    fun getUser(session: Session): Oauth2Action<User>
+
+    fun getGuilds(session: Session): Oauth2Action<List<Guild>>
+
+    companion object {
+        const val REST_VERSION = 6
+    }
 }

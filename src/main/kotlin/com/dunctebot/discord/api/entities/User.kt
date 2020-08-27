@@ -22,19 +22,49 @@
  * SOFTWARE.
  */
 
-package com.dunctebot.dashboard
+package com.dunctebot.discord.api.entities
 
-import com.dunctebot.discord.api.oauth.Scope
-import io.github.cdimascio.dotenv.dotenv
-import org.slf4j.LoggerFactory
+import com.dunctebot.discord.api.DiscordClient
 
-fun main() {
-    val logger = LoggerFactory.getLogger("Main")
-    val env = dotenv()
+interface User : ISnowflake {
+    val name: String
 
-    Server(env)
+    val discriminator: String
 
-    Scope.from("bla")
+    val avatarId: String?
 
-    logger.info("Application ready: http://{}:{}/", env["SERVER_IP"], env["SERVER_PORT"])
+    val avatarUrl: String?
+        get() = if (avatarId == null) null else {
+            val extension = if (avatarId!!.startsWith("a_")) "gif" else "png"
+            AVATAR_URL.format(id, avatarId, extension)
+        }
+
+    val defaultAvatarId: String
+
+    val defaultAvatarUrl: String
+        get() = DEFAULT_AVATAR_URL.format(id, defaultAvatarId)
+
+    val effectiveAvatarUrl: String
+        get() = if (avatarId == null) defaultAvatarUrl else avatarUrl!!
+
+    val tag: String
+
+    val hasPrivateChannel: Boolean
+
+    // todo: open private channel
+
+    // todo: get mutual guilds
+
+    val bot: Boolean
+
+    val client: DiscordClient
+
+    // todo: flags
+
+    val flagsRaw: Int
+
+    companion object {
+        const val AVATAR_URL = "https://cdn.discordapp.com/avatars/%s/%s.%s"
+        const val DEFAULT_AVATAR_URL = "https://cdn.discordapp.com/embed/avatars/%s.png"
+    }
 }

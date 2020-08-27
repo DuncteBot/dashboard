@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package com.dunctebot.discord.rest
+package com.dunctebot.discord.api.rest
 
 interface RestClient {
     // todo

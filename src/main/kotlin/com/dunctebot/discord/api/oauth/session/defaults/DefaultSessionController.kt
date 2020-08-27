@@ -22,10 +22,21 @@
  * SOFTWARE.
  */
 
-package com.dunctebot.discord.entities
+package com.dunctebot.discord.api.oauth.session.defaults
 
-interface ISnowflake {
+import com.dunctebot.discord.api.oauth.session.SessionController
+import com.dunctebot.discord.api.oauth.session.SessionInfo
 
-    val id: String
-    val idLong: Long
+class DefaultSessionController: SessionController<DefaultSession> {
+    private val sessions = mutableMapOf<String, DefaultSession>()
+
+    override fun getSession(identifier: String): DefaultSession? = sessions[identifier]
+
+    override fun createSession(info: SessionInfo): DefaultSession {
+        val newSession = DefaultSession(info)
+
+        sessions[info.identifier] = newSession
+
+        return newSession
+    }
 }

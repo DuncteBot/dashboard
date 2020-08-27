@@ -22,19 +22,21 @@
  * SOFTWARE.
  */
 
-package com.dunctebot.dashboard
+package com.dunctebot.discord.api.oauth.state.defaults
 
-import com.dunctebot.discord.api.oauth.Scope
-import io.github.cdimascio.dotenv.dotenv
-import org.slf4j.LoggerFactory
+import com.dunctebot.discord.api.oauth.state.StateController
+import java.util.*
 
-fun main() {
-    val logger = LoggerFactory.getLogger("Main")
-    val env = dotenv()
+class DefaultStateController : StateController {
+    private val states = mutableMapOf<String, String>()
 
-    Server(env)
+    override fun generateNewState(redirectUri: String): String {
+        val newState = UUID.randomUUID().toString()
 
-    Scope.from("bla")
+        states[newState] = redirectUri
 
-    logger.info("Application ready: http://{}:{}/", env["SERVER_IP"], env["SERVER_PORT"])
+        return newState
+    }
+
+    override fun consumeState(state: String): String? = states.remove(state)
 }

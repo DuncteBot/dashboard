@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package com.dunctebot.discord
+package com.dunctebot.discord.api
 
 interface DiscordClient {
     //
