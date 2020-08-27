@@ -34,10 +34,12 @@ class Server(private val env: Dotenv) {
         ipAddress(env["SERVER_IP"])
 
         get("/") {_, _ ->
+            val user = jda.retrieveUserById("191231307290771456").complete()
+
             "Hello World" +
                 "<h1>Kotlin ${KotlinVersion.CURRENT}</h1>" +
                 "<h1>Spark 2.9.1</h1>" +
-                "<h1>User with ID:191231307290771456 is: </h1>"
+                "<h1>User with ID:191231307290771456 is: ${user.asTag}</h1>"
         }
     }
 
