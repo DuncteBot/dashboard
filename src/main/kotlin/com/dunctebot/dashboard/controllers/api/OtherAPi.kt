@@ -55,7 +55,7 @@ object OtherAPi {
             request.session().invalidate()
 
             return mapper.createObjectNode()
-                .put("status", "error")
+                .put("success", false)
                 .put("message", "SESSION_INVALID")
                 .put("code", response.status())
         }
@@ -77,7 +77,7 @@ object OtherAPi {
         }
 
         return mapper.createObjectNode()
-            .put("status", "success")
+            .put("success", true)
             .put("total", guildsRequest.size)
             .put("code", response.status())
             .set<ObjectNode>("guilds", guilds)
