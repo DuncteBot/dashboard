@@ -30,6 +30,7 @@ import com.dunctebot.dashboard.controllers.api.OtherAPi
 import com.dunctebot.dashboard.controllers.errors.HttpErrorHandlers
 import com.dunctebot.dashboard.rendering.VelocityRenderer
 import com.dunctebot.dashboard.rendering.WebVariables
+import com.dunctebot.dashboard.websocket.DataWebSocket
 import com.dunctebot.dashboard.websocket.EchoWebSocket
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.json.JsonMapper
@@ -98,6 +99,7 @@ class Server(private val env: Dotenv) {
 
         defaultResponseTransformer(responseTransformer)
 
+        webSocket("/websocket", DataWebSocket::class.java)
         webSocket("/echo", EchoWebSocket::class.java)
 
         // Non settings related routes

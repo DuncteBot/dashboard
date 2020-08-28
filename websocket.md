@@ -6,19 +6,19 @@
 - creating role hashes
 
 #### Internal data exchange
-Request:
+Request (from-bot):
 ```json
 {
-  "roles_put_hash": {
-    "guild_id": "1321513153",
-    "hash": "blablabla"
-  }
+  "t": "ROLES_PUT_HASH",
+  "guild_id": "1321513153",
+  "hash": "blablabla"
 }
 ```
-Response:
+Response (to-bot):
 ```json
 {
-  "roles_put_hash": {
+  "t": "ROLES_PUT_HASH",
+  "data": {
     "guild_id": "1321513153",
     "hash": "blablabla",
     "success": true 
@@ -27,34 +27,36 @@ Response:
 ```
 
 #### invalidating guild settings and updating
+Request (to-bot):
 ```json
 {
-  "guild_settings": {
-    "remove": [
-      "array of guild ids to forget the settings for"
-    ],
-    "update": [
-      "array of guild ids to update the settings for"
-    ],
-    "add": [
-      "array of guild ids to fetch the settings for"
-    ]
-  }
+  "t": "GUILD_SETTINGS",
+  "remove": [
+    "array of guild ids to forget the settings for"
+  ],
+  "update": [
+    "array of guild ids to update the settings for"
+  ],
+  "add": [
+    "array of guild ids to fetch the settings for"
+  ]
 }
 ```
 
 #### getting command info
-Request:
+Request (to-bot):
 ```json
 {
-  "retrieve": {
-    "commands": {}
-  }
+  "t": "RETRIEVE",
+  "identifier": "Identifier for finding the data we requested",
+  "commands": {}
 }
 ```
-Response:
+Response (from-bot):
 ```json
 {
+  "t": "RETRIEVE",
+  "identifier": "Identifier for finding the data we requested",
   "commands": [
     {
       "name": "etc..."
@@ -66,23 +68,25 @@ Response:
 #### getting guild info
 All fields are optional
 
-Request:
+Request (to-bot):
 ```json
 {
-  "retrieve": {
-    "guilds": [
-      "list of guild ids"
-    ],
-    "guild_member_info": {
-      "guild_id": "13456",
-      "member_id": "5464654684"
-    }
+  "t": "RETRIEVE",
+  "identifier": "Identifier for finding the data we requested",
+  "guilds": [
+    "list of guild ids"
+  ],
+  "guild_member_info": {
+    "guild_id": "13456",
+    "member_id": "5464654684"
   }
 }
 ```
-Response:
+Response (from-bot):
 ```json
 {
+  "t": "RETRIEVE",
+  "identifier": "Identifier for finding the data we requested",
   "guilds": [
     {
       "guild_id": "13456",
