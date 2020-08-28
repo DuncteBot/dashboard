@@ -27,8 +27,9 @@ package com.dunctebot.dashboard.controllers.api
 import com.dunctebot.dashboard.Server.Companion.SESSION_ID
 import com.dunctebot.dashboard.Server.Companion.USER_ID
 import com.dunctebot.dashboard.getSession
-import com.dunctebot.dashboard.jda
+import com.dunctebot.dashboard.restJDA
 import com.dunctebot.dashboard.userId
+import com.dunctebot.duncteapi.jsonMapper
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.json.JsonMapper
 import com.fasterxml.jackson.databind.node.ObjectNode
@@ -46,7 +47,7 @@ object OtherAPi {
         .expireAfterWrite(5, TimeUnit.MINUTES)
         .build<String, List<OAuth2Guild>>()
 
-    fun getUserGuilds(request: Request, response: Response, oAuth2Client: OAuth2Client, mapper: JsonMapper): Any {
+    fun getUserGuilds(request: Request, response: Response, oAuth2Client: OAuth2Client): Any {
         val attributes = request.session().attributes()
 
         // We need to make sure that we are logged in and have a user id
@@ -54,13 +55,13 @@ object OtherAPi {
         if (!attributes.contains(USER_ID) || !attributes.contains(SESSION_ID)) {
             request.session().invalidate()
 
-            return mapper.createObjectNode()
+            return jsonMapper.createObjectNode()
                 .put("success", false)
                 .put("message", "SESSION_INVALID")
                 .put("code", response.status())
         }
 
-        val guilds = mapper.createArrayNode()
+        val guilds = jsonMapper.createArrayNode()
 
         // Attempt to get all guilds from the cache
         // We are using a cache here to make sure we don't rate limit our application
@@ -72,11 +73,11 @@ object OtherAPi {
             // Only add the servers where the user has the MANAGE_SERVER
             // perms to the list
             if (it.hasPermission(Permission.MANAGE_SERVER)) {
-                guilds.add(guildToJson(it, mapper))
+                guilds.add(guildToJson(it, jsonMapper))
             }
         }
 
-        return mapper.createObjectNode()
+        return jsonMapper.createObjectNode()
             .put("success", true)
             .put("total", guildsRequest.size)
             .put("code", response.status())
@@ -93,7 +94,7 @@ object OtherAPi {
         }
 
         // TODO: fetch guild info from bot
-        val memberCount = jda.fakeJDA.getGuildById(guild.idLong)?.memberCount ?: -1
+        val memberCount = restJDA.fakeJDA.getGuildById(guild.idLong)?.memberCount ?: -1
 
         return mapper.createObjectNode()
             .put("name", guild.name)

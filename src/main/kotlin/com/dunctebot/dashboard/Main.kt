@@ -26,13 +26,15 @@ package com.dunctebot.dashboard
 
 import com.dunctebot.dashboard.controllers.GuildController
 import com.dunctebot.dashboard.controllers.api.OtherAPi
+import com.dunctebot.duncteapi.DuncteApi
 import com.dunctebot.jda.JDARestClient
 import io.github.cdimascio.dotenv.dotenv
 import org.slf4j.LoggerFactory
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
-lateinit var jda: JDARestClient
+lateinit var restJDA: JDARestClient
+lateinit var duncteApis: DuncteApi
 
 private val systemPool = Executors.newScheduledThreadPool(4) { Thread(it, "Bot-Service-Thread") }
 
@@ -40,7 +42,8 @@ fun main() {
     val logger = LoggerFactory.getLogger("Main")
     val env = dotenv()
 
-    jda = JDARestClient(env["BOT_TOKEN"]!!)
+    restJDA = JDARestClient(env["BOT_TOKEN"]!!)
+    duncteApis = DuncteApi(env["BOT_TOKEN"]!!)
 
     Server(env)
 

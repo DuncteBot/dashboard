@@ -25,7 +25,7 @@
 package com.dunctebot.dashboard.controllers
 
 import com.dunctebot.dashboard.WebHelpers
-import com.dunctebot.dashboard.jda
+import com.dunctebot.dashboard.restJDA
 import com.dunctebot.dashboard.rendering.WebVariables
 import com.github.benmanes.caffeine.cache.Caffeine
 import net.dv8tion.jda.api.entities.Member
@@ -52,13 +52,13 @@ object GuildController {
         val guild = try {
             // TODO: do we want to do this?
             // Maybe only cache for a short time as it will get outdated data
-            jda.fakeJDA.getGuildById(guildId) ?: jda.retrieveGuildById(guildId.toString()).complete()
+            restJDA.fakeJDA.getGuildById(guildId) ?: restJDA.retrieveGuildById(guildId.toString()).complete()
         } catch (e: ErrorResponseException) {
             e.printStackTrace()
             return WebHelpers.haltNotFound(request, response)
         }
 
-        val members = jda.retrieveAllMembers(guild).stream().toList()
+        val members = restJDA.retrieveAllMembers(guild).stream().toList()
 
         println("Approximate count: ${guild.memberCount}")
         println("Actual count: ${members.size}")

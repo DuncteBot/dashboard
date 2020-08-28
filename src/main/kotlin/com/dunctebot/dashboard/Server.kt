@@ -32,8 +32,8 @@ import com.dunctebot.dashboard.rendering.VelocityRenderer
 import com.dunctebot.dashboard.rendering.WebVariables
 import com.dunctebot.dashboard.websocket.DataWebSocket
 import com.dunctebot.dashboard.websocket.EchoWebSocket
+import com.dunctebot.duncteapi.jsonMapper
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.json.JsonMapper
 import com.jagrosh.jdautilities.oauth2.OAuth2Client
 import io.github.cdimascio.dotenv.Dotenv
 import spark.ModelAndView
@@ -43,7 +43,6 @@ import spark.Spark.*
 // The socket server will be used to communicate with DuncteBot himself
 // NGINX can secure the websocket (hopefully it does this by default as we are using the same domain)
 class Server(private val env: Dotenv) {
-    private val mapper = JsonMapper()
     private val engine = VelocityRenderer(env)
     private val oAuth2Client = OAuth2Client.Builder()
         .setClientId(env["OAUTH_CLIENT_ID"]!!.toLong())
@@ -86,7 +85,7 @@ class Server(private val env: Dotenv) {
         val responseTransformer: (Any) -> String = {
             when (it) {
                 is JsonNode -> {
-                    mapper.writeValueAsString(it)
+                    jsonMapper.writeValueAsString(it)
                 }
                 is ModelAndView -> {
                     engine.render(it)
@@ -111,13 +110,13 @@ class Server(private val env: Dotenv) {
         addAPIRoutes()
 
         notFound { request, response ->
-            val result = HttpErrorHandlers.notFound(request, response, mapper)
+            val result = HttpErrorHandlers.notFound(request, response)
 
             return@notFound responseTransformer(result)
         }
 
         internalServerError { request, response ->
-            val result = HttpErrorHandlers.internalServerError(request, response, mapper)
+            val result = HttpErrorHandlers.internalServerError(request, response)
 
             return@internalServerError responseTransformer(result)
         }
@@ -170,7 +169,7 @@ class Server(private val env: Dotenv) {
             }
 
             get("/user-guilds") { request, response ->
-                return@get OtherAPi.getUserGuilds(request, response, oAuth2Client, mapper)
+                return@get OtherAPi.getUserGuilds(request, response, oAuth2Client)
             }
 
             get("/commands.json") {_, _ ->

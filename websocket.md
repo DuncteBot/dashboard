@@ -5,13 +5,22 @@
 - check if bot in guild
 - creating role hashes
 
+#### Authorising
+Request (from-bot):
+```json
+{
+  "t": "IDENTIFY",
+  "token": "auth token for api"
+}
+```
+
 #### Internal data exchange
 Request (from-bot):
 ```json
 {
-  "t": "ROLES_PUT_HASH",
-  "guild_id": "1321513153",
-  "hash": "blablabla"
+  "t": "IDENTIFY",
+  "success": true,
+  "message": "Only present if success is false, gives info about the error"
 }
 ```
 Response (to-bot):

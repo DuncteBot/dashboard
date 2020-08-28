@@ -20,13 +20,13 @@ package com.dunctebot.dashboard.controllers.errors
 
 import com.dunctebot.dashboard.constants.ContentType
 import com.dunctebot.dashboard.rendering.WebVariables
-import com.fasterxml.jackson.databind.json.JsonMapper
+import com.dunctebot.duncteapi.jsonMapper
 import spark.Request
 import spark.Response
 
 object HttpErrorHandlers {
 
-    fun notFound(request: Request, response: Response, mapper: JsonMapper): Any {
+    fun notFound(request: Request, response: Response): Any {
         if (request.headers("Accept") != ContentType.JSON || response.type() != ContentType.JSON) {
             response.type(ContentType.HTML)
 
@@ -37,13 +37,13 @@ object HttpErrorHandlers {
 
         response.type(ContentType.JSON)
 
-        return mapper.createObjectNode()
+        return jsonMapper.createObjectNode()
             .put("success", false)
             .put("message", "'${request.pathInfo()}' was not found")
             .put("code", response.status())
     }
 
-    fun internalServerError(request: Request, response: Response, mapper: JsonMapper): Any {
+    fun internalServerError(request: Request, response: Response): Any {
         if (request.headers("Accept") != ContentType.JSON || response.type() != ContentType.JSON) {
             response.type(ContentType.HTML)
 
@@ -54,7 +54,7 @@ object HttpErrorHandlers {
 
         response.type(ContentType.JSON)
 
-        return mapper.createObjectNode()
+        return jsonMapper.createObjectNode()
             .put("success", false)
             .put("message", "Internal server error")
             .put("code", response.status())
