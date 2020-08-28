@@ -30,6 +30,7 @@ import com.dunctebot.dashboard.controllers.api.OtherAPi
 import com.dunctebot.dashboard.controllers.errors.HttpErrorHandlers
 import com.dunctebot.dashboard.rendering.VelocityRenderer
 import com.dunctebot.dashboard.rendering.WebVariables
+import com.dunctebot.dashboard.websocket.EchoWebSocket
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.json.JsonMapper
 import com.jagrosh.jdautilities.oauth2.OAuth2Client
@@ -95,6 +96,8 @@ class Server(private val env: Dotenv) {
         }
 
         defaultResponseTransformer(responseTransformer)
+
+        webSocket("/echo", EchoWebSocket::class.java)
 
         // Non settings related routes
         get("/roles/:hash") { request, response ->
@@ -165,6 +168,10 @@ class Server(private val env: Dotenv) {
 
             get("/user-guilds") { request, response ->
                 return@get OtherAPi.getUserGuilds(request, response, oAuth2Client, mapper)
+            }
+
+            get("/commands.json") {_, _ ->
+                "TODO: setup websocket to bot"
             }
         }
     }

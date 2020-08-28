@@ -92,6 +92,7 @@ object OtherAPi {
             "https://cdn.discordapp.com/embed/avatars/$number.png"
         }
 
+        // TODO: fetch guild info from bot
         val memberCount = jda.fakeJDA.getGuildById(guild.idLong)?.memberCount ?: -1
 
         return mapper.createObjectNode()
