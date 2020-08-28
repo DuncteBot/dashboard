@@ -40,6 +40,7 @@ import spark.Spark.*
 
 // TODO: add socket server http://sparkjava.com/documentation#websockets
 // The socket server will be used to communicate with DuncteBot himself
+// NGINX can secure the websocket (hopefully it does this by default as we are using the same domain)
 class Server(private val env: Dotenv) {
     private val mapper = JsonMapper()
     private val engine = VelocityRenderer(env)
