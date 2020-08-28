@@ -27,6 +27,7 @@ package com.dunctebot.dashboard
 import com.dunctebot.dashboard.controllers.GuildController
 import com.dunctebot.dashboard.controllers.RootController
 import com.dunctebot.dashboard.controllers.api.OtherAPi
+import com.dunctebot.dashboard.controllers.errors.HttpErrorHandlers
 import com.dunctebot.dashboard.rendering.VelocityRenderer
 import com.dunctebot.dashboard.rendering.WebVariables
 import com.fasterxml.jackson.databind.JsonNode
@@ -36,6 +37,8 @@ import io.github.cdimascio.dotenv.Dotenv
 import spark.ModelAndView
 import spark.Spark.*
 
+// TODO: add socket server http://sparkjava.com/documentation#websockets
+// The socket server will be used to communicate with DuncteBot himself
 class Server(private val env: Dotenv) {
     private val mapper = JsonMapper()
     private val engine = VelocityRenderer(env)
@@ -98,7 +101,30 @@ class Server(private val env: Dotenv) {
             return@get GuildController.showGuildRoles(request, response)
         }
 
-        // settings related routes
+        addDashboardRoutes()
+        addAPIRoutes()
+
+        notFound { request, response ->
+            val result = HttpErrorHandlers.notFound(request, response, mapper)
+
+            return@notFound responseTransformer(result)
+        }
+
+        internalServerError { request, response ->
+            val result = HttpErrorHandlers.internalServerError(request, response, mapper)
+
+            return@internalServerError responseTransformer(result)
+        }
+
+        // I hate how they made it varargs
+        // now I have to add parentheses
+        after({ _, response ->
+            // enable gzip, this is done automagically by sending the header
+            response.header("Content-Encoding", "gzip")
+        })
+    }
+
+    private fun addDashboardRoutes() {
         get("/callback") { request, response ->
             return@get RootController.callback(request, response, oAuth2Client)
         }
@@ -120,7 +146,9 @@ class Server(private val env: Dotenv) {
                     .toModelAndView("dashboard/index.vm")
             }
         }
+    }
 
+    private fun addAPIRoutes() {
         path("/api") {
             before("/*") { _, response ->
                 response.type("application/json")
