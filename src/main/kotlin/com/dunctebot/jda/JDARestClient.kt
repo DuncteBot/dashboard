@@ -24,27 +24,20 @@
 
 package com.dunctebot.jda
 
-import net.dv8tion.jda.api.GatewayEncoding
+import com.dunctebot.jda.impl.MemberPaginationActionImpl
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.SelfUser
 import net.dv8tion.jda.api.entities.User
-import net.dv8tion.jda.api.requests.GatewayIntent
 import net.dv8tion.jda.api.requests.RestAction
-import net.dv8tion.jda.api.utils.ChunkingFilter
-import net.dv8tion.jda.api.utils.Compression
 import net.dv8tion.jda.api.utils.MiscUtil
 import net.dv8tion.jda.api.utils.data.DataArray
-import net.dv8tion.jda.api.utils.data.DataObject
 import net.dv8tion.jda.internal.JDAImpl
 import net.dv8tion.jda.internal.requests.RestActionImpl
 import net.dv8tion.jda.internal.requests.Route
-import net.dv8tion.jda.internal.requests.WebSocketClient
 import net.dv8tion.jda.internal.utils.config.AuthorizationConfig
 import net.dv8tion.jda.internal.utils.config.MetaConfig
 import net.dv8tion.jda.internal.utils.config.SessionConfig
 import net.dv8tion.jda.internal.utils.config.ThreadingConfig
-import net.dv8tion.jda.internal.utils.config.flags.ConfigFlag
-import okhttp3.OkHttpClient
 import java.util.concurrent.Executors
 
 
@@ -58,13 +51,7 @@ class JDARestClient(token: String) {
 
     init {
         val authConfig = AuthorizationConfig(token)
-        val sessionConfig = SessionConfig(
-            FakeSessionController(),
-            OkHttpClient(),
-            null, null,
-            ConfigFlag.getDefault(),
-            900, 250
-        )
+        val sessionConfig = SessionConfig.getDefault()
         val threadConfig = ThreadingConfig.getDefault()
         val metaConfig = MetaConfig.getDefault()
 
@@ -75,9 +62,6 @@ class JDARestClient(token: String) {
         }, true)
 
         jda = JDAImpl(authConfig, sessionConfig, threadConfig, metaConfig)
-
-        jda.setChunkingFilter(ChunkingFilter.NONE)
-        setWebsocketClientOnJDA()
 
         retrieveSelfUser().queue(jda::setSelfUser)
     }
@@ -93,16 +77,6 @@ class JDARestClient(token: String) {
         }
     }
 
-    private fun setWebsocketClientOnJDA() {
-        val cls = jda.javaClass
-
-        val field = cls.getDeclaredField("client")
-
-        field.isAccessible = true
-
-        field.set(jda, WebSocketClient(jda, Compression.ZLIB, GatewayIntent.ALL_INTENTS, GatewayEncoding.ETF))
-    }
-
     private fun retrieveSelfUser(): RestAction<SelfUser> {
         val route = Route.Self.GET_SELF.compile()
 
@@ -111,15 +85,7 @@ class JDARestClient(token: String) {
         }
     }
 
-    // after is a snowflake id dummy
-    private fun retrieveGuildMembersArray(guildId: String, limit: Int = 1000, after: String = "0"): RestAction<DataArray> {
-        val route = Route.get("guilds/$guildId/members").compile().withQueryParams(
-            "limit", limit.toString(),
-            "after", after
-        )
-
-        return RestActionImpl(jda, route) { response, _ -> response.array}
-    }
+    fun retrieveAllMembers(guild: Guild): MemberPaginationAction = MemberPaginationActionImpl(guild)
 
     private fun retrieveGuildChannelsArray(guildId: String): RestAction<DataArray> {
         val route = Route.Guilds.GET_CHANNELS.compile(guildId)
@@ -127,51 +93,19 @@ class JDARestClient(token: String) {
         return RestActionImpl(jda, route) { response, _ -> response.array}
     }
 
-    fun retrieveGuildById(id: String, withMembers: Boolean = false): RestAction<Guild> {
+    fun retrieveGuildById(id: String): RestAction<Guild> {
         val route = Route.Guilds.GET_GUILD.compile(id).withQueryParams("with_counts", "true")
-        val membersMap = MiscUtil.newLongMap<DataObject>()
 
-        if (withMembers) {
-            // oh god, we start chunking the members here
-            var lastId = "0"
+        return retrieveGuildChannelsArray(id).flatMap { channels ->
+            RestActionImpl(jda, route) { response, _ ->
+                val data = response.getObject()
 
-            do {
-                val members = retrieveGuildMembersArray(id, after = lastId).complete()
+                // fake a bit of data
+                data.put("channels", channels)
+                data.put("voice_states", DataArray.empty())
 
-                if (members.isEmpty) {
-                    break
-                }
-
-                val currentLastId = members.getObject(members.length() - 1).getObject("user").getString("id")
-
-                if (currentLastId == lastId) {
-                    break
-                }
-
-                lastId = currentLastId
-
-                for (i in 0 until members.length()) {
-                    val obj = members.getObject(i)
-
-                    membersMap.put(obj.getObject("user").getLong("id"), obj)
-                }
-
-            } while (true)
-        }
-
-        return RestActionImpl(jda, route) { response, _ ->
-            val data = response.getObject()
-
-            // fake a bit of data
-            data.put("channels", retrieveGuildChannelsArray(id).complete())
-            data.put("voice_states", DataArray.empty())
-
-            jda.entityBuilder.createGuild(
-                id.toLong(),
-                data,
-                membersMap,
-                data.getInt("approximate_member_count")
-            )
+                jda.entityBuilder.createGuild(id.toLong(), data, MiscUtil.newLongMap(), data.getInt("approximate_member_count"))
+            }
         }
     }
 }

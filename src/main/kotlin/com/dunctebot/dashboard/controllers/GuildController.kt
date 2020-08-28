@@ -28,12 +28,13 @@ import com.dunctebot.dashboard.WebHelpers
 import com.dunctebot.dashboard.jda
 import com.dunctebot.dashboard.rendering.WebVariables
 import com.github.benmanes.caffeine.cache.Caffeine
+import net.dv8tion.jda.api.entities.Member
 import net.dv8tion.jda.api.entities.Role
 import net.dv8tion.jda.api.exceptions.ErrorResponseException
-import net.dv8tion.jda.api.utils.cache.MemberCacheView
 import spark.Request
 import spark.Response
 import java.util.concurrent.TimeUnit
+import kotlin.streams.toList
 
 object GuildController {
     val guildHashes = Caffeine.newBuilder()
@@ -41,7 +42,8 @@ object GuildController {
         .build<String, Long>()
 
     init {
-        guildHashes.put("test", 191245668617158656L)
+        guildHashes.put("db", 191245668617158656L)
+        guildHashes.put("md", 416512197590777857L)
     }
 
     fun showGuildRoles(request: Request, response: Response): Any {
@@ -49,21 +51,26 @@ object GuildController {
         val guildId = guildHashes.getIfPresent(hash) ?: return WebHelpers.haltNotFound(request, response)
         val guild = try {
             // TODO: do we want to do this?
-            // Maybe only cache for a short time as it will get outdated
-            jda.fakeJDA.getGuildById(guildId) ?: jda.retrieveGuildById(guildId.toString(), true).complete()
+            // Maybe only cache for a short time as it will get outdated data
+            jda.fakeJDA.getGuildById(guildId) ?: jda.retrieveGuildById(guildId.toString()).complete()
         } catch (e: ErrorResponseException) {
             e.printStackTrace()
             return WebHelpers.haltNotFound(request, response)
         }
 
+        val members = jda.retrieveAllMembers(guild).stream().toList()
+
+        println("Approximate count: ${guild.memberCount}")
+        println("Actual count: ${members.size}")
+
         return WebVariables()
             .put("title", "Roles for ${guild.name}")
             .put("guild_name", guild.name)
-            .put("roles", guild.roles.map { CustomRole(it, guild.memberCache) })
+            .put("roles", guild.roles.map { CustomRole(it, members) })
             .toModelAndView("guildRoles.vm")
     }
 
-    class CustomRole(private val realRole: Role, allMembers: MemberCacheView) : Role by realRole {
+    class CustomRole(private val realRole: Role, allMembers: List<Member>) : Role by realRole {
         // Accessed by our templating engine
         @Suppress("unused")
         val memberCount = allMembers.filter { it.roles.contains(realRole) }.size
