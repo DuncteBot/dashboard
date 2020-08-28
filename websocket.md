@@ -51,6 +51,32 @@ Request (to-bot):
   ]
 }
 ```
+```json
+{
+  "t": "CUSTOM_COMMANDS",
+  "remove": [
+    {
+      "name": "a_name",
+      "guild_id": "16515631"
+    }
+  ],
+  "update": [
+    {
+      "name": "a_name",
+      "guild_id": "16515631",
+      "content": "This is a cool command {atuser} 123"
+    }
+  ],
+  "add": [
+    {
+      "name": "a_name",
+      "guild_id": "16515631",
+      "content": "This is a cool command {atuser}"
+    }
+  ]
+}
+```
+Response (from-bot): None
 
 #### getting command info
 Request (to-bot):
