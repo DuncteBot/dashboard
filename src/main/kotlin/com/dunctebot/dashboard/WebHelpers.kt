@@ -74,27 +74,24 @@ fun Request.getSession(oAuth2Client: OAuth2Client): Session? {
 
 fun String?.toCBBool(): Boolean = if (this.isNullOrEmpty()) false else (this == "on")
 
-object WebHelpers {
+fun haltNotFound(request: Request, response: Response) {
+    Spark.halt(404, CustomErrorPages.getFor(404, request, response) as String)
+}
 
-    fun haltNotFound(request: Request, response: Response) {
-        Spark.halt(404, CustomErrorPages.getFor(404, request, response) as String)
-    }
+fun verifyCaptcha(httpClient: OkHttpClient, response: String, secret: String, mapper: ObjectMapper): JsonNode {
+    val body = FormBody.Builder()
+        .add("secret", secret)
+        .add("response", response)
+        .build()
 
-    fun verifyCaptcha(httpClient: OkHttpClient, response: String, secret: String, mapper: ObjectMapper): JsonNode {
-        val body = FormBody.Builder()
-            .add("secret", secret)
-            .add("response", response)
+    httpClient.newCall(
+        okhttp3.Request.Builder()
+            .url("https://hcaptcha.com/siteverify")
+            .patch(body)
             .build()
+    ).execute().use {
+        val readFully = IOUtil.readFully(IOUtil.getBody(it))
 
-        httpClient.newCall(
-            okhttp3.Request.Builder()
-                .url("https://hcaptcha.com/siteverify")
-                .patch(body)
-                .build()
-        ).execute().use {
-            val readFully = IOUtil.readFully(IOUtil.getBody(it))
-
-            return mapper.readTree(readFully)
-        }
+        return mapper.readTree(readFully)
     }
 }

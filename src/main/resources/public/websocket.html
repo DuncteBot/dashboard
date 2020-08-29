@@ -34,7 +34,7 @@
 <body>
     <h1>Open your console</h1>
     <script>
-        const webSocket = new WebSocket(`ws://${location.hostname}:${location.port}/echo`);
+        const webSocket = new WebSocket(`ws://${location.hostname}:${location.port}/websocket`);
         webSocket.onmessage = (msg) => console.log(msg);
         webSocket.onopen = () => console.log('socket is ready');
         webSocket.onclose = () => console.log('Socket is closed');

@@ -24,24 +24,35 @@
 
 package com.dunctebot.duncteapi
 
+import com.dunctebot.dashboard.httpClient
+import com.dunctebot.dashboard.jsonMapper
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.json.JsonMapper
-import okhttp3.OkHttpClient
 import okhttp3.Request
 
-val httpClient = OkHttpClient()
-val jsonMapper = JsonMapper()
-
 class DuncteApi(private val apiKey: String) {
+    private val validTokens = mutableListOf<String>()
 
     fun validateToken(token: String): Boolean {
-        val json = executeRequest(defaultRequest("/validate-token?token=$token"))
+        if (validTokens.contains(token)) {
+            return true
+        }
 
-        return json["success"].asBoolean()
+        val json = executeRequest(defaultRequest("validate-token?bot_routes=true&the_token=$token"))
+
+        val isValid = json["success"].asBoolean()
+
+        // cache the valid tokens to make validation faster
+        if (isValid) {
+            validTokens.add(token)
+        }
+
+        return isValid
     }
 
     private fun defaultRequest(path: String, prefixBot: Boolean = true): Request.Builder {
         val prefix = if (prefixBot) "bot/" else ""
+
+        println("$API_HOST/$prefix$path")
 
         return Request.Builder()
             .url("$API_HOST/$prefix$path")
@@ -60,8 +71,8 @@ class DuncteApi(private val apiKey: String) {
 
     companion object {
 //        const val API_HOST = "http://localhost:8081"
-//        const val API_HOST = "http://duncte123-apis-lumen.test/"
-        const val API_HOST = "https://apis.duncte123.me"
+        const val API_HOST = "http://duncte123-apis-lumen.test/"
+//        const val API_HOST = "https://apis.duncte123.me"
         const val USER_AGENT = "Mozilla/5.0 (compatible; SkyBot/dashboard; +https://dashboard.dunctebot.com)"
     }
 }

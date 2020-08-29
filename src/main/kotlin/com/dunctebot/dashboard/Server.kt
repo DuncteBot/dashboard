@@ -32,7 +32,7 @@ import com.dunctebot.dashboard.rendering.VelocityRenderer
 import com.dunctebot.dashboard.rendering.WebVariables
 import com.dunctebot.dashboard.websocket.DataWebSocket
 import com.dunctebot.dashboard.websocket.EchoWebSocket
-import com.dunctebot.duncteapi.jsonMapper
+import com.dunctebot.dashboard.jsonMapper
 import com.fasterxml.jackson.databind.JsonNode
 import com.jagrosh.jdautilities.oauth2.OAuth2Client
 import io.github.cdimascio.dotenv.Dotenv

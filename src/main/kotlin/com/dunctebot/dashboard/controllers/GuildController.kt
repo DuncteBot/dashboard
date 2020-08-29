@@ -24,9 +24,9 @@
 
 package com.dunctebot.dashboard.controllers
 
-import com.dunctebot.dashboard.WebHelpers
-import com.dunctebot.dashboard.restJDA
+import com.dunctebot.dashboard.haltNotFound
 import com.dunctebot.dashboard.rendering.WebVariables
+import com.dunctebot.dashboard.restJDA
 import com.github.benmanes.caffeine.cache.Caffeine
 import net.dv8tion.jda.api.entities.Member
 import net.dv8tion.jda.api.entities.Role
@@ -48,14 +48,14 @@ object GuildController {
 
     fun showGuildRoles(request: Request, response: Response): Any {
         val hash = request.params("hash")
-        val guildId = guildHashes.getIfPresent(hash) ?: return WebHelpers.haltNotFound(request, response)
+        val guildId = guildHashes.getIfPresent(hash) ?: return haltNotFound(request, response)
         val guild = try {
             // TODO: do we want to do this?
             // Maybe only cache for a short time as it will get outdated data
             restJDA.fakeJDA.getGuildById(guildId) ?: restJDA.retrieveGuildById(guildId.toString()).complete()
         } catch (e: ErrorResponseException) {
             e.printStackTrace()
-            return WebHelpers.haltNotFound(request, response)
+            return haltNotFound(request, response)
         }
 
         val members = restJDA.retrieveAllMembers(guild).stream().toList()

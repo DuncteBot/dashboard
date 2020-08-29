@@ -19,8 +19,8 @@
 package com.dunctebot.dashboard.controllers.errors
 
 import com.dunctebot.dashboard.constants.ContentType
+import com.dunctebot.dashboard.jsonMapper
 import com.dunctebot.dashboard.rendering.WebVariables
-import com.dunctebot.duncteapi.jsonMapper
 import spark.Request
 import spark.Response
 

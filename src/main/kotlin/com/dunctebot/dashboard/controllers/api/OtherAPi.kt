@@ -29,9 +29,8 @@ import com.dunctebot.dashboard.Server.Companion.USER_ID
 import com.dunctebot.dashboard.getSession
 import com.dunctebot.dashboard.restJDA
 import com.dunctebot.dashboard.userId
-import com.dunctebot.duncteapi.jsonMapper
+import com.dunctebot.dashboard.jsonMapper
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.json.JsonMapper
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.jagrosh.jdautilities.oauth2.OAuth2Client
@@ -73,7 +72,7 @@ object OtherAPi {
             // Only add the servers where the user has the MANAGE_SERVER
             // perms to the list
             if (it.hasPermission(Permission.MANAGE_SERVER)) {
-                guilds.add(guildToJson(it, jsonMapper))
+                guilds.add(guildToJson(it))
             }
         }
 
@@ -84,7 +83,7 @@ object OtherAPi {
             .set<ObjectNode>("guilds", guilds)
     }
 
-    private fun guildToJson(guild: OAuth2Guild, mapper: JsonMapper): JsonNode {
+    private fun guildToJson(guild: OAuth2Guild): JsonNode {
         // Get guild id or random default avatar url
         val icon = if (!guild.iconUrl.isNullOrEmpty()) {
             guild.iconUrl
@@ -96,7 +95,7 @@ object OtherAPi {
         // TODO: fetch guild info from bot
         val memberCount = restJDA.fakeJDA.getGuildById(guild.idLong)?.memberCount ?: -1
 
-        return mapper.createObjectNode()
+        return jsonMapper.createObjectNode()
             .put("name", guild.name)
             .put("iconId", guild.iconId)
             .put("iconUrl", icon)

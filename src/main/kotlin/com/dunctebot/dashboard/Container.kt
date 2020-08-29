@@ -24,35 +24,18 @@
 
 package com.dunctebot.dashboard
 
-import com.dunctebot.dashboard.controllers.GuildController
-import com.dunctebot.dashboard.controllers.api.OtherAPi
 import com.dunctebot.duncteapi.DuncteApi
 import com.dunctebot.jda.JDARestClient
+import com.fasterxml.jackson.databind.json.JsonMapper
 import io.github.cdimascio.dotenv.dotenv
-import org.slf4j.LoggerFactory
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
+import okhttp3.OkHttpClient
 
-private val systemPool = Executors.newScheduledThreadPool(4) { Thread(it, "Bot-Service-Thread") }
+val env = dotenv()
 
-fun main() {
-    val logger = LoggerFactory.getLogger("Main")
+val restJDA = JDARestClient(env["BOT_TOKEN"]!!)
+val duncteApis = DuncteApi("Bot ${env["BOT_TOKEN"]!!}")
 
-    // start cleaners
-    // clean the hashes pool every hour
-    systemPool.scheduleAtFixedRate(
-        GuildController.guildHashes::cleanUp,
-        1,
-        1,
-        TimeUnit.HOURS
-    )
-    // Clean the guilds pool every 30 minutes
-    systemPool.scheduleAtFixedRate(
-        OtherAPi.guildsRequests::cleanUp,
-        30,
-        30,
-        TimeUnit.MINUTES
-    )
+val server = Server(env)
 
-    logger.info("Application ready: http://{}:{}/", env["SERVER_IP"], env["SERVER_PORT"])
-}
+val httpClient = OkHttpClient()
+val jsonMapper = JsonMapper()

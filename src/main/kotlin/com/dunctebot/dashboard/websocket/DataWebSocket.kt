@@ -25,13 +25,9 @@
 package com.dunctebot.dashboard.websocket
 
 import com.dunctebot.dashboard.duncteApis
-import net.dv8tion.jda.api.exceptions.ParsingException
-import net.dv8tion.jda.api.utils.data.DataObject
 import org.eclipse.jetty.websocket.api.Session
-import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose
-import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect
-import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage
-import org.eclipse.jetty.websocket.api.annotations.WebSocket
+import org.eclipse.jetty.websocket.api.StatusCode
+import org.eclipse.jetty.websocket.api.annotations.*
 import java.io.IOException
 import java.util.*
 import java.util.concurrent.ConcurrentLinkedQueue
@@ -43,8 +39,21 @@ class DataWebSocket {
 
     @OnWebSocketConnect
     fun onConnected(session: Session) {
-//        sessions.add(session)
-        // don't add the session to the queue as we only want to add it after auth
+        val token: String? = session.upgradeRequest.getHeader("Authorization")
+
+        if (token.isNullOrBlank()) {
+            session.close(StatusCode.POLICY_VIOLATION, "Unauthorised")
+            return
+        }
+
+        if (!duncteApis.validateToken(token)) {
+            session.close(StatusCode.POLICY_VIOLATION, "Unauthorised")
+            return
+        }
+
+        sessions.add(session)
+
+        session.remote.sendString("""{"t": "ROLES_PUT_HASH"}""")
     }
 
     @OnWebSocketClose
@@ -56,35 +65,10 @@ class DataWebSocket {
     @Throws(IOException::class)
     fun onMessage(session: Session, message: String) {
         println("Got: $message")
-
-        // Ignore all sessions that are not in the queue
-        if (!sessions.contains(session)) {
-            // is this safe?
-            if (checkAuth(message)) {
-                sessions.add(session)
-            } else {
-                session.close(403, "Unauthorised")
-            }
-
-            return
-        }
     }
 
-    private fun checkAuth(message: String): Boolean {
-        try {
-            val data = DataObject.fromJson(message)
-
-            if (data.getString("t") != "IDENTIFY") {
-                return false
-            }
-
-            val token = data.getString("token", null) ?: return false
-
-            return duncteApis.validateToken(token)
-        } catch (ignored: ParsingException) {
-            // invalid json or missing keys
-        }
-
-        return false
+    @OnWebSocketError
+    fun onError(session: Session, thr: Throwable) {
+        thr.printStackTrace()
     }
 }

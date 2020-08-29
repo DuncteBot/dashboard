@@ -6,21 +6,16 @@
 - creating role hashes
 
 #### Authorising
-Request (from-bot):
-```json
-{
-  "t": "IDENTIFY",
-  "token": "auth token for api"
-}
-```
+Send an "Authorization" header with the correct token (one that is for the bot routes)
+
 
 #### Internal data exchange
 Request (from-bot):
 ```json
 {
-  "t": "IDENTIFY",
-  "success": true,
-  "message": "Only present if success is false, gives info about the error"
+  "t": "ROLES_PUT_HASH",
+  "guild_id": "1321513153",
+  "hash": "blablabla"
 }
 ```
 Response (to-bot):
