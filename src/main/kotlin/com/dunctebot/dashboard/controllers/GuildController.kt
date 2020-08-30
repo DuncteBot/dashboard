@@ -41,11 +41,6 @@ object GuildController {
         .expireAfterWrite(2, TimeUnit.HOURS)
         .build<String, Long>()
 
-    init {
-        guildHashes.put("db", 191245668617158656L)
-        guildHashes.put("md", 416512197590777857L)
-    }
-
     fun showGuildRoles(request: Request, response: Response): Any {
         val hash = request.params("hash")
         val guildId = guildHashes.getIfPresent(hash) ?: return haltNotFound(request, response)
@@ -60,8 +55,8 @@ object GuildController {
 
         val members = restJDA.retrieveAllMembers(guild).stream().toList()
 
-        println("Approximate count: ${guild.memberCount}")
-        println("Actual count: ${members.size}")
+//        println("Approximate count: ${guild.memberCount}")
+//        println("Actual count: ${members.size}")
 
         return WebVariables()
             .put("title", "Roles for ${guild.name}")

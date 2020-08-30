@@ -25,17 +25,30 @@
 package com.dunctebot.dashboard.websocket
 
 import com.dunctebot.dashboard.duncteApis
+import com.dunctebot.dashboard.jsonMapper
+import com.dunctebot.dashboard.websocket.handlers.RolesHashHandler
+import com.dunctebot.dashboard.websocket.handlers.base.SocketHandler
+import com.fasterxml.jackson.core.JsonProcessingException
+import com.fasterxml.jackson.databind.JsonNode
 import org.eclipse.jetty.websocket.api.Session
 import org.eclipse.jetty.websocket.api.StatusCode
 import org.eclipse.jetty.websocket.api.annotations.*
+import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.util.*
 import java.util.concurrent.ConcurrentLinkedQueue
 
 @WebSocket
 class DataWebSocket {
+    private val logger = LoggerFactory.getLogger(DataWebSocket::class.java)
+
     // Store sessions if you want to, for example, broadcast a message to all users
     private val sessions: Queue<Session> = ConcurrentLinkedQueue()
+    private val handlersMap = mutableMapOf<String, SocketHandler>()
+
+    init {
+        setupHandlers()
+    }
 
     @OnWebSocketConnect
     fun onConnected(session: Session) {
@@ -52,23 +65,46 @@ class DataWebSocket {
         }
 
         sessions.add(session)
-
-        session.remote.sendString("""{"t": "ROLES_PUT_HASH"}""")
     }
 
     @OnWebSocketClose
     fun onClosed(session: Session, statusCode: Int, reason: String?) {
         sessions.remove(session)
+        println("Session $session disconnected")
     }
 
     @OnWebSocketMessage
     @Throws(IOException::class)
     fun onMessage(session: Session, message: String) {
         println("Got: $message")
+
+        try {
+            val json = jsonMapper.readTree(message)
+
+            dispatch(session, json)
+        } catch (e: JsonProcessingException) {
+            logger.error("Error when parsing json from WS", e)
+        }
     }
 
     @OnWebSocketError
     fun onError(session: Session, thr: Throwable) {
         thr.printStackTrace()
+    }
+
+    private fun dispatch(session: Session, raw: JsonNode) {
+        val type = raw["t"].asText()
+        val handler = handlersMap[type]
+
+        if (handler == null) {
+            logger.error("Unknown event or missing handler for type $type")
+            return
+        }
+
+        handler.handle(session, raw)
+    }
+
+    private fun setupHandlers() {
+        handlersMap["ROLES_PUT_HASH"] = RolesHashHandler()
     }
 }

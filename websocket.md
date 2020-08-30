@@ -14,8 +14,10 @@ Request (from-bot):
 ```json
 {
   "t": "ROLES_PUT_HASH",
-  "guild_id": "1321513153",
-  "hash": "blablabla"
+  "d": {
+    "guild_id": "1321513153",
+    "hash": "blablabla"
+  }
 }
 ```
 Response (to-bot):
