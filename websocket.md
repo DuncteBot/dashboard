@@ -34,43 +34,53 @@ Response (to-bot):
 
 #### invalidating guild settings and updating
 Request (to-bot):
+
+both update and add send the full guild settings object to the bot
 ```json
 {
   "t": "GUILD_SETTINGS",
-  "remove": [
-    "array of guild ids to forget the settings for"
-  ],
-  "update": [
-    "array of guild ids to update the settings for"
-  ],
-  "add": [
-    "array of guild ids to fetch the settings for"
-  ]
+  "d":{
+    "remove": [
+      "array of guild ids to forget the settings for"
+    ],
+    "update": [
+      {
+        "guildId": "guildid"
+      }
+    ],
+    "add": [
+      {
+        "guildId": "guildid"
+      }
+    ]
+  } 
 }
 ```
 ```json
 {
   "t": "CUSTOM_COMMANDS",
-  "remove": [
-    {
-      "name": "a_name",
-      "guild_id": "16515631"
-    }
-  ],
-  "update": [
-    {
-      "name": "a_name",
-      "guild_id": "16515631",
-      "content": "This is a cool command {atuser} 123"
-    }
-  ],
-  "add": [
-    {
-      "name": "a_name",
-      "guild_id": "16515631",
-      "content": "This is a cool command {atuser}"
-    }
-  ]
+  "d": {
+    "remove": [
+        {
+          "name": "a_name",
+          "guild_id": "16515631"
+        }
+    ],
+    "update": [
+        {
+          "name": "a_name",
+          "guild_id": "16515631",
+          "content": "This is a cool command {atuser} 123"
+        }
+    ],
+    "add": [
+      {
+        "name": "a_name",
+        "guild_id": "16515631",
+        "content": "This is a cool command {atuser}"
+      }
+    ]
+  }
 }
 ```
 Response (from-bot): None
