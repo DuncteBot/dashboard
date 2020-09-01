@@ -5,6 +5,11 @@
 - check if bot in guild
 - creating role hashes
 
+# todo
+- jda to json
+- shared code packages
+- flat repository (all packages in a single repository)
+
 #### Authorising
 Send an "Authorization" header with the correct token (one that is for the bot routes)
 
@@ -127,48 +132,56 @@ Response (from-bot):
 ```
 
 #### getting guild info
-All fields are optional
+All data fields are optional
 
 Request (to-bot):
 ```json
 {
-  "t": "RETRIEVE",
-  "identifier": "Identifier for finding the data we requested",
-  "guilds": [
-    "list of guild ids"
-  ],
-  "guild_member_info": {
-    "guild_id": "13456",
-    "member_id": "5464654684"
+  "t": "FETCH_DATA",
+  "d": {
+    "identifier": "Identifier for finding the data we requested",
+    "guilds": [
+      "list of guild ids"
+    ],
+    "guild_member_info": [
+      {
+        "guild_id": "13456",
+        "member_id": "5464654684"
+      }
+    ]
   }
 }
 ```
 Response (from-bot):
 ```json
 {
-  "t": "RETRIEVE",
-  "identifier": "Identifier for finding the data we requested",
-  "guilds": [
-    {
-      "guild_id": "13456",
-      "member_count": 999, // or -1 for not in server
-      "text_channels": [
-        // JDA text channel object
-      ],
-      "voice_channels": [
-        // JDA voice channel object
-      ],
-      "roles": [
-        // JDA role object
-      ]
-    }
-  ],
-   "guild_member_info": {
-      "guild_id": "13456",
-      "member_id": "5464654684",
-      "member": {
-        // JDA member object
+  "t": "FETCH_DATA",
+  "d": {
+    "identifier": "Identifier for finding the data we requested",
+    "guilds": [
+      {
+        "guild_id": "13456",
+        "member_count": 999, // or -1 for not in server
+        "text_channels": [
+          // JDA text channel object
+        ],
+        "voice_channels": [
+          // JDA voice channel object
+        ],
+        "roles": [
+          // JDA role object
+        ]
       }
-   }
+    ],
+    "guild_member_info": [
+       {
+        "guild_id": "13456",
+        "member_id": "5464654684",
+        "member": {
+           // JDA member object
+        }
+       }
+    ]
+  }
 }
 ```
