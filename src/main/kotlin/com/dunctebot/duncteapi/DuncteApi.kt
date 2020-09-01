@@ -38,7 +38,6 @@ class DuncteApi(private val apiKey: String) {
         }
 
         val json = executeRequest(defaultRequest("validate-token?bot_routes=true&the_token=$token"))
-
         val isValid = json["success"].asBoolean()
 
         // cache the valid tokens to make validation faster
@@ -51,8 +50,6 @@ class DuncteApi(private val apiKey: String) {
 
     private fun defaultRequest(path: String, prefixBot: Boolean = true): Request.Builder {
         val prefix = if (prefixBot) "bot/" else ""
-
-        println("$API_HOST/$prefix$path")
 
         return Request.Builder()
             .url("$API_HOST/$prefix$path")

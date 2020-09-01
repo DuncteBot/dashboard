@@ -40,5 +40,5 @@ abstract class SocketHandler {
         }
     }
 
-    protected abstract fun handleInternally(session: Session, data: JsonNode)
+    protected abstract fun handleInternally(session: Session, data: JsonNode?)
 }

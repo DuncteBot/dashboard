@@ -24,6 +24,7 @@
 
 package com.dunctebot.dashboard
 
+import com.dunctebot.dashboard.websocket.DataWebSocket
 import com.dunctebot.duncteapi.DuncteApi
 import com.dunctebot.jda.JDARestClient
 import com.fasterxml.jackson.databind.json.JsonMapper
@@ -39,3 +40,4 @@ val server = Server(env)
 
 val httpClient = OkHttpClient()
 val jsonMapper = JsonMapper()
+val webSocket = DataWebSocket()

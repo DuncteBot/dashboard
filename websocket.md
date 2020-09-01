@@ -32,6 +32,25 @@ Response (to-bot):
 }
 ```
 
+#### data updates
+Request (to-bot):
+
+TODO: also do guild settings in here? 
+```json
+{
+  "t": "DATA_UPDATE",
+  "d": {
+    "patrons": {
+      "add": [],
+      "remove": []
+    },
+    "unbans": [],
+    "unmutes": [],
+    "reminders": []
+  }
+}
+```
+
 #### invalidating guild settings and updating
 Request (to-bot):
 

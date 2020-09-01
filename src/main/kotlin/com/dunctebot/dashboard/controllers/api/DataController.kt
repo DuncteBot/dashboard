@@ -22,20 +22,26 @@
  * SOFTWARE.
  */
 
-package com.dunctebot.dashboard.websocket.handlers
+package com.dunctebot.dashboard.controllers.api
 
-import com.dunctebot.dashboard.controllers.GuildController
-import com.dunctebot.dashboard.websocket.handlers.base.SocketHandler
-import com.fasterxml.jackson.databind.JsonNode
-import org.eclipse.jetty.websocket.api.Session
+import com.dunctebot.dashboard.duncteApis
+import com.dunctebot.dashboard.jsonMapper
+import com.dunctebot.dashboard.webSocket
+import spark.Request
+import spark.Spark
 
-class RolesHashHandler : SocketHandler() {
-    override fun handleInternally(session: Session, data: JsonNode?) {
-        val hash = data!!["hash"].asText()
-        val guildId = data["guild_id"].asLong()
+object DataController {
+    fun updateData(request: Request): Any {
+        if (!request.headers().contains("Authorization") || !duncteApis.validateToken(request.headers("Authorization"))) {
+            Spark.halt(401)
+        }
 
-        logger.debug("Adding hash for $guildId: $hash")
+        // parse the data to make sure that it is proper json
+        val updateData = jsonMapper.readTree(request.bodyAsBytes())
 
-        GuildController.guildHashes.put(hash, guildId)
+        // send the data to all instances that are connected
+        webSocket.broadcast(updateData)
+
+        return jsonMapper.createObjectNode().put("success", true)
     }
 }

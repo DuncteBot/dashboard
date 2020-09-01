@@ -30,6 +30,8 @@ import com.dunctebot.dashboard.websocket.handlers.RolesHashHandler
 import com.dunctebot.dashboard.websocket.handlers.base.SocketHandler
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.JsonNode
+import net.dv8tion.jda.api.utils.data.DataArray
+import net.dv8tion.jda.api.utils.data.DataObject
 import org.eclipse.jetty.websocket.api.Session
 import org.eclipse.jetty.websocket.api.StatusCode
 import org.eclipse.jetty.websocket.api.annotations.*
@@ -37,6 +39,7 @@ import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.util.*
 import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.Executors
 
 @WebSocket
 class DataWebSocket {
@@ -45,6 +48,12 @@ class DataWebSocket {
     // Store sessions if you want to, for example, broadcast a message to all users
     private val sessions: Queue<Session> = ConcurrentLinkedQueue()
     private val handlersMap = mutableMapOf<String, SocketHandler>()
+
+    private val executor = Executors.newSingleThreadExecutor {
+        val t = Thread(it, "WS-SendThread")
+        t.isDaemon = true
+        return@newSingleThreadExecutor t
+    }
 
     init {
         setupHandlers()
@@ -78,10 +87,28 @@ class DataWebSocket {
     fun onMessage(session: Session, message: String) {
         println("Got: $message")
 
+        session.remote.sendString(DataObject.empty()
+            .put("t", "DATA_UPDATE")
+            .put("d", DataObject.empty()
+                .put("reminders", DataArray.empty()
+                    .add(DataObject.empty()
+                        .put("id", 1)
+                        .put("user_id", "191231307290771456")
+                        .put("reminder", "Test reminder from WS")
+                        .put("channel_id", "387881926691782657")
+                        .put("remind_create_date", "2020-09-01T07:18:12.000000Z")
+                        .put("remind_date", "2020-09-01T10:18:12.000000Z")
+                    )
+                )
+            )
+            .toString())
+
         try {
             val json = jsonMapper.readTree(message)
 
-            dispatch(session, json)
+            if (json.has("t")) {
+                dispatch(session, json)
+            }
         } catch (e: JsonProcessingException) {
             logger.error("Error when parsing json from WS", e)
         }
@@ -90,6 +117,20 @@ class DataWebSocket {
     @OnWebSocketError
     fun onError(session: Session, thr: Throwable) {
         thr.printStackTrace()
+    }
+
+    fun broadcast(message: JsonNode) {
+        executor.submit {
+            try {
+                sessions.forEach {
+                    it.remote.sendString(
+                        jsonMapper.writeValueAsString(message)
+                    )
+                }
+            } catch (e: Exception) {
+                logger.error("Error with broadcast", e)
+            }
+        }
     }
 
     private fun dispatch(session: Session, raw: JsonNode) {

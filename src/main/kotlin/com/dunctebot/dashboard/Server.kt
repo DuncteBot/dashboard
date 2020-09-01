@@ -26,13 +26,12 @@ package com.dunctebot.dashboard
 
 import com.dunctebot.dashboard.controllers.GuildController
 import com.dunctebot.dashboard.controllers.RootController
+import com.dunctebot.dashboard.controllers.api.DataController
 import com.dunctebot.dashboard.controllers.api.OtherAPi
 import com.dunctebot.dashboard.controllers.errors.HttpErrorHandlers
 import com.dunctebot.dashboard.rendering.VelocityRenderer
 import com.dunctebot.dashboard.rendering.WebVariables
-import com.dunctebot.dashboard.websocket.DataWebSocket
 import com.dunctebot.dashboard.websocket.EchoWebSocket
-import com.dunctebot.dashboard.jsonMapper
 import com.fasterxml.jackson.databind.JsonNode
 import com.jagrosh.jdautilities.oauth2.OAuth2Client
 import io.github.cdimascio.dotenv.Dotenv
@@ -98,7 +97,7 @@ class Server(private val env: Dotenv) {
 
         defaultResponseTransformer(responseTransformer)
 
-        webSocket("/websocket", DataWebSocket::class.java)
+        webSocket("/websocket", webSocket)
         webSocket("/echo", EchoWebSocket::class.java)
 
         // Non settings related routes
@@ -174,6 +173,10 @@ class Server(private val env: Dotenv) {
 
             get("/commands.json") {_, _ ->
                 "TODO: setup websocket to bot"
+            }
+
+            post("/update-data") { request, _ ->
+                return@post DataController.updateData(request)
             }
         }
     }
