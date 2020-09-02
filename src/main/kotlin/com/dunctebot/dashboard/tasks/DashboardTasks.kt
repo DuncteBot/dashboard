@@ -22,33 +22,35 @@
  * SOFTWARE.
  */
 
-package com.dunctebot.dashboard.controllers.api
+package com.dunctebot.dashboard.tasks
 
-import com.dunctebot.dashboard.authOrFail
-import com.dunctebot.dashboard.duncteApis
-import com.dunctebot.dashboard.jsonMapper
-import com.dunctebot.dashboard.webSocket
-import spark.Request
-import spark.Spark
+import com.dunctebot.dashboard.controllers.GuildController
+import com.dunctebot.dashboard.controllers.api.OtherAPi
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
-object DataController {
-    fun updateData(request: Request): Any {
-        request.authOrFail()
-
-        // parse the data to make sure that it is proper json
-        val updateData = jsonMapper.readTree(request.bodyAsBytes())
-
-        // send the data to all instances that are connected
-        webSocket.broadcast(updateData)
-
-        return jsonMapper.createObjectNode().put("success", true)
+class DashboardTasks {
+    private val threadPool = Executors.newScheduledThreadPool(4) {
+        val t = Thread(it, "DashboardTasksThread")
+        t.isDaemon = true
+        return@newScheduledThreadPool t
     }
 
-    fun invalidateTokens(request: Request): Any {
-        request.authOrFail()
-
-        duncteApis.validTokens.clear()
-
-        return "ok"
+    init {
+        // start cleaners
+        // clean the hashes pool every hour
+        threadPool.scheduleAtFixedRate(
+            GuildController.guildHashes::cleanUp,
+            1,
+            1,
+            TimeUnit.HOURS
+        )
+        // Clean the guilds pool every 30 minutes
+        threadPool.scheduleAtFixedRate(
+            OtherAPi.guildsRequests::cleanUp,
+            30,
+            30,
+            TimeUnit.MINUTES
+        )
     }
 }

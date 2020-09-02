@@ -62,6 +62,12 @@ val Request.userId: String
 
 fun Request.getGuild(shardManager: ShardManager): Guild? = shardManager.getGuildById(this.params(GUILD_ID))
 
+fun Request.authOrFail() {
+    if (!(this.headers().contains("Authorization") && duncteApis.validateToken(this.headers("Authorization")))) {
+        Spark.halt(401)
+    }
+}
+
 fun Request.getSession(oAuth2Client: OAuth2Client): Session? {
     val session: String? = this.session().attribute(SESSION_ID)
 

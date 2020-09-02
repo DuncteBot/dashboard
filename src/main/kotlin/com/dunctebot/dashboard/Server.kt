@@ -178,6 +178,10 @@ class Server(private val env: Dotenv) {
             post("/update-data") { request, _ ->
                 return@post DataController.updateData(request)
             }
+
+            get("/invalidate-tokens") { request, _ ->
+                return@get DataController.invalidateTokens(request)
+            }
         }
     }
 

@@ -30,7 +30,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import okhttp3.Request
 
 class DuncteApi(private val apiKey: String) {
-    private val validTokens = mutableListOf<String>()
+    val validTokens = mutableListOf<String>()
 
     fun validateToken(token: String): Boolean {
         if (validTokens.contains(token)) {

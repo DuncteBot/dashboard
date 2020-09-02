@@ -24,35 +24,14 @@
 
 package com.dunctebot.dashboard
 
-import com.dunctebot.dashboard.controllers.GuildController
-import com.dunctebot.dashboard.controllers.api.OtherAPi
-import com.dunctebot.duncteapi.DuncteApi
-import com.dunctebot.jda.JDARestClient
-import io.github.cdimascio.dotenv.dotenv
+import com.dunctebot.dashboard.tasks.DashboardTasks
 import org.slf4j.LoggerFactory
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
-
-private val systemPool = Executors.newScheduledThreadPool(4) { Thread(it, "Bot-Service-Thread") }
 
 fun main() {
     val logger = LoggerFactory.getLogger("Main")
 
-    // start cleaners
-    // clean the hashes pool every hour
-    systemPool.scheduleAtFixedRate(
-        GuildController.guildHashes::cleanUp,
-        1,
-        1,
-        TimeUnit.HOURS
-    )
-    // Clean the guilds pool every 30 minutes
-    systemPool.scheduleAtFixedRate(
-        OtherAPi.guildsRequests::cleanUp,
-        30,
-        30,
-        TimeUnit.MINUTES
-    )
+    // start tasks
+    DashboardTasks()
 
     logger.info("Application ready: http://{}:{}/", env["SERVER_IP"], env["SERVER_PORT"])
 }
