@@ -39,7 +39,8 @@ Response (to-bot):
 ```
 
 #### data updates
-Request (to-bot):
+##### to bot
+Request:
 
 TODO: also do guild settings in here? 
 ```json
@@ -53,6 +54,20 @@ TODO: also do guild settings in here?
     "unbans": [],
     "unmutes": [],
     "reminders": []
+  }
+}
+```
+
+##### to dashboard
+```json
+{
+  "t": "DATA_UPDATE",
+  "d": {
+    "guilds": {
+      "invalidate": [
+        "list of guild ids to invalidate"
+      ]
+    }
   }
 }
 ```
@@ -141,7 +156,7 @@ Request (to-bot):
   "t": "FETCH_DATA",
   "d": {
     "identifier": "Identifier for finding the data we requested",
-    "guilds": [
+    "partial_guilds": [
       "list of guild ids"
     ],
     "guild_member_info": [
@@ -159,7 +174,7 @@ Response (from-bot):
   "t": "FETCH_DATA",
   "d": {
     "identifier": "Identifier for finding the data we requested",
-    "guilds": [
+    "partial_guilds": [
       {
         "guild_id": "13456",
         "member_count": 999, // or -1 for not in server

@@ -24,10 +24,10 @@
 
 package com.dunctebot.dashboard.controllers
 
-import com.dunctebot.dashboard.Server.Companion.HOMEPAGE
-import com.dunctebot.dashboard.Server.Companion.OLD_PAGE
-import com.dunctebot.dashboard.Server.Companion.SESSION_ID
-import com.dunctebot.dashboard.Server.Companion.USER_ID
+import com.dunctebot.dashboard.WebServer.Companion.HOMEPAGE
+import com.dunctebot.dashboard.WebServer.Companion.OLD_PAGE
+import com.dunctebot.dashboard.WebServer.Companion.SESSION_ID
+import com.dunctebot.dashboard.WebServer.Companion.USER_ID
 import com.jagrosh.jdautilities.oauth2.OAuth2Client
 import com.jagrosh.jdautilities.oauth2.Scope
 import com.jagrosh.jdautilities.oauth2.exceptions.InvalidStateException

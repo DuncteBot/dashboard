@@ -42,7 +42,7 @@ import spark.Spark.*
 // TODO: add socket server http://sparkjava.com/documentation#websockets
 // The socket server will be used to communicate with DuncteBot himself
 // NGINX can secure the websocket (hopefully it does this by default as we are using the same domain)
-class Server(private val env: Dotenv) {
+class WebServer(private val env: Dotenv) {
     private val engine = VelocityRenderer(env)
     private val oAuth2Client = OAuth2Client.Builder()
         .setClientId(env["OAUTH_CLIENT_ID"]!!.toLong())
@@ -104,6 +104,17 @@ class Server(private val env: Dotenv) {
         // Non settings related routes
         get("/roles/:hash") { request, response ->
             return@get GuildController.showGuildRoles(request, response)
+        }
+
+        get("/register-server") {_, _ ->
+            WebVariables()
+                .put("title", "Register your server for patron perks")
+                .put("captcha_sitekey", env["CAPTCHA_SITEKEY"]!!)
+                .toModelAndView("oneGuildRegister.vm")
+        }
+
+        post("/register-server") { request, _ ->
+            return@post GuildController.handleOneGuildRegister(request)
         }
 
         addDashboardRoutes()

@@ -2,15 +2,15 @@
 <h1>List of roles for $guild_name</h1>
 <table class="striped centered">
     <thead>
-    <tr>
-        <th>Id</th>
-        <th>name</th>
-        <th>Members with this role</th>
-    </tr>
+        <tr>
+            <th>Id</th>
+            <th>name</th>
+            <th>Members with this role</th>
+        </tr>
     </thead>
     <tbody>
         #foreach($role in $roles)
-        <tr>
+        <tr data-color="$role.getColorRaw()">
             <td>$role.getIdLong()</td>
             <td>$role.getName()</td>
             <td>$role.getMemberCount() Members</td>

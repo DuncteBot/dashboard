@@ -36,7 +36,7 @@ val env = dotenv()
 val restJDA = JDARestClient(env["BOT_TOKEN"]!!)
 val duncteApis = DuncteApi("Bot ${env["BOT_TOKEN"]!!}")
 
-val server = Server(env)
+val server = WebServer(env)
 
 val httpClient = OkHttpClient()
 val jsonMapper = JsonMapper()

@@ -24,8 +24,8 @@
 
 package com.dunctebot.dashboard.controllers.api
 
-import com.dunctebot.dashboard.Server.Companion.SESSION_ID
-import com.dunctebot.dashboard.Server.Companion.USER_ID
+import com.dunctebot.dashboard.WebServer.Companion.SESSION_ID
+import com.dunctebot.dashboard.WebServer.Companion.USER_ID
 import com.dunctebot.dashboard.getSession
 import com.dunctebot.dashboard.restJDA
 import com.dunctebot.dashboard.userId

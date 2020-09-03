@@ -26,6 +26,7 @@ package com.dunctebot.dashboard.websocket
 
 import com.dunctebot.dashboard.duncteApis
 import com.dunctebot.dashboard.jsonMapper
+import com.dunctebot.dashboard.websocket.handlers.DataUpdateHandler
 import com.dunctebot.dashboard.websocket.handlers.RolesHashHandler
 import com.dunctebot.dashboard.websocket.handlers.base.SocketHandler
 import com.fasterxml.jackson.core.JsonProcessingException
@@ -147,5 +148,6 @@ class DataWebSocket {
 
     private fun setupHandlers() {
         handlersMap["ROLES_PUT_HASH"] = RolesHashHandler()
+        handlersMap["DATA_UPDATE"] = DataUpdateHandler()
     }
 }

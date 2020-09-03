@@ -24,9 +24,9 @@
 
 package com.dunctebot.dashboard.controllers
 
-import com.dunctebot.dashboard.haltNotFound
+import com.dunctebot.dashboard.*
+import com.dunctebot.dashboard.rendering.DbModelAndView
 import com.dunctebot.dashboard.rendering.WebVariables
-import com.dunctebot.dashboard.restJDA
 import com.github.benmanes.caffeine.cache.Caffeine
 import net.dv8tion.jda.api.entities.Member
 import net.dv8tion.jda.api.entities.Role
@@ -37,9 +37,58 @@ import java.util.concurrent.TimeUnit
 import kotlin.streams.toList
 
 object GuildController {
+    // some hash -> "$userId-$guildId"
+    val securityKeys = mutableMapOf<String, String>()
     val guildHashes = Caffeine.newBuilder()
         .expireAfterWrite(2, TimeUnit.HOURS)
         .build<String, Long>()
+
+    fun handleOneGuildRegister(request: Request): Any {
+        val params = request.paramsMap
+        val token = params["token"]
+
+        // TODO: remove these debug things
+        if (token.isNullOrBlank()) {
+            return renderPatronRegisterPage {
+                it.put("message", "[debug 1] Submitted token is not valid")
+            }
+        }
+
+        if (!securityKeys.containsKey(token)) {
+            return renderPatronRegisterPage {
+                it.put("message", "[debug 2] Submitted token is not valid")
+            }
+        }
+
+        val userId = params["user_id"].toSafeLong()
+        val guildId = params["guild_id"].toSafeLong()
+        val theFormat = "$userId-$guildId"
+
+        if (securityKeys[token] != theFormat) {
+            return renderPatronRegisterPage {
+                it.put("message", "[debug 3] Submitted token is not valid")
+            }
+        }
+
+        // remove the token as it is used
+        securityKeys.remove(token)
+
+        // check if guild is already registered
+        // tell the bot to register the guild
+
+        return ""
+    }
+
+    private fun renderPatronRegisterPage(vars: (WebVariables) -> Unit = {}): DbModelAndView {
+        val map = WebVariables()
+
+        vars(map)
+
+        map.put("title", "Register your server for patron perks")
+            .put("captcha_sitekey", env["CAPTCHA_SITEKEY"]!!)
+
+        return map.toModelAndView("oneGuildRegister.vm")
+    }
 
     fun showGuildRoles(request: Request, response: Response): Any {
         val hash = request.params("hash")

@@ -22,43 +22,19 @@
  * SOFTWARE.
  */
 
-window.eventBus = new EventEmitter();
+package com.dunctebot.dashboard.websocket.handlers
 
-// We had to rename this form _ to id because
-// the fucking patreon button has lodash
-function id(el) {
-    return document.getElementById(el);
-}
+import com.dunctebot.dashboard.restJDA
+import com.dunctebot.dashboard.websocket.handlers.base.SocketHandler
+import com.fasterxml.jackson.databind.JsonNode
+import org.eclipse.jetty.websocket.api.Session
 
-function hide(itemId) {
-    id(itemId).style.display = 'none';
-}
-
-function unHide(itemId) {
-    id(itemId).style.display = 'block';
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    id('year').innerHTML = `${(new Date()).getFullYear()}`;
-    M.Sidenav.init(document.querySelectorAll('.sidenav'));
-
-    // M.AutoInit();
-
-    eventBus.emit('loaded');
-});
-
-document.addEventListener('click', (event) => eventBus.emit('click', event));
-
-function getMessage(m) {
-    switch (m) {
-        case 'missing_input':
-            return 'Please fill in all fields';
-        case 'no_user':
-            return 'The specified user id did not resolve any users.';
-        case 'no_guild':
-            return 'The specified server id did not resolve any servers.';
-        default:
-            return m;
+class DataUpdateHandler : SocketHandler() {
+    override fun handleInternally(session: Session, data: JsonNode?) {
+        if (data!!.has("guilds")) {
+            data["guilds"]["invalidate"].forEach {
+                restJDA.invalidateGuild(it.asLong())
+            }
+        }
     }
 }
-

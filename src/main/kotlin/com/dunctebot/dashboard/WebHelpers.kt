@@ -24,18 +24,16 @@
 
 package com.dunctebot.dashboard
 
-import com.dunctebot.dashboard.Server.Companion.GUILD_ID
-import com.dunctebot.dashboard.Server.Companion.SESSION_ID
-import com.dunctebot.dashboard.Server.Companion.USER_ID
+import com.dunctebot.dashboard.WebServer.Companion.GUILD_ID
+import com.dunctebot.dashboard.WebServer.Companion.SESSION_ID
+import com.dunctebot.dashboard.WebServer.Companion.USER_ID
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.jagrosh.jdautilities.oauth2.OAuth2Client
 import com.jagrosh.jdautilities.oauth2.session.Session
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.sharding.ShardManager
 import net.dv8tion.jda.internal.utils.IOUtil
 import okhttp3.FormBody
-import okhttp3.OkHttpClient
 import spark.*
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
@@ -83,13 +81,25 @@ fun Request.getSession(oAuth2Client: OAuth2Client): Session? {
 
 fun String?.toCBBool(): Boolean = if (this.isNullOrEmpty()) false else (this == "on")
 
+fun String?.toSafeLong(): Long {
+    if (this.isNullOrBlank()) {
+        return 0L
+    }
+
+    return try {
+        this.toLong()
+    } catch (ignored: NumberFormatException) {
+        0L
+    }
+}
+
 fun haltNotFound(request: Request, response: Response) {
     Spark.halt(404, CustomErrorPages.getFor(404, request, response) as String)
 }
 
-fun verifyCaptcha(httpClient: OkHttpClient, response: String, secret: String, mapper: ObjectMapper): JsonNode {
+fun verifyCaptcha(response: String): JsonNode {
     val body = FormBody.Builder()
-        .add("secret", secret)
+        .add("secret", env["CAPTCHA_SECRET"]!!)
         .add("response", response)
         .build()
 
@@ -101,6 +111,6 @@ fun verifyCaptcha(httpClient: OkHttpClient, response: String, secret: String, ma
     ).execute().use {
         val readFully = IOUtil.readFully(IOUtil.getBody(it))
 
-        return mapper.readTree(readFully)
+        return jsonMapper.readTree(readFully)
     }
 }

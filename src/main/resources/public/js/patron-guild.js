@@ -1,48 +1,57 @@
 /*
- * Skybot, a multipurpose discord bot
- *      Copyright (C) 2017 - 2020  Duncan "duncte123" Sterken & Ramid "ramidzkh" Khan & Maurice R S "Sanduhr32"
+ * MIT License
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published
- * by the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Copyright (c) 2020 Duncan Sterken
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
 
 function submitForm(token) {
+    let userId = id('user_id').value;
+    let guildId = id('guild_id').value;
 
-    let userId = id("user_id").value;
-    let guildId = id("guild_id").value;
+    id('btn').disabled = true;
+    id('btn').classList.add('disabled');
+    id('msg').innerHTML = 'Checking ids.....';
 
-    id("btn").disabled = true;
-    id("btn").classList.add("disabled");
-    id("msg").innerHTML = "Checking ids.....";
-
-    fetch("/api/checkUserAndGuild", {
-        method: "POST",
+    fetch('/api/check/user-guild', {
+        method: 'POST',
         headers: {
-            "Content-Type": "application/x-www-form-urlencoded"
+            'Content-Type': 'application/json'
         },
-        body: `user_id=${userId}&guild_id=${guildId}`
+        body: JSON.stringify({
+            user_id: userId,
+            guild_id: guildId,
+            captcha_response: token
+        })
     })
         .then((blob) => blob.json())
         .then((json) => {
-            reset("");
+            reset('');
 
             if (json.code !== 200) {
-                id("confirm").innerHTML = `ERROR: <b>${getMessage(json.message)}</b>`;
+                id('confirm').innerHTML = `ERROR: <b>${getMessage(json.message)}</b>`;
                 return;
             }
 
-            id("confirm").innerHTML = `
-                    <div class="row">
+            id('confirm').innerHTML = `
+                <div class="row">
                     <div class="col s12 m6">
                         <div class="card indigo">
                             <div class="card-content white-text">
@@ -58,7 +67,7 @@ function submitForm(token) {
                                 <p>If this is not correct please change the ids in the form and press submit again.</p>
                             </div>
                             <div class="card-action ">
-                                <a href="#" class="btn green white-text text-lighten-4" onclick="submitPatronForm(); return false;">This is correct</a>
+                                <a href="#" class="btn green white-text text-lighten-4" onclick="submitPatronForm('${json.token}'); return false;">This is correct</a>
                             </div>
                         </div>
                     </div>
@@ -72,13 +81,15 @@ function submitForm(token) {
         });
 }
 
-function submitPatronForm() {
+function submitPatronForm(token) {
+    id('token').value = token;
     id('patrons').submit();
 }
 
 function reset(message) {
     window.scrollTo(0, 0);
-    id("btn").disabled = false;
-    id("btn").classList.remove("disabled");
-    id("msg").innerHTML = message;
+    id('token').value = '';
+    id('btn').disabled = false;
+    id('btn').classList.remove('disabled');
+    id('msg').innerHTML = message;
 }

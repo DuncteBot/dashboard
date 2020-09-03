@@ -24,9 +24,12 @@
 
 package com.dunctebot.dashboard.controllers.api
 
+import com.dunctebot.dashboard.controllers.GuildController
 import com.dunctebot.dashboard.jsonBody
 import com.dunctebot.dashboard.jsonMapper
 import com.dunctebot.dashboard.restJDA
+import com.dunctebot.dashboard.utils.HashUtils
+import com.dunctebot.dashboard.verifyCaptcha
 import com.fasterxml.jackson.databind.node.ObjectNode
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.User
@@ -37,12 +40,34 @@ object GuildApiController {
     fun findUserAndGuild(request: Request, response: Response): Any {
         val data = request.jsonBody
 
-        if (!(data.has("user_id") && data.has("guild_id"))) {
+        if (!(data.has("user_id") && data.has("guild_id") && data.has("captcha_response"))) {
             response.status(406)
 
             return jsonMapper.createObjectNode()
                 .put("success", false)
                 .put("message", "missing_input")
+                .put("code", response.status())
+        }
+
+        if (data["captcha_response"].isNull) {
+            response.status(406)
+
+            return jsonMapper.createObjectNode()
+                .put("success", false)
+                .put("message", "Captcha missing")
+                .put("code", response.status())
+
+        }
+
+        val captchaResponse = data["captcha_response"].asText()
+        val captchaResult = verifyCaptcha(captchaResponse)
+
+        if (!captchaResult["success"].asBoolean()) {
+            response.status(403)
+
+            return jsonMapper.createObjectNode()
+                .put("success", false)
+                .put("message", "Could not validate that you are a human")
                 .put("code", response.status())
         }
 
@@ -87,8 +112,14 @@ object GuildApiController {
             .put("name", user.name)
             .put("formatted", user.asTag)
 
+        val theKey = "${user.idLong}-${guild.idLong}"
+        val theHash = HashUtils.sha1(theKey + System.currentTimeMillis())
+
+        GuildController.securityKeys[theHash] = theKey
+
         val node = jsonMapper.createObjectNode()
             .put("success", true)
+            .put("token", theHash)
             .put("code", response.status())
 
         node.set<ObjectNode>("user", userJson)

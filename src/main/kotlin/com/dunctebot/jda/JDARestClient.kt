@@ -25,6 +25,7 @@
 package com.dunctebot.jda
 
 import com.dunctebot.jda.impl.MemberPaginationActionImpl
+import com.github.benmanes.caffeine.cache.Caffeine
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.SelfUser
 import net.dv8tion.jda.api.entities.User
@@ -40,6 +41,7 @@ import net.dv8tion.jda.internal.utils.config.MetaConfig
 import net.dv8tion.jda.internal.utils.config.SessionConfig
 import net.dv8tion.jda.internal.utils.config.ThreadingConfig
 import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 
 /**
@@ -48,6 +50,12 @@ import java.util.concurrent.Executors
  * This class has been inspired by GivawayBot and all credit goes to them https://github.com/jagrosh/GiveawayBot
  */
 class JDARestClient(token: String) {
+    // create a guild cache that keeps the guilds in cache for 30 minutes
+    // When we stop accessing the guild it will be removed from the cache
+    private val guildCache = Caffeine.newBuilder()
+        .expireAfterAccess(30, TimeUnit.MINUTES)
+        .build<String, Guild>()
+
     private val jda: JDAImpl
 
     init {
@@ -65,6 +73,10 @@ class JDARestClient(token: String) {
         jda = JDAImpl(authConfig, sessionConfig, threadConfig, metaConfig)
 
         retrieveSelfUser().queue(jda::setSelfUser)
+    }
+
+    fun invalidateGuild(guildId: Long) {
+        jda.guildsView.remove(guildId)
     }
 
     // is public for JDA utils
@@ -95,13 +107,21 @@ class JDARestClient(token: String) {
     }
 
     fun retrieveGuildById(id: String): RestAction<Guild> {
-        // Lookup the guild from the cache
+        // We're caching two events here, is that worth it?
+        /*// Lookup the guild from the cache
         val guildById = jda.getGuildById(id)
 
         // If we already have it we will return the cached guild
         // TODO: invalidation of caches
         if (guildById != null) {
             return CompletedRestAction(jda, guildById)
+        }*/
+
+        // Temp cache
+        val cachedGuild = guildCache.getIfPresent(id)
+
+        if (cachedGuild != null) {
+            return CompletedRestAction(jda, cachedGuild)
         }
 
         val route = Route.Guilds.GET_GUILD.compile(id).withQueryParams("with_counts", "true")
