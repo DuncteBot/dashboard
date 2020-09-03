@@ -26,13 +26,14 @@ package com.dunctebot.dashboard.websocket
 
 import com.dunctebot.dashboard.duncteApis
 import com.dunctebot.dashboard.jsonMapper
+import com.dunctebot.dashboard.utils.HashUtils
 import com.dunctebot.dashboard.websocket.handlers.DataUpdateHandler
+import com.dunctebot.dashboard.websocket.handlers.FetchDataHandler
 import com.dunctebot.dashboard.websocket.handlers.RolesHashHandler
 import com.dunctebot.dashboard.websocket.handlers.base.SocketHandler
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.JsonNode
-import net.dv8tion.jda.api.utils.data.DataArray
-import net.dv8tion.jda.api.utils.data.DataObject
+import com.fasterxml.jackson.databind.node.ObjectNode
 import org.eclipse.jetty.websocket.api.Session
 import org.eclipse.jetty.websocket.api.StatusCode
 import org.eclipse.jetty.websocket.api.annotations.*
@@ -80,29 +81,13 @@ class DataWebSocket {
     @OnWebSocketClose
     fun onClosed(session: Session, statusCode: Int, reason: String?) {
         sessions.remove(session)
-        println("Session $session disconnected")
+        println("Client ${session.remoteAddress} disconnected with code $statusCode and reason $reason")
     }
 
     @OnWebSocketMessage
     @Throws(IOException::class)
     fun onMessage(session: Session, message: String) {
         println("Got: $message")
-
-        session.remote.sendString(DataObject.empty()
-            .put("t", "DATA_UPDATE")
-            .put("d", DataObject.empty()
-                .put("reminders", DataArray.empty()
-                    .add(DataObject.empty()
-                        .put("id", 1)
-                        .put("user_id", "191231307290771456")
-                        .put("reminder", "Test reminder from WS")
-                        .put("channel_id", "387881926691782657")
-                        .put("remind_create_date", "2020-09-01T07:18:12.000000Z")
-                        .put("remind_date", "2020-09-01T10:18:12.000000Z")
-                    )
-                )
-            )
-            .toString())
 
         try {
             val json = jsonMapper.readTree(message)
@@ -120,9 +105,24 @@ class DataWebSocket {
         thr.printStackTrace()
     }
 
+    fun requestData(data: JsonNode, callback: (JsonNode) -> Unit) {
+        val hash = HashUtils.sha1(data.toString() + System.currentTimeMillis())
+
+        (data as ObjectNode).put("identifier", hash)
+
+        val request = jsonMapper.createObjectNode()
+            .put("t", "FETCH_DATA")
+            .set<ObjectNode>("d", data)
+
+        (handlersMap["FETCH_DATA"]!! as FetchDataHandler).waitingMap[hash] = callback
+
+        broadcast(request)
+    }
+
     fun broadcast(message: JsonNode) {
         executor.submit {
             try {
+                println("Broadcasting $message")
                 sessions.forEach {
                     it.remote.sendString(
                         jsonMapper.writeValueAsString(message)
@@ -139,7 +139,7 @@ class DataWebSocket {
         val handler = handlersMap[type]
 
         if (handler == null) {
-            logger.error("Unknown event or missing handler for type $type")
+            logger.warn("Unknown event or missing handler for type $type")
             return
         }
 
@@ -149,5 +149,6 @@ class DataWebSocket {
     private fun setupHandlers() {
         handlersMap["ROLES_PUT_HASH"] = RolesHashHandler()
         handlersMap["DATA_UPDATE"] = DataUpdateHandler()
+        handlersMap["FETCH_DATA"] = FetchDataHandler()
     }
 }

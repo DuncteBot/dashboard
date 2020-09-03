@@ -46,7 +46,7 @@
                 <button class="btn waves-effect waves-light waves-ripple blue accent-4 h-captcha"
                         type="button"
                         id="btn"
-                        data-sitekey="$chapta_sitekey"
+                        data-sitekey="$captcha_sitekey"
                         data-theme="dark"
                         data-callback="submitForm">Submit
                 </button>

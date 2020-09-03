@@ -50,33 +50,49 @@ object GuildController {
         // TODO: remove these debug things
         if (token.isNullOrBlank()) {
             return renderPatronRegisterPage {
-                it.put("message", "[debug 1] Submitted token is not valid")
+                it.put("message", "[debug 1] Submitted token is not valid.")
             }
         }
 
         if (!securityKeys.containsKey(token)) {
             return renderPatronRegisterPage {
-                it.put("message", "[debug 2] Submitted token is not valid")
+                it.put("message", "[debug 2] Submitted token is not valid.")
             }
         }
 
-        val userId = params["user_id"].toSafeLong()
-        val guildId = params["guild_id"].toSafeLong()
+        val userId = params["user_id"] ?: "0"
+        val guildId = params["guild_id"] ?: "0"
         val theFormat = "$userId-$guildId"
 
         if (securityKeys[token] != theFormat) {
             return renderPatronRegisterPage {
-                it.put("message", "[debug 3] Submitted token is not valid")
+                it.put("message", "[debug 3] Submitted token is not valid.")
             }
         }
 
         // remove the token as it is used
         securityKeys.remove(token)
 
-        // check if guild is already registered
-        // tell the bot to register the guild
+        if (duncteApis.isOneGuildPatron(userId)) {
+            return renderPatronRegisterPage {
+                it.put("message", "This user is already registered, please contact a bot admin to have it changed.")
+            }
+        }
 
-        return ""
+        val sendData = jsonMapper.createObjectNode()
+            .put("t", "DATA_UPDATE")
+
+        sendData.putObject("d")
+            .putObject("new_one_guild")
+            .put("user_id", userId)
+            .put("guild_id", guildId)
+
+        webSocket.broadcast(sendData)
+
+        return renderPatronRegisterPage {
+            it.put("message", "Server successfully registered.")
+                .put("hideForm", true)
+        }
     }
 
     private fun renderPatronRegisterPage(vars: (WebVariables) -> Unit = {}): DbModelAndView {

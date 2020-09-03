@@ -106,7 +106,7 @@ fun verifyCaptcha(response: String): JsonNode {
     httpClient.newCall(
         okhttp3.Request.Builder()
             .url("https://hcaptcha.com/siteverify")
-            .patch(body)
+            .post(body)
             .build()
     ).execute().use {
         val readFully = IOUtil.readFully(IOUtil.getBody(it))

@@ -24,17 +24,15 @@
 
 package com.dunctebot.dashboard.controllers.api
 
+import com.dunctebot.dashboard.*
 import com.dunctebot.dashboard.controllers.GuildController
-import com.dunctebot.dashboard.jsonBody
-import com.dunctebot.dashboard.jsonMapper
-import com.dunctebot.dashboard.restJDA
 import com.dunctebot.dashboard.utils.HashUtils
-import com.dunctebot.dashboard.verifyCaptcha
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
-import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.User
 import spark.Request
 import spark.Response
+import java.util.concurrent.CompletableFuture
 
 object GuildApiController {
     fun findUserAndGuild(request: Request, response: Response): Any {
@@ -87,8 +85,21 @@ object GuildApiController {
                 .put("code", response.status())
         }
 
-        val guild: Guild? = try {
-            restJDA.retrieveGuildById(data["guild_id"].asText()).complete()
+        val guild: JsonNode? = try {
+            val future = CompletableFuture<JsonNode>()
+
+            val json = jsonMapper.createObjectNode()
+                json.putArray("partial_guilds")
+                .add(data["guild_id"].asText())
+            webSocket.requestData(json, future::complete)
+
+            val respJson = future.get()["partial_guilds"][0]
+
+            if (respJson["member_count"].asInt() == -1) {
+                null
+            } else {
+                respJson
+            }
         } catch (e: Exception) {
             e.printStackTrace()
             null
@@ -103,16 +114,17 @@ object GuildApiController {
                 .put("code", response.status())
         }
 
+        val guildId = guild["id"].asText()
         val guildJson = jsonMapper.createObjectNode()
-            .put("id", guild.id)
-            .put("name", guild.name)
+            .put("id", guildId)
+            .put("name", guild["name"].asText())
 
         val userJson = jsonMapper.createObjectNode()
             .put("id", user.id)
             .put("name", user.name)
             .put("formatted", user.asTag)
 
-        val theKey = "${user.idLong}-${guild.idLong}"
+        val theKey = "${user.idLong}-${guildId}"
         val theHash = HashUtils.sha1(theKey + System.currentTimeMillis())
 
         GuildController.securityKeys[theHash] = theKey

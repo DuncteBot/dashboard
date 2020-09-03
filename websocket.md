@@ -47,6 +47,10 @@ TODO: also do guild settings in here?
 {
   "t": "DATA_UPDATE",
   "d": {
+    "new_one_guild": {
+      "user_id": "user id",
+      "guild_id": "guild id"
+    },
     "patrons": {
       "add": [],
       "remove": []

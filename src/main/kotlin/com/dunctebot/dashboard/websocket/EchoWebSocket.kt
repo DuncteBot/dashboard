@@ -35,25 +35,19 @@ import java.util.concurrent.ConcurrentLinkedQueue
 
 @WebSocket
 class EchoWebSocket {
-    // Store sessions if you want to, for example, broadcast a message to all users
-    private val sessions: Queue<Session> = ConcurrentLinkedQueue()
-
     @OnWebSocketConnect
     fun connected(session: Session) {
-        // auth can be done here
-        sessions.add(session)
+        //
     }
 
     @OnWebSocketClose
     fun closed(session: Session, statusCode: Int, reason: String?) {
-        sessions.remove(session)
-        println("Closed")
+        //
     }
 
     @OnWebSocketMessage
     @Throws(IOException::class)
     fun message(session: Session, message: String) {
-        println("Got: $message") // Print message
-        session.remote.sendString(message) // and send it back
+        session.remote.sendString(message)
     }
 }

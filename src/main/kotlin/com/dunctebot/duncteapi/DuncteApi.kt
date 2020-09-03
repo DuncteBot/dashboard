@@ -48,6 +48,12 @@ class DuncteApi(private val apiKey: String) {
         return isValid
     }
 
+    fun isOneGuildPatron(userId: String): Boolean {
+        val json = executeRequest(defaultRequest("patrons/oneguild/$userId"))
+
+        return !json["data"].isEmpty
+    }
+
     private fun defaultRequest(path: String, prefixBot: Boolean = true): Request.Builder {
         val prefix = if (prefixBot) "bot/" else ""
 

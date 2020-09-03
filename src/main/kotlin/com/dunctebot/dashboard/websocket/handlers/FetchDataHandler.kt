@@ -22,22 +22,20 @@
  * SOFTWARE.
  */
 
-package com.dunctebot.dashboard
+package com.dunctebot.dashboard.websocket.handlers
 
-import com.dunctebot.dashboard.websocket.DataWebSocket
-import com.dunctebot.duncteapi.DuncteApi
-import com.dunctebot.jda.JDARestClient
-import com.fasterxml.jackson.databind.json.JsonMapper
-import io.github.cdimascio.dotenv.dotenv
-import okhttp3.OkHttpClient
+import com.dunctebot.dashboard.websocket.handlers.base.SocketHandler
+import com.fasterxml.jackson.databind.JsonNode
+import org.eclipse.jetty.websocket.api.Session
 
-val env = dotenv()
+class FetchDataHandler : SocketHandler() {
+    val waitingMap = mutableMapOf<String, (JsonNode) -> Unit>()
 
-val restJDA = JDARestClient(env["BOT_TOKEN"]!!)
-val duncteApis = DuncteApi("Bot ${env["BOT_TOKEN"]!!}")
+    override fun handleInternally(session: Session, data: JsonNode?) {
+        val identifier = data!!["identifier"].asText()
 
-val httpClient = OkHttpClient()
-val jsonMapper = JsonMapper()
-val webSocket = DataWebSocket()
-
-val server = WebServer(env)
+        if (waitingMap.containsKey(identifier)) {
+            waitingMap[identifier]!!(data)
+        }
+    }
+}
