@@ -32,6 +32,7 @@ import net.dv8tion.jda.api.requests.RestAction
 import net.dv8tion.jda.api.utils.MiscUtil
 import net.dv8tion.jda.api.utils.data.DataArray
 import net.dv8tion.jda.internal.JDAImpl
+import net.dv8tion.jda.internal.requests.CompletedRestAction
 import net.dv8tion.jda.internal.requests.RestActionImpl
 import net.dv8tion.jda.internal.requests.Route
 import net.dv8tion.jda.internal.utils.config.AuthorizationConfig
@@ -94,6 +95,15 @@ class JDARestClient(token: String) {
     }
 
     fun retrieveGuildById(id: String): RestAction<Guild> {
+        // Lookup the guild from the cache
+        val guildById = jda.getGuildById(id)
+
+        // If we already have it we will return the cached guild
+        // TODO: invalidation of caches
+        if (guildById != null) {
+            return CompletedRestAction(jda, guildById)
+        }
+
         val route = Route.Guilds.GET_GUILD.compile(id).withQueryParams("with_counts", "true")
 
         return retrieveGuildChannelsArray(id).flatMap { channels ->

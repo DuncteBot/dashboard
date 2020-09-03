@@ -27,6 +27,7 @@ package com.dunctebot.dashboard
 import com.dunctebot.dashboard.controllers.GuildController
 import com.dunctebot.dashboard.controllers.RootController
 import com.dunctebot.dashboard.controllers.api.DataController
+import com.dunctebot.dashboard.controllers.api.GuildApiController
 import com.dunctebot.dashboard.controllers.api.OtherAPi
 import com.dunctebot.dashboard.controllers.errors.HttpErrorHandlers
 import com.dunctebot.dashboard.rendering.VelocityRenderer
@@ -181,6 +182,12 @@ class Server(private val env: Dotenv) {
 
             get("/invalidate-tokens") { request, _ ->
                 return@get DataController.invalidateTokens(request)
+            }
+
+            path("/check") {
+                post("/user-guild") { request, response ->
+                    return@post GuildApiController.findUserAndGuild(request, response)
+                }
             }
         }
     }

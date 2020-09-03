@@ -57,6 +57,9 @@ val Request.paramsMap: Map<String, String>
         return map
     }
 
+val Request.jsonBody: JsonNode
+    get() = jsonMapper.readTree(this.bodyAsBytes())
+
 val Request.userId: String
     get() = this.session().attribute(USER_ID) as String
 

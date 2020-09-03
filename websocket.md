@@ -4,6 +4,7 @@
 - check permissions
 - check if bot in guild
 - creating role hashes
+- seperate server that just forwards messages between bots and dashboards (check who is who with header)
 
 # todo
 - jda to json
@@ -113,7 +114,7 @@ Response (from-bot): None
 Request (to-bot):
 ```json
 {
-  "t": "RETRIEVE",
+  "t": "FETCH_DATA",
   "identifier": "Identifier for finding the data we requested",
   "commands": {}
 }
@@ -121,7 +122,7 @@ Request (to-bot):
 Response (from-bot):
 ```json
 {
-  "t": "RETRIEVE",
+  "t": "FETCH_DATA",
   "identifier": "Identifier for finding the data we requested",
   "commands": [
     {
