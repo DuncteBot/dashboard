@@ -24,6 +24,7 @@
 
 package com.dunctebot.dashboard
 
+import com.dunctebot.dashboard.controllers.DashboardController
 import com.dunctebot.dashboard.controllers.GuildController
 import com.dunctebot.dashboard.controllers.RootController
 import com.dunctebot.dashboard.controllers.api.DataController
@@ -36,6 +37,8 @@ import com.dunctebot.dashboard.websocket.EchoWebSocket
 import com.fasterxml.jackson.databind.JsonNode
 import com.jagrosh.jdautilities.oauth2.OAuth2Client
 import io.github.cdimascio.dotenv.Dotenv
+import net.dv8tion.jda.api.Permission
+import net.dv8tion.jda.api.entities.TextChannel
 import spark.ModelAndView
 import spark.Spark.*
 
@@ -162,6 +165,16 @@ class WebServer(private val env: Dotenv) {
                     .toModelAndView("dashboard/index.vm")
             }
         }
+
+        path("/server/$GUILD_ID") {
+            before("/*") { request, response ->
+                return@before DashboardController.before(request, response)
+            }
+
+            get(""){ request, _ ->
+                return@get DashboardController.guildSettingSelect(request)
+            }
+        }
     }
 
     private fun addAPIRoutes() {
@@ -205,6 +218,27 @@ class WebServer(private val env: Dotenv) {
 
     fun shutdown() {
         awaitStop()
+    }
+
+    private fun getWithGuildData(path: String, map: WebVariables, view: String) {
+        get(path) { request, response ->
+            val guild = request.fetchGuild()
+
+            if (guild != null) {
+                val guildId = guild.idLong
+
+                val tcs = guild.textChannelCache.filter(TextChannel::canTalk).toList()
+                val goodRoles = guild.roleCache.filter {
+                    guild.selfMember.canInteract(it) && it.name != "@everyone" && it.name != "@here"
+                }.filter { !it.isManaged }.toList()
+
+                map.put("goodChannels", tcs)
+                map.put("goodRoles", goodRoles)
+            }
+
+            map.toModelAndView(view)
+        }
+
     }
 
     companion object {

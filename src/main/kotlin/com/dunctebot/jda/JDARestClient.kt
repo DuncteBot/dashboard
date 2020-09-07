@@ -127,6 +127,7 @@ class JDARestClient(token: String) {
 
         val route = Route.Guilds.GET_GUILD.compile(id).withQueryParams("with_counts", "true")
 
+        // if the first rest action fails the second one will never be called
         return retrieveGuildChannelsArray(id).flatMap { channels ->
             RestActionImpl(jda, route) { response, _ ->
                 val data = response.getObject()
@@ -135,7 +136,12 @@ class JDARestClient(token: String) {
                 data.put("channels", channels)
                 data.put("voice_states", DataArray.empty())
 
-                jda.entityBuilder.createGuild(id.toLong(), data, MiscUtil.newLongMap(), data.getInt("approximate_member_count"))
+                val guild = jda.entityBuilder
+                    .createGuild(id.toLong(), data, MiscUtil.newLongMap(), data.getInt("approximate_member_count"))
+
+                guildCache.put(id, guild)
+
+                guild
             }
         }
     }

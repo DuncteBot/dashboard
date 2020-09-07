@@ -37,6 +37,7 @@ import okhttp3.FormBody
 import spark.*
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
+import java.util.concurrent.CompletableFuture
 
 private fun String.decodeUrl() = URLDecoder.decode(this, StandardCharsets.UTF_8);
 
@@ -61,7 +62,15 @@ val Request.jsonBody: JsonNode
 val Request.userId: String
     get() = this.session().attribute(USER_ID) as String
 
-fun Request.getGuild(shardManager: ShardManager): Guild? = shardManager.getGuildById(this.params(GUILD_ID))
+fun Request.fetchGuild(): Guild? {
+    val guildId: String = this.params(GUILD_ID) ?: return null
+
+    return try {
+        restJDA.retrieveGuildById(guildId).complete()
+    } catch (e: Exception) {
+        null
+    }
+}
 
 fun Request.authOrFail() {
     if (!(this.headers().contains("Authorization") && duncteApis.validateToken(this.headers("Authorization")))) {
