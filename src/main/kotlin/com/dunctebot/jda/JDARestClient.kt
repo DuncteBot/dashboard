@@ -75,12 +75,13 @@ class JDARestClient(token: String) {
         retrieveSelfUser().queue(jda::setSelfUser)
     }
 
-    fun invalidateGuild(guildId: Long) {
-        jda.guildsView.remove(guildId)
-    }
-
     // is public for JDA utils
     val fakeJDA = FakeJDA(this, jda)
+
+    fun invalidateGuild(guildId: Long) {
+        jda.guildsView.remove(guildId)
+        guildCache.invalidate(guildId.toString())
+    }
 
     fun retrieveUserById(id: String): RestAction<User> {
         val route = Route.Users.GET_USER.compile(id)
@@ -103,7 +104,7 @@ class JDARestClient(token: String) {
     private fun retrieveGuildChannelsArray(guildId: String): RestAction<DataArray> {
         val route = Route.Guilds.GET_CHANNELS.compile(guildId)
 
-        return RestActionImpl(jda, route) { response, _ -> response.array}
+        return RestActionImpl(jda, route) { response, _ -> response.array }
     }
 
     fun retrieveGuildById(id: String): RestAction<Guild> {
