@@ -93,12 +93,18 @@ object GuildApiController {
                 .add(data["guild_id"].asText())
             webSocket.requestData(json, future::complete)
 
-            val respJson = future.get()["partial_guilds"][0]
+            val partialGuilds = future.get()["partial_guilds"]
 
-            if (respJson["member_count"].asInt() == -1) {
+            if (partialGuilds.isEmpty) {
                 null
             } else {
-                respJson
+                val respJson = partialGuilds[0]
+
+                if (respJson["member_count"].asInt() == -1) {
+                    null
+                } else {
+                    respJson
+                }
             }
         } catch (e: Exception) {
             e.printStackTrace()

@@ -24,12 +24,9 @@
 
 package com.dunctebot.dashboard.controllers.api
 
+import com.dunctebot.dashboard.*
 import com.dunctebot.dashboard.WebServer.Companion.SESSION_ID
 import com.dunctebot.dashboard.WebServer.Companion.USER_ID
-import com.dunctebot.dashboard.getSession
-import com.dunctebot.dashboard.restJDA
-import com.dunctebot.dashboard.userId
-import com.dunctebot.dashboard.jsonMapper
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.github.benmanes.caffeine.cache.Caffeine
@@ -38,6 +35,7 @@ import com.jagrosh.jdautilities.oauth2.entities.OAuth2Guild
 import net.dv8tion.jda.api.Permission
 import spark.Request
 import spark.Response
+import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ThreadLocalRandom
 import java.util.concurrent.TimeUnit
 
@@ -46,7 +44,7 @@ object OtherAPi {
         .expireAfterWrite(5, TimeUnit.MINUTES)
         .build<String, List<OAuth2Guild>>()
 
-    fun getUserGuilds(request: Request, response: Response, oAuth2Client: OAuth2Client): Any {
+    fun fetchGuildsOfUser(request: Request, response: Response, oAuth2Client: OAuth2Client): Any {
         val attributes = request.session().attributes()
 
         // We need to make sure that we are logged in and have a user id
@@ -68,13 +66,22 @@ object OtherAPi {
             return@get oAuth2Client.getGuilds(request.getSession(oAuth2Client)).complete()
         }!!
 
-        guildsRequest.forEach {
-            // Only add the servers where the user has the MANAGE_SERVER
-            // perms to the list
-            if (it.hasPermission(Permission.MANAGE_SERVER)) {
-                guilds.add(guildToJson(it))
-            }
-        }
+        // Only add the servers where the user has the MANAGE_SERVER
+        // perms to the list
+        val filteredGilds = guildsRequest.filter { it.hasPermission(Permission.MANAGE_SERVER) }
+
+        val future = CompletableFuture<JsonNode>()
+        val json = jsonMapper.createObjectNode()
+        val partialRequest = json.putArray("partial_guilds")
+
+        // add all guild ids to the map
+        filteredGilds.map(OAuth2Guild::getId).forEach(partialRequest::add)
+
+        webSocket.requestData(json, future::complete)
+
+        val partialGuilds = future.get()["partial_guilds"]
+
+        filteredGilds.forEach { guilds.add(guildToJson(it, partialGuilds)) }
 
         return jsonMapper.createObjectNode()
             .put("success", true)
@@ -83,7 +90,7 @@ object OtherAPi {
             .set<ObjectNode>("guilds", guilds)
     }
 
-    private fun guildToJson(guild: OAuth2Guild): JsonNode {
+    private fun guildToJson(guild: OAuth2Guild, partialGuilds: JsonNode): JsonNode {
         // Get guild id or random default avatar url
         val icon = if (!guild.iconUrl.isNullOrEmpty()) {
             guild.iconUrl
@@ -92,15 +99,16 @@ object OtherAPi {
             "https://cdn.discordapp.com/embed/avatars/$number.png"
         }
 
-        // TODO: fetch guild info from bot
-        val memberCount = restJDA.fakeJDA.getGuildById(guild.idLong)?.memberCount ?: -1
+        // #getId does a Long.toUnsignedString operation so we store it here to save some cycles
+        val textId = guild.id
+        val part = partialGuilds.find { it["id"].asText() == textId } ?: jsonMapper.createObjectNode().put("member_count", -1)
 
         return jsonMapper.createObjectNode()
             .put("name", guild.name)
             .put("iconId", guild.iconId)
             .put("iconUrl", icon)
             .put("owner", guild.isOwner)
-            .put("members", memberCount)
-            .put("id", guild.id)
+            .put("members", part["member_count"].asInt())
+            .put("id", textId)
     }
 }

@@ -37,7 +37,6 @@ import com.dunctebot.dashboard.websocket.EchoWebSocket
 import com.fasterxml.jackson.databind.JsonNode
 import com.jagrosh.jdautilities.oauth2.OAuth2Client
 import io.github.cdimascio.dotenv.Dotenv
-import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.entities.TextChannel
 import spark.ModelAndView
 import spark.Spark.*
@@ -111,6 +110,7 @@ class WebServer(private val env: Dotenv) {
 
         get("/register-server") {_, _ ->
             WebVariables()
+                .put("hide_settings", true)
                 .put("title", "Register your server for patron perks")
                 .put("captcha_sitekey", env["CAPTCHA_SITEKEY"]!!)
                 .toModelAndView("oneGuildRegister.vm")
@@ -123,8 +123,11 @@ class WebServer(private val env: Dotenv) {
         addDashboardRoutes()
         addAPIRoutes()
 
+        // TODO: does not seem to work with WS enabled
         notFound { request, response ->
             val result = HttpErrorHandlers.notFound(request, response)
+
+            println("not found")
 
             return@notFound responseTransformer(result)
         }
@@ -137,10 +140,10 @@ class WebServer(private val env: Dotenv) {
 
         // I hate how they made it varargs
         // now I have to add parentheses
-        after({ _, response ->
+        /*after({ _, response ->
             // enable gzip, this is done automagically by sending the header
             response.header("Content-Encoding", "gzip")
-        })
+        })*/
     }
 
     private fun addDashboardRoutes() {
@@ -162,18 +165,26 @@ class WebServer(private val env: Dotenv) {
             get("") { _, _ ->
                 return@get WebVariables()
                     .put("title", "Dashboard")
+                    .put("hide_settings", true)
                     .toModelAndView("dashboard/index.vm")
             }
         }
 
         path("/server/$GUILD_ID") {
-            before("/*") { request, response ->
+            // TODO: enable again
+            /*before("*") { request, response ->
                 return@before DashboardController.before(request, response)
+            }*/
+
+            get("") { request, response ->
+                return@get response.redirect("/server/${request.guildId}/basic")
             }
 
-            get(""){ request, _ ->
-                return@get DashboardController.guildSettingSelect(request)
-            }
+            getWithGuildData(
+                "/basic",
+                WebVariables().put("title", "Dashboard"),
+                "dashboard/basicSettings.vm"
+            )
         }
     }
 
@@ -193,7 +204,7 @@ class WebServer(private val env: Dotenv) {
             }
 
             get("/user-guilds") { request, response ->
-                return@get OtherAPi.getUserGuilds(request, response, oAuth2Client)
+                return@get OtherAPi.fetchGuildsOfUser(request, response, oAuth2Client)
             }
 
             get("/commands.json") {_, _ ->
@@ -234,7 +245,10 @@ class WebServer(private val env: Dotenv) {
 
                 map.put("goodChannels", tcs)
                 map.put("goodRoles", goodRoles)
+                map.put("guild", guild)
             }
+
+            map.put("hide_settings", false)
 
             map.toModelAndView(view)
         }

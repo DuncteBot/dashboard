@@ -47,33 +47,32 @@ object GuildController {
         val params = request.paramsMap
         val token = params["token"]
 
-        // TODO: remove these debug things
         if (token.isNullOrBlank()) {
             return renderPatronRegisterPage {
-                it.put("message", "[debug 1] Submitted token is not valid.")
+                it.put("message", "Submitted token is not valid.")
             }
         }
 
         if (!securityKeys.containsKey(token)) {
             return renderPatronRegisterPage {
-                it.put("message", "[debug 2] Submitted token is not valid.")
+                it.put("message", "Submitted token is not valid.")
             }
         }
 
-        val userId = params["user_id"] ?: "0"
-        val guildId = params["guild_id"] ?: "0"
+        val userId = params["user_id"].toSafeLong()
+        val guildId = params["guild_id"].toSafeLong()
         val theFormat = "$userId-$guildId"
 
         if (securityKeys[token] != theFormat) {
             return renderPatronRegisterPage {
-                it.put("message", "[debug 3] Submitted token is not valid.")
+                it.put("message", "Submitted token is not valid.")
             }
         }
 
         // remove the token as it is used
         securityKeys.remove(token)
 
-        if (duncteApis.isOneGuildPatron(userId)) {
+        if (duncteApis.isOneGuildPatron(userId.toString())) {
             return renderPatronRegisterPage {
                 it.put("message", "This user is already registered, please contact a bot admin to have it changed.")
             }
@@ -101,6 +100,7 @@ object GuildController {
         vars(map)
 
         map.put("title", "Register your server for patron perks")
+            .put("hide_settings", true)
             .put("captcha_sitekey", env["CAPTCHA_SITEKEY"]!!)
 
         return map.toModelAndView("oneGuildRegister.vm")
@@ -124,6 +124,7 @@ object GuildController {
 //        println("Actual count: ${members.size}")
 
         return WebVariables()
+            .put("hide_settings", true)
             .put("title", "Roles for ${guild.name}")
             .put("guild_name", guild.name)
             .put("roles", guild.roles.map { CustomRole(it, members) })

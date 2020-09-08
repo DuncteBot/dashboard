@@ -27,12 +27,14 @@ package com.dunctebot.jda
 import com.dunctebot.jda.impl.MemberPaginationActionImpl
 import com.github.benmanes.caffeine.cache.Caffeine
 import net.dv8tion.jda.api.entities.Guild
+import net.dv8tion.jda.api.entities.Member
 import net.dv8tion.jda.api.entities.SelfUser
 import net.dv8tion.jda.api.entities.User
 import net.dv8tion.jda.api.requests.RestAction
 import net.dv8tion.jda.api.utils.MiscUtil
 import net.dv8tion.jda.api.utils.data.DataArray
 import net.dv8tion.jda.internal.JDAImpl
+import net.dv8tion.jda.internal.entities.GuildImpl
 import net.dv8tion.jda.internal.requests.CompletedRestAction
 import net.dv8tion.jda.internal.requests.RestActionImpl
 import net.dv8tion.jda.internal.requests.Route
@@ -107,6 +109,14 @@ class JDARestClient(token: String) {
         return RestActionImpl(jda, route) { response, _ -> response.array }
     }
 
+    fun retrieveMemberById(guild: Guild, memberId: String): RestAction<Member> {
+        val route = Route.Guilds.GET_MEMBER.compile(guild.id, memberId)
+
+        return RestActionImpl(jda, route) {
+            response, _ -> jda.entityBuilder.createMember(guild as GuildImpl, response.getObject())
+        }
+    }
+
     fun retrieveGuildById(id: String): RestAction<Guild> {
         // We're caching two events here, is that worth it?
         /*// Lookup the guild from the cache
@@ -138,6 +148,11 @@ class JDARestClient(token: String) {
 
                 val guild = jda.entityBuilder
                     .createGuild(id.toLong(), data, MiscUtil.newLongMap(), data.getInt("approximate_member_count"))
+
+                val selfMember = retrieveMemberById(guild, jda.selfUser.id).complete()
+                guild.membersView.writeLock().use {
+                    guild.membersView.map.put(jda.selfUser.idLong, selfMember)
+                }
 
                 guildCache.put(id, guild)
 

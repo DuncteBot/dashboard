@@ -62,8 +62,11 @@ val Request.jsonBody: JsonNode
 val Request.userId: String
     get() = this.session().attribute(USER_ID) as String
 
+val Request.guildId: String?
+    get() = this.params(GUILD_ID)
+
 fun Request.fetchGuild(): Guild? {
-    val guildId: String = this.params(GUILD_ID) ?: return null
+    val guildId: String = this.guildId ?: return null
 
     return try {
         restJDA.retrieveGuildById(guildId).complete()

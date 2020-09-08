@@ -30,6 +30,7 @@ import com.dunctebot.dashboard.WebServer.Companion.SESSION_ID
 import com.dunctebot.dashboard.WebServer.Companion.USER_ID
 import com.dunctebot.dashboard.fetchGuild
 import com.dunctebot.dashboard.rendering.WebVariables
+import com.dunctebot.dashboard.restJDA
 import com.dunctebot.dashboard.userId
 import net.dv8tion.jda.api.Permission
 import spark.Request
@@ -56,8 +57,9 @@ object DashboardController {
         }
 
         val member = try {
-            guild.retrieveMemberById(request.userId).complete()
+            restJDA.retrieveMemberById(guild, request.userId).complete()
         } catch (e: Exception) {
+            e.printStackTrace()
             throw Spark.halt(200, "<h1>Either discord did a fucky wucky or you are not in the server that you are trying to edit</h1>")
         }
 
@@ -71,6 +73,7 @@ object DashboardController {
             .put("title", "Dashboard")
             .put("id", request.params(GUILD_ID))
             .put("name", request.fetchGuild()?.name ?: "wot?")
+            .put("guild", request.fetchGuild() ?: "")
             .toModelAndView("dashboard/panelSelection.vm")
     }
 }

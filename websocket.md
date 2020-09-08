@@ -180,7 +180,7 @@ Response (from-bot):
     "identifier": "Identifier for finding the data we requested",
     "partial_guilds": [
       {
-        "guild_id": "13456",
+        "id": "13456",
         "member_count": 999, // or -1 for not in server
         "text_channels": [
           // JDA text channel object

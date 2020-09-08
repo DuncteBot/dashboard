@@ -30,6 +30,20 @@
         * {
             --color: #0751c6;
         }
+
+        header, main, footer {
+            padding-left: 300px;
+        }
+
+        @media only screen and (max-width : 992px) {
+            header, main, footer {
+                padding-left: 0;
+            }
+        }
+
+        .sidenav-overlay {
+            z-index: 2!important;
+        }
     </style>
     <!--Import Google Icon Font-->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
@@ -44,13 +58,45 @@
 
 </head>
 <body class="discord dark-not-black">
+
 <header>
     <div class="navbar-fixed">
         <nav class="indigo">
             <div class="nav-wrapper container">
+                <a href="#" data-target="server-setting-selection" class="sidenav-trigger"><i class="material-icons">menu</i></a>
                 <a href="/" class="brand-logo">Dashboard</a>
             </div>
         </nav>
+
+        #if(!$hide_settings)
+            <ul id="server-setting-selection" class="discord dark-not-black sidenav sidenav-fixed">
+                <li class="bold">
+                    <a class="white-text" href="/server/$guild.getIdLong()/basic">Basic Settings</a>
+                </li>
+                <li class="bold">
+                    <a class="white-text" href="/server/$guild.getIdLong()/moderation">Moderation Settings</a>
+                </li>
+                <li class="bold">
+                    <a class="white-text" href="/server/$guild.getIdLong()/customcommands">Custom Commnds</a>
+                </li>
+                <li class="bold">
+                    <a class="white-text" href="/server/$guild.getIdLong()/messages">Welcome/Leave message</a>
+                </li>
+            </ul>
+
+            <script>
+                const ul = document.getElementById('server-setting-selection');
+                const path = window.location.href;
+
+                for (const li of ul.children) {
+                    console.log(li.firstElementChild.href, path)
+                    if (li.firstElementChild.href === path) {
+                        li.classList.add('active');
+                        break;
+                    }
+                }
+            </script>
+        #end
     </div>
 </header>
 

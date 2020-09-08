@@ -52,7 +52,7 @@ eventBus.once('loaded', () => {
 
                 if (guild.members > -1) {
                     members = `${guild.members} members`;
-                    settingsLink = `<a href="/server/${guild.id}/">Edit settings</a>`;
+                    settingsLink = `<a href="/server/${guild.id}">Edit settings</a>`;
                 }
 
                 div.innerHTML += `<div class="col s12 m6 l4 xl3">
