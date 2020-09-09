@@ -31,13 +31,11 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.jagrosh.jdautilities.oauth2.OAuth2Client
 import com.jagrosh.jdautilities.oauth2.session.Session
 import net.dv8tion.jda.api.entities.Guild
-import net.dv8tion.jda.api.sharding.ShardManager
 import net.dv8tion.jda.internal.utils.IOUtil
 import okhttp3.FormBody
 import spark.*
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
-import java.util.concurrent.CompletableFuture
 
 private fun String.decodeUrl() = URLDecoder.decode(this, StandardCharsets.UTF_8);
 

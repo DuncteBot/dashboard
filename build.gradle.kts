@@ -35,12 +35,18 @@ repositories {
     jcenter()
 
     maven {
+        url = uri("https://dl.bintray.com/duncte123/maven")
+    }
+
+    maven {
         url = uri("https://jitpack.io")
     }
 }
 
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
+    implementation(group = "com.dunctebot", name = "dunctebot-models", version = "0.0.3")
+
     implementation(group = "ch.qos.logback", name = "logback-classic", version = "1.2.3")
     implementation(group = "io.github.cdimascio", name = "java-dotenv", version = "5.2.1")
 

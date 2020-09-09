@@ -26,6 +26,7 @@ package com.dunctebot.duncteapi
 
 import com.dunctebot.dashboard.httpClient
 import com.dunctebot.dashboard.jsonMapper
+import com.dunctebot.models.settings.GuildSetting
 import com.fasterxml.jackson.databind.JsonNode
 import okhttp3.Request
 
@@ -54,6 +55,12 @@ class DuncteApi(private val apiKey: String) {
         return !json["data"].isEmpty
     }
 
+    fun getGuildSetting(guildId: Long): GuildSetting {
+        val json = executeRequest(defaultRequest("guildsettings/$guildId"))
+
+        return jsonMapper.readValue(json.traverse(), GuildSetting::class.java)
+    }
+
     private fun defaultRequest(path: String, prefixBot: Boolean = true): Request.Builder {
         val prefix = if (prefixBot) "bot/" else ""
 
@@ -73,9 +80,9 @@ class DuncteApi(private val apiKey: String) {
     private fun JsonNode.toJsonString() = jsonMapper.writeValueAsString(this)
 
     companion object {
-//        const val API_HOST = "http://localhost:8081"
+        // const val API_HOST = "http://localhost:8081"
         const val API_HOST = "http://duncte123-apis-lumen.test/"
-//        const val API_HOST = "https://apis.duncte123.me"
+        // const val API_HOST = "https://apis.duncte123.me"
         const val USER_AGENT = "Mozilla/5.0 (compatible; SkyBot/dashboard; +https://dashboard.dunctebot.com)"
     }
 }

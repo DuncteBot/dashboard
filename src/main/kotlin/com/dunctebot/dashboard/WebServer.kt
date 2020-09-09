@@ -24,7 +24,6 @@
 
 package com.dunctebot.dashboard
 
-import com.dunctebot.dashboard.controllers.DashboardController
 import com.dunctebot.dashboard.controllers.GuildController
 import com.dunctebot.dashboard.controllers.RootController
 import com.dunctebot.dashboard.controllers.api.DataController
@@ -246,9 +245,20 @@ class WebServer(private val env: Dotenv) {
                 map.put("goodChannels", tcs)
                 map.put("goodRoles", goodRoles)
                 map.put("guild", guild)
+                map.put("settings", duncteApis.getGuildSetting(guildId))
             }
 
             map.put("hide_settings", false)
+
+            val session = request.session()
+            val message: String? = session.attribute(FLASH_MESSAGE)
+
+            if (!message.isNullOrEmpty()) {
+                session.attribute(FLASH_MESSAGE, null)
+                map.put("message", message)
+            } else {
+                map.put("message", false)
+            }
 
             map.toModelAndView(view)
         }

@@ -29,7 +29,6 @@ import com.dunctebot.dashboard.duncteApis
 import com.dunctebot.dashboard.jsonMapper
 import com.dunctebot.dashboard.webSocket
 import spark.Request
-import spark.Spark
 
 object DataController {
     fun updateData(request: Request): Any {
