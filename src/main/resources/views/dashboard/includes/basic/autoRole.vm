@@ -1,5 +1,5 @@
 ## Autorole
-<div class="input-field col s12 m3">
+<div class="input-field col s12 m4">
     <select id="autoRoleRole" name="autoRoleRole">
         <option value="" selected disabled>Select a role</option>
         #foreach($role in $goodRoles)

@@ -32,7 +32,12 @@ import com.dunctebot.dashboard.controllers.api.OtherAPi
 import com.dunctebot.dashboard.controllers.errors.HttpErrorHandlers
 import com.dunctebot.dashboard.rendering.VelocityRenderer
 import com.dunctebot.dashboard.rendering.WebVariables
+import com.dunctebot.dashboard.utils.fetchGuildPatronStatus
 import com.dunctebot.dashboard.websocket.EchoWebSocket
+import com.dunctebot.models.settings.GuildSetting
+import com.dunctebot.models.settings.ProfanityFilterType
+import com.dunctebot.models.settings.WarnAction
+import com.dunctebot.models.utils.Utils
 import com.fasterxml.jackson.databind.JsonNode
 import com.jagrosh.jdautilities.oauth2.OAuth2Client
 import io.github.cdimascio.dotenv.Dotenv
@@ -107,7 +112,7 @@ class WebServer(private val env: Dotenv) {
             return@get GuildController.showGuildRoles(request, response)
         }
 
-        get("/register-server") {_, _ ->
+        get("/register-server") { _, _ ->
             WebVariables()
                 .put("hide_settings", true)
                 .put("title", "Register your server for patron perks")
@@ -179,10 +184,37 @@ class WebServer(private val env: Dotenv) {
                 return@get response.redirect("/server/${request.guildId}/basic")
             }
 
+            // basic settings
             getWithGuildData(
                 "/basic",
                 WebVariables().put("title", "Dashboard"),
                 "dashboard/basicSettings.vm"
+            )
+
+            // Moderation settings
+            getWithGuildData(
+                "/moderation",
+                WebVariables()
+                    .put("filterValues", ProfanityFilterType.values())
+                    .put("warnActionTypes", WarnAction.Type.values())
+                    .put("title", "Dashboard")
+                    .put("loggingTypes", GuildSetting.LOGGING_TYPES)
+                    .put("patronMaxWarnActions", WarnAction.PATRON_MAX_ACTIONS),
+                "dashboard/moderationSettings.vm"
+            )
+
+            // Custom command settings
+            getWithGuildData(
+                "/custom-commands",
+                WebVariables().put("title", "Dashboard"),
+                "dashboard/customCommandSettings.vm"
+            )
+
+            // Message settings
+            getWithGuildData(
+                "/messages",
+                WebVariables().put("title", "Dashboard"),
+                "dashboard/welcomeLeaveDesc.vm"
             )
         }
     }
@@ -206,7 +238,7 @@ class WebServer(private val env: Dotenv) {
                 return@get OtherAPi.fetchGuildsOfUser(request, response, oAuth2Client)
             }
 
-            get("/commands.json") {_, _ ->
+            get("/commands.json") { _, _ ->
                 "TODO: setup websocket to bot"
             }
 
@@ -231,7 +263,7 @@ class WebServer(private val env: Dotenv) {
     }
 
     private fun getWithGuildData(path: String, map: WebVariables, view: String) {
-        get(path) { request, response ->
+        get(path) { request, _ ->
             val guild = request.fetchGuild()
 
             if (guild != null) {
@@ -245,7 +277,13 @@ class WebServer(private val env: Dotenv) {
                 map.put("goodChannels", tcs)
                 map.put("goodRoles", goodRoles)
                 map.put("guild", guild)
-                map.put("settings", duncteApis.getGuildSetting(guildId))
+
+                val settings = duncteApis.getGuildSetting(guildId)
+
+                map.put("settings", settings)
+                map.put("guildColor", Utils.colorToHex(settings.embedColor))
+
+                map.put("guild_patron", fetchGuildPatronStatus(request.guildId!!))
             }
 
             map.put("hide_settings", false)

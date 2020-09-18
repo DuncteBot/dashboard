@@ -69,11 +69,13 @@ object DashboardController {
     }
 
     fun guildSettingSelect(request: Request): Any {
+        val guild = request.fetchGuild();
+
         return WebVariables()
             .put("title", "Dashboard")
             .put("id", request.params(GUILD_ID))
-            .put("name", request.fetchGuild()?.name ?: "wot?")
-            .put("guild", request.fetchGuild() ?: "")
+            .put("name", guild?.name ?: "wot?")
+            .put("guild", guild ?: "")
             .toModelAndView("dashboard/panelSelection.vm")
     }
 }

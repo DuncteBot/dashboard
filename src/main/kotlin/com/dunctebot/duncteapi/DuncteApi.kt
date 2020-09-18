@@ -58,7 +58,7 @@ class DuncteApi(private val apiKey: String) {
     fun getGuildSetting(guildId: Long): GuildSetting {
         val json = executeRequest(defaultRequest("guildsettings/$guildId"))
 
-        return jsonMapper.readValue(json.traverse(), GuildSetting::class.java)
+        return jsonMapper.readValue(json["data"].traverse(), GuildSetting::class.java)
     }
 
     private fun defaultRequest(path: String, prefixBot: Boolean = true): Request.Builder {
