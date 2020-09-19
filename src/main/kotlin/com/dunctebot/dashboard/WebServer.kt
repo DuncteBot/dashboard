@@ -26,6 +26,7 @@ package com.dunctebot.dashboard
 
 import com.dunctebot.dashboard.controllers.GuildController
 import com.dunctebot.dashboard.controllers.RootController
+import com.dunctebot.dashboard.controllers.SettingsController
 import com.dunctebot.dashboard.controllers.api.DataController
 import com.dunctebot.dashboard.controllers.api.GuildApiController
 import com.dunctebot.dashboard.controllers.api.OtherAPi
@@ -190,6 +191,10 @@ class WebServer(private val env: Dotenv) {
                 WebVariables().put("title", "Dashboard"),
                 "dashboard/basicSettings.vm"
             )
+
+            post("/basic") { request, response ->
+                return@post SettingsController.saveBasic(request, response)
+            }
 
             // Moderation settings
             getWithGuildData(

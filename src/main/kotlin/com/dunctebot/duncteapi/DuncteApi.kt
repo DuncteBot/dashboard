@@ -24,11 +24,13 @@
 
 package com.dunctebot.duncteapi
 
+import com.dunctebot.dashboard.constants.ContentType.JSON
 import com.dunctebot.dashboard.httpClient
 import com.dunctebot.dashboard.jsonMapper
 import com.dunctebot.models.settings.GuildSetting
 import com.fasterxml.jackson.databind.JsonNode
 import okhttp3.Request
+import okhttp3.RequestBody
 
 class DuncteApi(private val apiKey: String) {
     val validTokens = mutableListOf<String>()
@@ -59,6 +61,38 @@ class DuncteApi(private val apiKey: String) {
         val json = executeRequest(defaultRequest("guildsettings/$guildId"))
 
         return jsonMapper.readValue(json["data"].traverse(), GuildSetting::class.java)
+    }
+
+    fun saveGuildSetting(setting: GuildSetting) {
+        val json = setting.toJson(jsonMapper)
+
+
+        patchJSON("guildsettings/${setting.guildId}", json)
+    }
+
+
+    private fun patchJSON(path: String, json: JsonNode, prefixBot: Boolean = true): JsonNode {
+        val body = RequestBody.create(null, json.toJsonString())
+        val request = defaultRequest(path, prefixBot)
+            .patch(body).addHeader("Content-Type", JSON)
+
+        return executeRequest(request)
+    }
+
+    private fun postJSON(path: String, json: JsonNode, prefixBot: Boolean = true): JsonNode {
+        val body = RequestBody.create(null, json.toJsonString())
+        val request = defaultRequest(path, prefixBot)
+            .post(body).addHeader("Content-Type", JSON)
+
+        return executeRequest(request)
+    }
+
+    private fun deleteJSON(path: String, json: JsonNode, prefixBot: Boolean = true): JsonNode {
+        val body = RequestBody.create(null, json.toJsonString())
+        val request = defaultRequest(path, prefixBot)
+            .delete(body).addHeader("Content-Type", JSON)
+
+        return executeRequest(request)
     }
 
     private fun defaultRequest(path: String, prefixBot: Boolean = true): Request.Builder {

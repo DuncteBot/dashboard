@@ -82,5 +82,7 @@ object SettingsController {
             .add(setting.toJson(jsonMapper))
 
         webSocket.broadcast(request)
+
+        duncteApis.saveGuildSetting(setting)
     }
 }
