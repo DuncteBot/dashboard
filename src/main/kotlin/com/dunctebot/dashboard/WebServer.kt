@@ -208,6 +208,10 @@ class WebServer(private val env: Dotenv) {
                 "dashboard/moderationSettings.vm"
             )
 
+            post("/moderation") { request, response ->
+                return@post SettingsController.saveModeration(request, response)
+            }
+
             // Custom command settings
             getWithGuildData(
                 "/custom-commands",
@@ -221,7 +225,20 @@ class WebServer(private val env: Dotenv) {
                 WebVariables().put("title", "Dashboard"),
                 "dashboard/welcomeLeaveDesc.vm"
             )
-        }
+
+            post("/messages") { request, response ->
+                return@post SettingsController.saveMessages(request, response)
+            }
+
+
+            // Soon tm?
+            /*get("/music") { request, _ ->
+                val guild = WebHelpers.getGuildFromRequest(request, shardManager)
+                    ?: return@get """{"message": "No guild? WOT"}"""
+                val mng = variables.audioUtils.getMusicManager(guild)
+
+                EarthUtils.gMMtoJSON(mng, variables.jackson)
+            }*/        }
     }
 
     private fun addAPIRoutes() {
@@ -237,6 +254,11 @@ class WebServer(private val env: Dotenv) {
 
             options("/*") { _, _ ->
                 // Allow OPTIONS requests
+            }
+
+            // TODO: make bot call api endpoint
+            get("/getServerCount") { _, response ->
+                return@get OtherAPi.guildCount(response)
             }
 
             get("/user-guilds") { request, response ->
@@ -259,6 +281,10 @@ class WebServer(private val env: Dotenv) {
                 post("/user-guild") { request, response ->
                     return@post GuildApiController.findUserAndGuild(request, response)
                 }
+            }
+
+            path("/custom-commands/$GUILD_ID") {
+
             }
         }
     }

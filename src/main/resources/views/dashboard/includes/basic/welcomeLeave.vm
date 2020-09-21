@@ -1,5 +1,5 @@
 ## Welcome/Leave
-<div class="input-field col s12 m4">
+<div class="input-field col s12 m5">
     <select id="welcomeChannel" name="welcomeChannel"
             onchange="checkSelect(this.id, 'welcomeChannelCB');">
         <option value="" selected disabled>Select a channel</option>

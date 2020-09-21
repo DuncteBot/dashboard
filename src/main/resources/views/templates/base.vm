@@ -50,6 +50,14 @@
         .sidenav-overlay {
             z-index: 2!important;
         }
+
+        .caret {
+            fill: #FFFFFF !important;
+        }
+
+        select {
+            display: none;
+        }
     </style>
     <!--Import Google Icon Font-->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>

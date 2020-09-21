@@ -28,12 +28,23 @@ import com.dunctebot.dashboard.constants.ContentType.JSON
 import com.dunctebot.dashboard.httpClient
 import com.dunctebot.dashboard.jsonMapper
 import com.dunctebot.models.settings.GuildSetting
+import com.dunctebot.models.settings.WarnAction
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.node.ArrayNode
+import com.github.benmanes.caffeine.cache.Caffeine
+import com.jagrosh.jdautilities.oauth2.entities.OAuth2Guild
 import okhttp3.Request
 import okhttp3.RequestBody
+import org.slf4j.LoggerFactory
+import java.util.concurrent.TimeUnit
 
 class DuncteApi(private val apiKey: String) {
+    private val logger = LoggerFactory.getLogger(DuncteApi::class.java)
     val validTokens = mutableListOf<String>()
+    // caching makes it a bit faster
+    private val settingCache = Caffeine.newBuilder()
+        .expireAfterAccess(30, TimeUnit.MINUTES)
+        .build<Long, GuildSetting>()
 
     fun validateToken(token: String): Boolean {
         if (validTokens.contains(token)) {
@@ -58,18 +69,52 @@ class DuncteApi(private val apiKey: String) {
     }
 
     fun getGuildSetting(guildId: Long): GuildSetting {
-        val json = executeRequest(defaultRequest("guildsettings/$guildId"))
+        return settingCache.get(guildId) {
+            val json = executeRequest(defaultRequest("guildsettings/$guildId"))
 
-        return jsonMapper.readValue(json["data"].traverse(), GuildSetting::class.java)
+            return@get jsonMapper.readValue(json["data"].traverse(), GuildSetting::class.java)
+        }!!
     }
 
     fun saveGuildSetting(setting: GuildSetting) {
         val json = setting.toJson(jsonMapper)
 
-
         patchJSON("guildsettings/${setting.guildId}", json)
     }
 
+    fun updateWarnActions(guildId: Long, actions: List<WarnAction>) {
+        val json = jsonMapper.createObjectNode()
+
+        json.putArray("warn_actions")
+            .addAll(jsonMapper.valueToTree<ArrayNode>(actions))
+
+        val response = postJSON("guildsettings/$guildId/warn-actions", json)
+
+        if (!response["success"].asBoolean()) {
+            logger.error("Failed to set warn actions for $guildId\n" +
+                "Response: {}", response["error"].toString())
+        }
+    }
+
+    fun fetchCustomCommands(guildId: Long): JsonNode {
+        return executeRequest(defaultRequest("customcommands/$guildId"))["data"]
+    }
+
+    fun fetchCustomCommand(guildId: Long, invoke: String): JsonNode? {
+        val resp = executeRequest(defaultRequest("customcommands/$guildId/$invoke"))
+
+        if (!resp["success"].asBoolean()) {
+            return null
+        }
+
+        return resp["data"]
+    }
+
+    fun updateCustomCommand(guildId: Long, command: JsonNode): Triple<Boolean, Boolean, Boolean> {
+        val response = patchJSON("customcommands/$guildId/${command["name"].asText()}", command)
+
+        return parseTripleResponse(response)
+    }
 
     private fun patchJSON(path: String, json: JsonNode, prefixBot: Boolean = true): JsonNode {
         val body = RequestBody.create(null, json.toJsonString())
@@ -109,6 +154,37 @@ class DuncteApi(private val apiKey: String) {
             .execute().use {
                 return jsonMapper.readTree(it.body()!!.byteStream())
             }
+    }
+
+    private fun parseTripleResponse(response: JsonNode): Triple<Boolean, Boolean, Boolean> {
+        val success = response["success"].asBoolean()
+
+        if (success) {
+            return Triple(first = true, second = false, third = false)
+        }
+
+        val error = response["error"]
+        val type = error["type"].asText()
+
+        if (type == "AmountException") {
+            return Triple(first = false, second = false, third = true)
+        }
+
+        if (type !== "ValidationException") {
+            return Triple(first = false, second = false, third = false)
+        }
+
+        val errors = response["error"]["errors"]
+
+        for (key in errors.fieldNames()) {
+            errors[key].forEach { reason ->
+                if (reason.asText().contains("The invoke has already been taken.")) {
+                    return Triple(first = false, second = true, third = false)
+                }
+            }
+        }
+
+        return Triple(first = false, second = false, third = false)
     }
 
     private fun JsonNode.toJsonString() = jsonMapper.writeValueAsString(this)
