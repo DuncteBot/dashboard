@@ -256,15 +256,11 @@ class WebServer(private val env: Dotenv) {
                 // Allow OPTIONS requests
             }
 
-            // TODO: make bot call api endpoint
-            get("/getServerCount") { _, response ->
-                return@get OtherAPi.guildCount(response)
-            }
-
             get("/user-guilds") { request, response ->
                 return@get OtherAPi.fetchGuildsOfUser(request, response, oAuth2Client)
             }
 
+            // keep?
             get("/commands.json") { _, _ ->
                 "TODO: setup websocket to bot"
             }

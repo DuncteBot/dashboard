@@ -90,23 +90,6 @@ object OtherAPi {
             .set<ObjectNode>("guilds", guilds)
     }
 
-    fun guildCount(response: Response): Any {
-
-        val future = CompletableFuture<JsonNode>()
-        val json = jsonMapper.createObjectNode()
-        json.putObject("shard_guild_count")
-
-        webSocket.requestData(json, future::complete)
-
-        val counts = future.get()["shard_guild_count"]
-
-        return jsonMapper.createObjectNode()
-            .put("success", true)
-            .put("server_count", counts["guilds"].asLong())
-            .put("shard_count", counts["shards"].asInt())
-            .put("code", response.status())
-    }
-
     private fun guildToJson(guild: OAuth2Guild, partialGuilds: JsonNode): JsonNode {
         // Get guild id or random default avatar url
         val icon = if (!guild.iconUrl.isNullOrEmpty()) {
