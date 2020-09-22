@@ -24,6 +24,7 @@
 
 package com.dunctebot.dashboard
 
+import com.dunctebot.dashboard.controllers.DashboardController
 import com.dunctebot.dashboard.controllers.GuildController
 import com.dunctebot.dashboard.controllers.RootController
 import com.dunctebot.dashboard.controllers.SettingsController
@@ -35,7 +36,6 @@ import com.dunctebot.dashboard.controllers.errors.HttpErrorHandlers
 import com.dunctebot.dashboard.rendering.VelocityRenderer
 import com.dunctebot.dashboard.rendering.WebVariables
 import com.dunctebot.dashboard.utils.fetchGuildPatronStatus
-import com.dunctebot.dashboard.websocket.EchoWebSocket
 import com.dunctebot.models.settings.GuildSetting
 import com.dunctebot.models.settings.ProfanityFilterType
 import com.dunctebot.models.settings.WarnAction
@@ -106,8 +106,8 @@ class WebServer(private val env: Dotenv) {
 
         defaultResponseTransformer(responseTransformer)
 
+        // TODO: move websocket server to external application
         webSocket("/websocket", webSocket)
-        webSocket("/echo", EchoWebSocket::class.java)
 
         // Non settings related routes
         get("/roles/:hash") { request, response ->
@@ -129,11 +129,8 @@ class WebServer(private val env: Dotenv) {
         addDashboardRoutes()
         addAPIRoutes()
 
-        // TODO: does not seem to work with WS enabled
         notFound { request, response ->
             val result = HttpErrorHandlers.notFound(request, response)
-
-            println("not found")
 
             return@notFound responseTransformer(result)
         }
@@ -144,12 +141,15 @@ class WebServer(private val env: Dotenv) {
             return@internalServerError responseTransformer(result)
         }
 
+        // fix 404 pages
+        Spark404Fix.asyncInject()
+
         // I hate how they made it varargs
         // now I have to add parentheses
-        /*after({ _, response ->
+        after({ _, response ->
             // enable gzip, this is done automagically by sending the header
             response.header("Content-Encoding", "gzip")
-        })*/
+        })
     }
 
     private fun addDashboardRoutes() {
@@ -177,10 +177,9 @@ class WebServer(private val env: Dotenv) {
         }
 
         path("/server/$GUILD_ID") {
-            // TODO: enable again
-            /*before("*") { request, response ->
+            before("*") { request, response ->
                 return@before DashboardController.before(request, response)
-            }*/
+            }
 
             get("") { request, response ->
                 return@get response.redirect("/server/${request.guildId}/basic")

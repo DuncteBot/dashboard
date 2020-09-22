@@ -65,7 +65,7 @@ function initEitor() {
 }
 
 function loadCommands() {
-    fetch(`/api/customcommands/${guildId}`, {
+    fetch(`/api/custom-commands/${guildId}`, {
         credentials: "same-origin"
     })
         .then((response) => response.json())
@@ -73,7 +73,7 @@ function loadCommands() {
 
             const div = id("commands");
 
-            if (json.status === "error") {
+            if (!json.success) {
                 div.innerHTML = `<h1 class="center">Session not valid</h1>
                               <h5 class="center">Please refresh your browser</h5>`;
                 return;
@@ -87,16 +87,16 @@ function loadCommands() {
             div.innerHTML = "";
 
             for (const command of json.commands) {
-                storedCommands[command.name] = command;
+                storedCommands[command.invoke] = command;
 
                 div.innerHTML += `
                     <li class="collection-item">
-                        <h6 class="left">${command.name}</h6>
+                        <h6 class="left">${command.invoke}</h6>
 
                         <div class="right">
-                            <a href="#" onclick="showCommand('${command.name}'); return false;"
+                            <a href="#" onclick="showCommand('${command.invoke}'); return false;"
                                 class="waves-effect waves-light btn valign-wrapper"><i class="left material-icons">create</i> Edit</a>
-                            <a href="#" onclick="deleteCommand('${command.name}'); return false;" 
+                            <a href="#" onclick="deleteCommand('${command.invoke}'); return false;" 
                                 class="waves-effect waves-light red btn valign-wrapper"><i class="left material-icons">delete</i> Delete</a>
                         </div>
 
@@ -125,7 +125,7 @@ function deleteCommand(name) {
 
     toast(`Deleting "${name}"!`);
 
-    doFetch('DELETE', {name: name}, () => {
+    doFetch('DELETE', {invoke: name}, () => {
         toast("Deleted!");
         hideEditor();
         id("chars").innerHTML = 0;
@@ -208,7 +208,7 @@ function createNew() {
     }
 
     const command = {
-        name: name,
+        invoke: name,
         message: action,
         guildId: guildId,
         autoresponse: id("autoresponse").checked,
@@ -227,7 +227,7 @@ function createNew() {
 }
 
 function doFetch(method, body, cb) {
-    fetch(`/api/customcommands/${guildId}`, {
+    fetch(`/api/custom-commands/${guildId}`, {
         method: method,
         credentials: "same-origin",
         headers: {
@@ -237,7 +237,7 @@ function doFetch(method, body, cb) {
     })
         .then((response) => response.json())
         .then((json) => {
-            if (json.status === "success") {
+            if (json.success) {
                 cb(json);
                 return
             }

@@ -50,7 +50,7 @@ dependencies {
     implementation(group = "ch.qos.logback", name = "logback-classic", version = "1.2.3")
     implementation(group = "io.github.cdimascio", name = "java-dotenv", version = "5.2.1")
 
-    implementation(group = "com.sparkjava", name = "spark-core", version = "2.9.1")
+    implementation(group = "com.sparkjava", name = "spark-core", version = "2.9.2")
     implementation(group = "org.apache.velocity", name = "velocity-engine-core", version = "2.2")
 
     implementation(group = "com.github.ben-manes.caffeine", name = "caffeine", version = "2.8.5")

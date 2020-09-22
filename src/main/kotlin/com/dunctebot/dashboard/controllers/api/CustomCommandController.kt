@@ -30,7 +30,10 @@ import com.dunctebot.dashboard.constants.ContentType
 import com.dunctebot.dashboard.duncteApis
 import com.dunctebot.dashboard.guildId
 import com.dunctebot.dashboard.jsonMapper
+import com.dunctebot.dashboard.webSocket
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
+import com.fasterxml.jackson.databind.node.ObjectNode
 import spark.Request
 import spark.Response
 import spark.Spark
@@ -69,7 +72,7 @@ object CustomCommandController {
     fun update(request: Request, response: Response): Any {
         val commandData = jsonMapper.readTree(request.bodyAsBytes())
 
-        if (!commandData.has("name") || !commandData.has("message")) {
+        if (!commandData.has("invoke") || !commandData.has("message")) {
             response.status(403)
 
             return jsonMapper.createObjectNode()
@@ -78,7 +81,7 @@ object CustomCommandController {
                 .put("code", response.status())
         }
 
-        val invoke = commandData["name"].asText()
+        val invoke = commandData["invoke"].asText()
         val message = commandData["message"].asText()
         val autoresponse = commandData["autoresponse"].asBoolean(false)
 
@@ -95,6 +98,18 @@ object CustomCommandController {
                 .put("code", response.status())
         }
 
+        val updateData = jsonMapper.createObjectNode()
+        updateData.putArray("update")
+            .add(
+                jsonMapper.createObjectNode()
+                    .put("guild_id", guildId)
+                    .put("invoke", invoke)
+                    .put("message", message)
+                    .put("autoresponse", autoresponse)
+            )
+
+        sendCustomCommandUpdate(updateData)
+
         return jsonMapper.createObjectNode()
             .put("success", true)
             .put("code", response.status())
@@ -103,7 +118,7 @@ object CustomCommandController {
     fun create(request: Request, response: Response): Any {
         val commandData = jsonMapper.readTree(request.bodyAsBytes())
 
-        if (!commandData.has("name") || !commandData.has("message") || !commandData.has("autoresponse")) {
+        if (!commandData.has("invoke") || !commandData.has("message") || !commandData.has("autoresponse")) {
             response.status(403)
 
             return jsonMapper.createObjectNode()
@@ -112,7 +127,7 @@ object CustomCommandController {
                 .put("code", response.status())
         }
 
-        val invoke = commandData["name"].asText().replace("\\s".toRegex(), "")
+        val invoke = commandData["invoke"].asText().replace("\\s".toRegex(), "")
 
         if (invoke.length > 25) {
             return jsonMapper.createObjectNode()
@@ -146,6 +161,18 @@ object CustomCommandController {
         val result = duncteApis.createCustomCommand(guildId, invoke, message, autoresponse)
 
         if (result.first) {
+            val updateData = jsonMapper.createObjectNode()
+            updateData.putArray("add")
+                .add(
+                    jsonMapper.createObjectNode()
+                        .put("guild_id", guildId)
+                        .put("invoke", invoke)
+                        .put("message", message)
+                        .put("autoresponse", autoresponse)
+                )
+
+            sendCustomCommandUpdate(updateData)
+
             return jsonMapper.createObjectNode()
                 .put("success", true)
                 .put("message", "Command added")
@@ -175,7 +202,7 @@ object CustomCommandController {
     fun delete(request: Request, response: Response): Any {
         val commandData = jsonMapper.readTree(request.bodyAsBytes())
 
-        if (!commandData.has("name")) {
+        if (!commandData.has("invoke")) {
             response.status(403)
 
             return jsonMapper.createObjectNode()
@@ -184,7 +211,7 @@ object CustomCommandController {
                 .put("code", response.status())
         }
 
-        val invoke = commandData["name"].asText()
+        val invoke = commandData["invoke"].asText()
 
         val guildId = request.guildId!!.toLong()
 
@@ -206,9 +233,27 @@ object CustomCommandController {
                 .put("code", response.status())
         }
 
+        val updateData = jsonMapper.createObjectNode()
+        updateData.putArray("remove")
+            .add(
+                jsonMapper.createObjectNode()
+                    .put("guild_id", guildId)
+                    .put("invoke", invoke)
+            )
+
+        sendCustomCommandUpdate(updateData)
+
         return jsonMapper.createObjectNode()
             .put("success", true)
             .put("message", "Command deleted")
             .put("code", response.status())
+    }
+
+    private fun sendCustomCommandUpdate(data: JsonNode) {
+        val json = jsonMapper.createObjectNode()
+            .put("t", "CUSTOM_COMMANDS")
+            .set<ObjectNode>("d", data)
+
+        webSocket.broadcast(json)
     }
 }

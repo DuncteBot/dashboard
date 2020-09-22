@@ -96,7 +96,7 @@ class DuncteApi(private val apiKey: String) {
     }
 
     fun fetchCustomCommands(guildId: Long): JsonNode {
-        return executeRequest(defaultRequest("customcommands/$guildId"))["data"]
+        return executeRequest(defaultRequest("customcommands/$guildId"))["data"]["data"]
     }
 
     fun fetchCustomCommand(guildId: Long, invoke: String): JsonNode? {

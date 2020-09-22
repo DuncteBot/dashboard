@@ -43,6 +43,7 @@ import java.util.*
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.Executors
 
+// TODO maybe add a queue for when the bot is offline?
 @WebSocket
 class DataWebSocket {
     private val logger = LoggerFactory.getLogger(DataWebSocket::class.java)
@@ -87,7 +88,7 @@ class DataWebSocket {
     @OnWebSocketMessage
     @Throws(IOException::class)
     fun onMessage(session: Session, message: String) {
-        println("Got: $message")
+        logger.debug("<- {}", message)
 
         try {
             val json = jsonMapper.readTree(message)
@@ -122,7 +123,7 @@ class DataWebSocket {
     fun broadcast(message: JsonNode) {
         executor.submit {
             try {
-                println("Broadcasting $message")
+                logger.debug("-> {}", message)
                 sessions.forEach {
                     it.remote.sendString(
                         jsonMapper.writeValueAsString(message)
