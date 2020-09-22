@@ -26,13 +26,11 @@ package com.dunctebot.dashboard.controllers.api
 
 import com.dunctebot.dashboard.WebServer.Companion.SESSION_ID
 import com.dunctebot.dashboard.WebServer.Companion.USER_ID
+import com.dunctebot.dashboard.constants.ContentType
 import com.dunctebot.dashboard.duncteApis
-import com.dunctebot.dashboard.fetchGuild
 import com.dunctebot.dashboard.guildId
 import com.dunctebot.dashboard.jsonMapper
 import com.fasterxml.jackson.databind.node.ArrayNode
-import com.fasterxml.jackson.databind.node.ObjectNode
-import net.dv8tion.jda.api.sharding.ShardManager
 import spark.Request
 import spark.Response
 import spark.Spark
@@ -42,6 +40,8 @@ object CustomCommandController {
         val attributes = request.session().attributes()
 
         if (!(attributes.contains(USER_ID) && attributes.contains(SESSION_ID))) {
+            response.type(ContentType.JSON)
+
             Spark.halt(401,
                 jsonMapper.writeValueAsString(
                     jsonMapper.createObjectNode()
@@ -54,11 +54,6 @@ object CustomCommandController {
     }
 
     fun show(request: Request, response: Response): Any {
-        val guild = request.fetchGuild() ?: return jsonMapper.createObjectNode()
-            .put("success", false)
-            .put("message", "guild not found")
-            .put("code", response.status())
-
         val commands = duncteApis.fetchCustomCommands(request.guildId!!.toLong()) as ArrayNode
 
         val res = jsonMapper.createObjectNode()
@@ -72,11 +67,6 @@ object CustomCommandController {
     }
 
     fun update(request: Request, response: Response): Any {
-        val guild = request.fetchGuild() ?: return jsonMapper.createObjectNode()
-            .put("success", false)
-            .put("message", "guild not found")
-            .put("code", response.status())
-
         val commandData = jsonMapper.readTree(request.bodyAsBytes())
 
         if (!commandData.has("name") || !commandData.has("message")) {
@@ -92,29 +82,16 @@ object CustomCommandController {
         val message = commandData["message"].asText()
         val autoresponse = commandData["autoresponse"].asBoolean(false)
 
-        val customCommand = duncteApis.fetchCustomCommand(guild.idLong, invoke)
-
-        if (customCommand == null) {
-            response.status(404)
-
-            return jsonMapper.createObjectNode()
-                .put("success", false)
-                .put("message", "Unknown command")
-                .put("code", response.status())
-        }
-
-        (customCommand as ObjectNode).put("name", invoke)
-            .put("message", message)
-            .put("autoresponse", autoresponse)
+        val guildId = request.guildId!!.toLong()
 
         // TODO: this should return a 404 error if the command does not exist
         //  (saves a request to the database)
-        val returnData = duncteApis.updateCustomCommand(guild.idLong, customCommand).first
+        val returnData = duncteApis.updateCustomCommand(guildId, invoke, message, autoresponse).first
 
         if (!returnData) {
             return jsonMapper.createObjectNode()
                 .put("success", false)
-                .put("message", "Something failed")
+                .put("message", "Could not update command")
                 .put("code", response.status())
         }
 
@@ -124,11 +101,6 @@ object CustomCommandController {
     }
 
     fun create(request: Request, response: Response): Any {
-        val guild = request.fetchGuild() ?: return jsonMapper.createObjectNode()
-            .put("success", false)
-            .put("message", "guild not found")
-            .put("code", response.status())
-
         val commandData = jsonMapper.readTree(request.bodyAsBytes())
 
         if (!commandData.has("name") || !commandData.has("message") || !commandData.has("autoresponse")) {
@@ -158,7 +130,9 @@ object CustomCommandController {
                 .put("code", response.status())
         }
 
-        if (duncteApis.fetchCustomCommand(guild.idLong, invoke) != null) {
+        val guildId = request.guildId!!.toLong()
+
+        if (duncteApis.fetchCustomCommand(guildId, invoke) != null) {
             response.status(404)
 
             return jsonMapper.createObjectNode()
@@ -169,7 +143,7 @@ object CustomCommandController {
 
         val autoresponse = commandData["autoresponse"].asBoolean(false)
 
-        val result = registerCustomCommand(invoke, message, guild.idLong, autoresponse, manager)
+        val result = duncteApis.createCustomCommand(guildId, invoke, message, autoresponse)
 
         if (result.first) {
             return jsonMapper.createObjectNode()
@@ -198,44 +172,42 @@ object CustomCommandController {
             .put("code", response.status())
     }
 
-    fun delete(request: Request, response: Response, shardManager: ShardManager, variables: Variables): Any {
-        val mapper = variables.jackson
-        val guild = request.getGuild(shardManager)!!
-        val commandData = mapper.readTree(request.bodyAsBytes())
+    fun delete(request: Request, response: Response): Any {
+        val commandData = jsonMapper.readTree(request.bodyAsBytes())
 
         if (!commandData.has("name")) {
             response.status(403)
 
-            return mapper.createObjectNode()
-                .put("status", "error")
+            return jsonMapper.createObjectNode()
+                .put("success", false)
                 .put("message", "Invalid data")
                 .put("code", response.status())
         }
 
         val invoke = commandData["name"].asText()
 
-        val manager = variables.commandManager
+        val guildId = request.guildId!!.toLong()
 
-        if (!commandExists(invoke, guild.idLong, manager)) {
+        if (duncteApis.fetchCustomCommand(guildId, invoke) == null) {
             response.status(404)
 
-            return mapper.createObjectNode()
-                .put("status", "error")
+            return jsonMapper.createObjectNode()
+                .put("success", false)
                 .put("message", "Command does not exists")
                 .put("code", response.status())
         }
 
-        val success = manager.removeCustomCommand(invoke, guild.idLong)
+        val success = duncteApis.deleteCustomCommand(guildId, invoke).first
 
         if (!success) {
-            return mapper.createObjectNode()
-                .put("status", "error")
+            return jsonMapper.createObjectNode()
+                .put("success", false)
                 .put("message", "Could not delete command")
                 .put("code", response.status())
         }
 
-        return mapper.createObjectNode()
-            .put("status", "success")
+        return jsonMapper.createObjectNode()
+            .put("success", true)
             .put("message", "Command deleted")
             .put("code", response.status())
     }

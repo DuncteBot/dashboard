@@ -27,6 +27,7 @@ package com.dunctebot.dashboard
 import com.dunctebot.dashboard.controllers.GuildController
 import com.dunctebot.dashboard.controllers.RootController
 import com.dunctebot.dashboard.controllers.SettingsController
+import com.dunctebot.dashboard.controllers.api.CustomCommandController
 import com.dunctebot.dashboard.controllers.api.DataController
 import com.dunctebot.dashboard.controllers.api.GuildApiController
 import com.dunctebot.dashboard.controllers.api.OtherAPi
@@ -284,7 +285,25 @@ class WebServer(private val env: Dotenv) {
             }
 
             path("/custom-commands/$GUILD_ID") {
+                before("") { request, response ->
+                    return@before CustomCommandController.before(request, response)
+                }
 
+                get("") { request, response ->
+                    return@get CustomCommandController.show(request, response)
+                }
+
+                patch("") { request, response ->
+                    return@patch CustomCommandController.update(request, response)
+                }
+
+                post("") { request, response ->
+                    return@post CustomCommandController.create(request, response)
+                }
+
+                delete("") { request, response ->
+                    return@delete CustomCommandController.delete(request, response)
+                }
             }
         }
     }

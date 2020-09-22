@@ -106,22 +106,24 @@ both update and add send the full guild settings object to the bot
   "d": {
     "remove": [
         {
-          "name": "a_name",
+          "invoke": "a_name",
           "guild_id": "16515631"
         }
     ],
     "update": [
         {
-          "name": "a_name",
+          "invoke": "a_name",
           "guild_id": "16515631",
-          "content": "This is a cool command {atuser} 123"
+          "message": "This is a cool command {atuser} 123",
+          "autoresponse": false
         }
     ],
     "add": [
       {
-        "name": "a_name",
+        "invoke": "a_name",
         "guild_id": "16515631",
-        "content": "This is a cool command {atuser}"
+        "message": "This is a cool command {atuser}",
+        "autoresponse": false
       }
     ]
   }

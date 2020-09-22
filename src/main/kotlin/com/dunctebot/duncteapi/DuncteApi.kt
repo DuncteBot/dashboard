@@ -32,7 +32,6 @@ import com.dunctebot.models.settings.WarnAction
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.github.benmanes.caffeine.cache.Caffeine
-import com.jagrosh.jdautilities.oauth2.entities.OAuth2Guild
 import okhttp3.Request
 import okhttp3.RequestBody
 import org.slf4j.LoggerFactory
@@ -110,8 +109,29 @@ class DuncteApi(private val apiKey: String) {
         return resp["data"]
     }
 
-    fun updateCustomCommand(guildId: Long, command: JsonNode): Triple<Boolean, Boolean, Boolean> {
-        val response = patchJSON("customcommands/$guildId/${command["name"].asText()}", command)
+    fun updateCustomCommand(guildId: Long, invoke: String, message: String, autoresponse: Boolean): Triple<Boolean, Boolean, Boolean> {
+        val json = jsonMapper.createObjectNode()
+            .put("message", message)
+            .put("autoresponse", autoresponse)
+
+        val response = patchJSON("customcommands/$guildId/$invoke", json)
+
+        return parseTripleResponse(response)
+    }
+
+    fun createCustomCommand(guildId: Long, name: String, message: String, autoresponse: Boolean): Triple<Boolean, Boolean, Boolean> {
+        val json = jsonMapper.createObjectNode()
+            .put("invoke", name)
+            .put("message", message)
+            .put("autoresponse", autoresponse)
+
+        val response = postJSON("customcommands/$guildId", json)
+
+        return parseTripleResponse(response)
+    }
+
+    fun deleteCustomCommand(guildId: Long, invoke: String): Triple<Boolean, Boolean, Boolean> {
+        val response = executeRequest(defaultRequest("customcommands/$guildId/$invoke").delete())
 
         return parseTripleResponse(response)
     }
