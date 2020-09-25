@@ -38,6 +38,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.neovisionaries.ws.client.*
 import net.dv8tion.jda.internal.utils.IOUtil
 import org.slf4j.LoggerFactory
+import java.io.IOException
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
@@ -81,9 +82,7 @@ class WebsocketClient : WebSocketAdapter(), WebSocketListener {
     }
 
     override fun onConnected(websocket: WebSocket, headers: MutableMap<String, MutableList<String>>) {
-        logger.info("Connected to dashboard WebSocket")
-
-        socket.sendText("""{"t": "test"}""")
+        logger.info("Connected to WebSocket")
     }
 
     override fun onDisconnected(websocket: WebSocket, serverCloseFrame: WebSocketFrame?, clientCloseFrame: WebSocketFrame?, closedByServer: Boolean) {
@@ -120,21 +119,27 @@ class WebsocketClient : WebSocketAdapter(), WebSocketListener {
     }
 
     override fun onTextMessage(websocket: WebSocket, data: ByteArray) {
-        val raw = jsonMapper.readTree(data)
+        try {
+            val raw = jsonMapper.readTree(data)
 
-        if (!raw.has("t")) {
-            return
+            logger.debug("<- {}", raw)
+
+            if (!raw.has("t")) {
+                return
+            }
+
+            val type = raw["t"].asText()
+            val handler = handlersMap[type]
+
+            if (handler == null) {
+                logger.warn("Unknown event or missing handler for type $type")
+                return
+            }
+
+            handler.handle(raw)
+        } catch (e: IOException) {
+            logger.error("Failed to parse json", e)
         }
-
-        val type = raw["t"].asText()
-        val handler = handlersMap[type]
-
-        if (handler == null) {
-            logger.warn("Unknown event or missing handler for type $type")
-            return
-        }
-
-        handler.handle(raw)
     }
 
     fun requestData(data: JsonNode, callback: (JsonNode) -> Unit) {
