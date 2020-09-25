@@ -37,7 +37,7 @@ import okhttp3.RequestBody
 import org.slf4j.LoggerFactory
 import java.util.concurrent.TimeUnit
 
-class DuncteApi(private val apiKey: String) {
+class DuncteApi(val apiKey: String) {
     private val logger = LoggerFactory.getLogger(DuncteApi::class.java)
     val validTokens = mutableListOf<String>()
     // caching makes it a bit faster

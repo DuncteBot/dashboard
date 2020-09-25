@@ -37,7 +37,7 @@ import spark.*
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 
-private fun String.decodeUrl() = URLDecoder.decode(this, StandardCharsets.UTF_8);
+private fun String.decodeUrl() = URLDecoder.decode(this, StandardCharsets.UTF_8)
 
 // TODO: Might just send a json body instead
 val Request.paramsMap: Map<String, String>

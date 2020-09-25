@@ -26,12 +26,11 @@ package com.dunctebot.dashboard.websocket.handlers
 
 import com.dunctebot.dashboard.websocket.handlers.base.SocketHandler
 import com.fasterxml.jackson.databind.JsonNode
-import org.eclipse.jetty.websocket.api.Session
 
 class FetchDataHandler : SocketHandler() {
     val waitingMap = mutableMapOf<String, (JsonNode) -> Unit>()
 
-    override fun handleInternally(session: Session, data: JsonNode?) {
+    override fun handleInternally(data: JsonNode?) {
         val identifier = data!!["identifier"].asText()
 
         if (waitingMap.containsKey(identifier)) {

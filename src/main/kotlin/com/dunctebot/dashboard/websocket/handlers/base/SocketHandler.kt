@@ -25,20 +25,19 @@
 package com.dunctebot.dashboard.websocket.handlers.base
 
 import com.fasterxml.jackson.databind.JsonNode
-import org.eclipse.jetty.websocket.api.Session
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 abstract class SocketHandler {
     protected val logger: Logger = LoggerFactory.getLogger(this.javaClass)
 
-    fun handle(session: Session, raw: JsonNode) {
+    fun handle(raw: JsonNode) {
         try {
-            handleInternally(session, raw["d"])
+            handleInternally(raw["d"])
         } catch (e: Throwable) {
             logger.error("Unhandled exception in socket handler", e)
         }
     }
 
-    protected abstract fun handleInternally(session: Session, data: JsonNode?)
+    protected abstract fun handleInternally(data: JsonNode?)
 }

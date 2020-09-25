@@ -23,7 +23,7 @@
  */
 
 plugins {
-    java
+//    java
     application
     kotlin("jvm") version "1.4.0"
 }
@@ -75,6 +75,10 @@ configure<JavaPluginConvention> {
     sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11
 
+}
+
+application {
+    mainClassName = "com.dunctebot.dashboard.MainKt"
 }
 
 tasks {

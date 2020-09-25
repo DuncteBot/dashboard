@@ -22,22 +22,26 @@
  * SOFTWARE.
  */
 
-package com.dunctebot.dashboard
+package com.dunctebot.dashboard.tasks
 
 import com.dunctebot.dashboard.websocket.WebsocketClient
-import com.dunctebot.duncteapi.DuncteApi
-import com.dunctebot.jda.JDARestClient
-import com.fasterxml.jackson.databind.json.JsonMapper
-import io.github.cdimascio.dotenv.dotenv
-import okhttp3.OkHttpClient
+import com.neovisionaries.ws.client.WebSocket
+import com.neovisionaries.ws.client.WebSocketState
+import org.slf4j.LoggerFactory
 
-val env = dotenv()
+class ReconnectTask(private val client: WebsocketClient): Runnable {
+    private val logger = LoggerFactory.getLogger(ReconnectTask::class.java)
 
-val restJDA = JDARestClient(env["BOT_TOKEN"]!!)
-val duncteApis = DuncteApi("Bot ${env["BOT_TOKEN"]!!}")
-
-val httpClient = OkHttpClient()
-val jsonMapper = JsonMapper()
-val webSocket = WebsocketClient()
-
-val server = WebServer(env)
+    override fun run() {
+        try {
+            val socket: WebSocket = client.socket
+            if (!socket.isOpen && socket.state != WebSocketState.CONNECTING &&
+                System.currentTimeMillis() - client.lastReconnectAttempt > client.reconnectInterval &&
+                client.mayReconnect) {
+                client.attemptReconnect()
+            }
+        } catch (e: Exception) {
+            logger.error("Caught exception in reconnect thread", e)
+        }
+    }
+}
