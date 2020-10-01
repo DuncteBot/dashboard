@@ -142,6 +142,10 @@ class WebsocketClient : WebSocketAdapter(), WebSocketListener {
         }
     }
 
+    override fun onThreadCreated(websocket: WebSocket, threadType: ThreadType, thread: Thread) {
+        thread.name = "DuncteBotWS-$threadType"
+    }
+
     fun requestData(data: JsonNode, callback: (JsonNode) -> Unit) {
         val hash = HashUtils.sha1(data.toString() + System.currentTimeMillis())
 
