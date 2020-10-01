@@ -27,10 +27,9 @@ package com.dunctebot.dashboard.websocket.handlers
 import com.dunctebot.dashboard.controllers.GuildController
 import com.dunctebot.dashboard.websocket.handlers.base.SocketHandler
 import com.fasterxml.jackson.databind.JsonNode
-import org.eclipse.jetty.websocket.api.Session
 
 class RolesHashHandler : SocketHandler() {
-    override fun handleInternally(session: Session, data: JsonNode?) {
+    override fun handleInternally(data: JsonNode?) {
         val hash = data!!["hash"].asText()
         val guildId = data["guild_id"].asLong()
 

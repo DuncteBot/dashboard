@@ -47,7 +47,6 @@ import net.dv8tion.jda.api.entities.TextChannel
 import spark.ModelAndView
 import spark.Spark.*
 
-// TODO: add socket server http://sparkjava.com/documentation#websockets
 // The socket server will be used to communicate with DuncteBot himself
 // NGINX can secure the websocket (hopefully it does this by default as we are using the same domain)
 class WebServer(private val env: Dotenv) {
@@ -106,9 +105,6 @@ class WebServer(private val env: Dotenv) {
 
         defaultResponseTransformer(responseTransformer)
 
-        // TODO: move websocket server to external application
-        webSocket("/websocket", webSocket)
-
         // Non settings related routes
         get("/roles/:hash") { request, response ->
             return@get GuildController.showGuildRoles(request, response)
@@ -140,9 +136,6 @@ class WebServer(private val env: Dotenv) {
 
             return@internalServerError responseTransformer(result)
         }
-
-        // fix 404 pages
-        Spark404Fix.asyncInject()
 
         // I hate how they made it varargs
         // now I have to add parentheses
