@@ -26,10 +26,11 @@ plugins {
 //    java
     application
     kotlin("jvm") version "1.4.0"
+    id("com.github.johnrengelman.shadow") version "6.1.0"
 }
 
 group = "com.dunctebot"
-version = "1.0-SNAPSHOT"
+version = "1.0"
 
 repositories {
     jcenter()
@@ -90,5 +91,8 @@ tasks {
     wrapper {
         gradleVersion = "6.1.1"
         distributionType = Wrapper.DistributionType.ALL
+    }
+    shadowJar {
+        archiveClassifier.set("")
     }
 }
