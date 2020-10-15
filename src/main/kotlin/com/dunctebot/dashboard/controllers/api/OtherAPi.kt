@@ -111,4 +111,8 @@ object OtherAPi {
             .put("members", part["member_count"].asInt())
             .put("id", textId)
     }
+
+    fun uptimeRobot(): Any {
+        return "This is just used by uptime robot to check if the application is up"
+    }
 }

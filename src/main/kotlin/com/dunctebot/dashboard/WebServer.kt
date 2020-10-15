@@ -253,6 +253,11 @@ class WebServer(private val env: Dotenv) {
                 return@get OtherAPi.fetchGuildsOfUser(request, response, oAuth2Client)
             }
 
+            // This is just used by uptime robot to check if the application is up
+            get("/uptimerobot") { _, _ ->
+                return@get OtherAPi.uptimeRobot()
+            }
+
             // keep?
             get("/commands.json") { _, _ ->
                 "TODO: setup websocket to bot"
