@@ -24,12 +24,11 @@
 
 package com.dunctebot.dashboard.controllers
 
-import com.dunctebot.dashboard.WebServer.Companion.GUILD_ID
 import com.dunctebot.dashboard.WebServer.Companion.OLD_PAGE
 import com.dunctebot.dashboard.WebServer.Companion.SESSION_ID
 import com.dunctebot.dashboard.WebServer.Companion.USER_ID
 import com.dunctebot.dashboard.fetchGuild
-import com.dunctebot.dashboard.rendering.WebVariables
+import com.dunctebot.dashboard.guildId
 import com.dunctebot.dashboard.restJDA
 import com.dunctebot.dashboard.userId
 import net.dv8tion.jda.api.Permission
@@ -47,14 +46,9 @@ object DashboardController {
         }
 
         val guild = request.fetchGuild()
-
-        if (guild == null) {
-            val guildId = request.params(GUILD_ID)
-
-            throw Spark.halt(404, "DuncteBot is not in the requested server, why don't you <a href=\"https://discord.com/oauth2" +
-                "/authorize?client_id=210363111729790977&guild_id=$guildId" +
-                "&scope=bot&permissions=1609952470\" target=\"_blank\">invite it</a>?")
-        }
+                ?: throw Spark.halt(404, "DuncteBot is not in the requested server, why don't you <a href=\"https://discord.com/oauth2" +
+                    "/authorize?client_id=210363111729790977&guild_id=${request.guildId}" +
+                    "&scope=bot&permissions=1609952470\" target=\"_blank\">invite it</a>?")
 
         val member = try {
             restJDA.retrieveMemberById(guild, request.userId).complete()
@@ -66,16 +60,5 @@ object DashboardController {
         if (!member.hasPermission(Permission.MANAGE_SERVER)) {
             Spark.halt(200, "<h1>You do not have permission to edit this server</h1>")
         }
-    }
-
-    fun guildSettingSelect(request: Request): Any {
-        val guild = request.fetchGuild();
-
-        return WebVariables()
-            .put("title", "Dashboard")
-            .put("id", request.params(GUILD_ID))
-            .put("name", guild?.name ?: "wot?")
-            .put("guild", guild ?: "")
-            .toModelAndView("dashboard/panelSelection.vm")
     }
 }
