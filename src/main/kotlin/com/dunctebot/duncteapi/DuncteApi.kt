@@ -167,6 +167,7 @@ class DuncteApi(val apiKey: String) {
             .url("$API_HOST/$prefix$path")
             .get()
             .addHeader("Authorization", apiKey)
+            .addHeader("Accept", JSON)
     }
 
     private fun executeRequest(request: Request.Builder): JsonNode {
@@ -211,8 +212,8 @@ class DuncteApi(val apiKey: String) {
 
     companion object {
         // const val API_HOST = "http://localhost:8081"
-        const val API_HOST = "http://duncte123-apis-lumen.test/"
-        // const val API_HOST = "https://apis.duncte123.me"
+//        const val API_HOST = "http://duncte123-apis-lumen.test/"
+         const val API_HOST = "https://apis.duncte123.me"
         const val USER_AGENT = "Mozilla/5.0 (compatible; SkyBot/dashboard; +https://dashboard.dunctebot.com)"
     }
 }
