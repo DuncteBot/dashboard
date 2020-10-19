@@ -80,7 +80,7 @@
                 <a href="#" data-target="server-setting-selection" class="sidenav-trigger"><i class="material-icons">menu</i></a>
                 <a href="/" class="brand-logo">
                     #if($guild)
-                        Editing $guild.getName()
+                        <i class="material-icons">arrow_back</i> Editing $guild.getName()
                     #else
                         Dashboard
                     #end
