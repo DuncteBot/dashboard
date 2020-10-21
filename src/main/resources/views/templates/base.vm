@@ -160,7 +160,7 @@
                            target="_blank">Donate</a></li>
                     <li><a class="grey-text text-lighten-3" href="https://patreon.com/DuncteBot"
                            target="_blank">Patreon</a></li>
-                    <li><a href="https://www.patreon.com/bePatron?u=6419542" data-patreon-widget-type="become-patron-button">Become a Patron!</a></li>
+##                    <li><a href="https://www.patreon.com/bePatron?u=6419542" data-patreon-widget-type="become-patron-button">Become a Patron!</a></li>
                 </ul>
             </div>
         </div>
@@ -179,7 +179,7 @@
 </footer>
 
 <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-<script async src="https://c6.patreon.com/becomePatronButton.bundle.js"></script>
+##<script async src="https://c6.patreon.com/becomePatronButton.bundle.js"></script>
 ## Why is this needed?
 ## {#<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>#}
 <!-- Compiled and minified JavaScript -->
