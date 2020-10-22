@@ -88,7 +88,7 @@ object SettingsController {
         val muteRole = params["muteRole"].toSafeLong()
         val spamFilter = params["spamFilter"].toCBBool()
         val kickMode = params["kickMode"].toCBBool()
-        val spamThreshold = (params["spamThreshold"] ?: "7").toInt()
+        val spamThreshold = params["spamThreshold"]?.toIntOrNull() ?: 7
         val filterType = params["filterType"]
 
         val logBan = params["logBan"].toCBBool()
@@ -99,6 +99,9 @@ object SettingsController {
 
         val aiSensitivity = ((params["ai-sensitivity"] ?: "0.7").toFloatOrNull() ?: 0.7f).minMax(0f, 1f)
         val rateLimits = parseRateLimits(request, params) ?: return response.redirect(request.url())
+
+        val youngAccountThreshold = params["young_account_threshold"]?.toIntOrNull() ?: 10
+        val youngAccountBanEnable = params["young_account_ban_enabled"].toCBBool()
 
         val guild = request.fetchGuild()!!
         val guildId = guild.idLong
@@ -122,6 +125,8 @@ object SettingsController {
             .setWarnLogging(logWarn)
             .setAiSensitivity(aiSensitivity)
             .setWarnActions(warnActionsList)
+            .setYoungAccountThreshold(youngAccountThreshold)
+            .setYoungAccountBanEnabled(youngAccountBanEnable)
 
         sendSettingUpdate(settings)
 
