@@ -47,8 +47,6 @@ object SettingsController {
             prefix = prefix.substring(0, 10)
         }
 
-        val welcomeChannel = params["welcomeChannel"].toSafeLong()
-        val welcomeLeaveEnabled = params["welcomeChannelCB"].toCBBool()
         val autorole = params["autoRoleRole"].toSafeLong()
         val announceTracks = params["announceTracks"].toCBBool()
         val allowAllToStop = params["allowAllToStop"].toCBBool()
@@ -63,8 +61,6 @@ object SettingsController {
 
         val settings = duncteApis.getGuildSetting(request.guildId!!.toLong())
             .setCustomPrefix(prefix)
-            .setWelcomeLeaveChannel(welcomeChannel)
-            .setEnableJoinMessage(welcomeLeaveEnabled)
             .setAutoroleRole(autorole)
             .setAnnounceTracks(announceTracks)
             .setLeaveTimeout(leaveTimeout)
