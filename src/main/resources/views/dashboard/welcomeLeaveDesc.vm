@@ -19,10 +19,10 @@
 
                 <!-- Switch -->
                 <div class="switch">
-                    Leave message:
+                    Leave message (non-functional):
                     <label>
                         Disabled
-                        <input type="checkbox" name="welcomeChannelCB" id="welcomeChannelCB"
+                        <input type="checkbox" name="leaveChannelCB" id="leaveChannelCB"
                                #if($settings.isEnableLeaveMessage())checked="checked"#{end}>
                         <span class="lever"></span>
                         Enabled

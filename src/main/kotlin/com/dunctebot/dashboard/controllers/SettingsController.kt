@@ -140,7 +140,8 @@ object SettingsController {
     fun saveMessages(request: Request, response: Response): Any {
         val params = request.paramsMap
 
-        val welcomeLeaveEnabled = params["welcomeChannelCB"].toCBBool()
+        val welcomeEnabled = params["welcomeChannelCB"].toCBBool()
+        val leaveEnabled = params["leaveChannelCB"].toCBBool()
         val welcomeMessage = params["welcomeMessage"]
         val leaveMessage = params["leaveMessage"]
         val serverDescription = params["serverDescription"]
@@ -151,7 +152,8 @@ object SettingsController {
             .setWelcomeLeaveChannel(welcomeChannel)
             .setCustomJoinMessage(welcomeMessage)
             .setCustomLeaveMessage(leaveMessage)
-            .setEnableJoinMessage(welcomeLeaveEnabled)
+            .setEnableJoinMessage(welcomeEnabled)
+            .setEnableLeaveMessage(leaveEnabled)
 
         sendSettingUpdate(settings)
 
