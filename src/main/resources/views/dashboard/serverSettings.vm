@@ -1,0 +1,66 @@
+#define ($styles)
+<style>
+    .menu {
+        display: none;
+    }
+
+    .menu.active {
+        display: block;
+    }
+</style>
+#end
+
+#define ($content)
+<form action="" class="row" method="post">
+    <div class="db-menus">
+        <div class="menu active" id="tab1">
+            <h1>Basic settings</h1>
+        </div>
+        <div class="menu" id="tab2">
+            <h1>Moderation settings</h1>
+        </div>
+        <div class="menu" id="tab3">
+            <h1>Custom commands</h1>
+        </div>
+        <div class="menu" id="tab4">
+            <h1>Welcome and leave messages</h1>
+        </div>
+    </div>
+    ## save button here
+</form>
+#end
+
+#define ($scripts)
+<script>
+    const ul = document.getElementById('server-setting-selection2');
+    const tabs = document.querySelector('.db-menus').children;
+
+    ul.addEventListener('click', (e) => {
+        if (e.target.nodeName !== 'A') {
+            return;
+        }
+
+        e.preventDefault();
+
+        setActive(e.target.getAttribute('href'));
+    });
+
+    function setActive(item) {
+        for (const li of ul.children) {
+            if (li.firstElementChild.getAttribute('href') === item) {
+                li.classList.add('active');
+            } else {
+                li.classList.remove('active');
+            }
+        }
+
+        for (const tab of tabs) {
+            tab.classList.remove('active');
+        }
+
+        document.querySelector(item).classList.add('active');
+    }
+</script>
+#end
+
+#parse('/views/templates/base.vm')

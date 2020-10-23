@@ -47,6 +47,22 @@
         }
         #end
 
+        #if($show_new_settings)
+        header, main, footer {
+            padding-left: 300px;
+        }
+
+        @media only screen and (max-width : 992px) {
+            header, main, footer {
+                padding-left: 0;
+            }
+        }
+
+        .sidenav .sidenav-fixed {
+            top: 20px;
+        }
+        #end
+
         .sidenav-overlay {
             z-index: 2!important;
         }
@@ -116,6 +132,23 @@
                     }
                 }
             </script>
+        #end
+
+        #if($show_new_settings)
+            <ul id="server-setting-selection2" class="discord not-black sidenav sidenav-fixed">
+                <li class="bold active">
+                    <a class="white-text" href="#tab1">Basic Settings</a>
+                </li>
+                <li class="bold">
+                    <a class="white-text" href="#tab2">Moderation Settings</a>
+                </li>
+                <li class="bold">
+                    <a class="white-text" href="#tab3">Custom Commnds</a>
+                </li>
+                <li class="bold">
+                    <a class="white-text" href="#tab4">Welcome/Leave message</a>
+                </li>
+            </ul>
         #end
     </div>
 </header>

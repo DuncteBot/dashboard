@@ -174,8 +174,16 @@ class WebServer(private val env: Dotenv) {
                 return@before DashboardController.before(request, response)
             }
 
-            get("") { request, response ->
+            /*get("") { request, response ->
                 return@get response.redirect("/server/${request.guildId}/basic")
+            }*/
+
+            get("") { _, _ ->
+                return@get WebVariables()
+                    .put("title", "Dashboard")
+                    .put("hide_settings", true)
+                    .put("show_new_settings", true)
+                    .toModelAndView("dashboard/serverSettings.vm")
             }
 
             // basic settings
