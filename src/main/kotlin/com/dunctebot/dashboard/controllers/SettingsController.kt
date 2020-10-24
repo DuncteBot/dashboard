@@ -47,8 +47,6 @@ object SettingsController {
             prefix = prefix.substring(0, 10)
         }
 
-        val welcomeChannel = params["welcomeChannel"].toSafeLong()
-        val welcomeLeaveEnabled = params["welcomeChannelCB"].toCBBool()
         val autorole = params["autoRoleRole"].toSafeLong()
         val announceTracks = params["announceTracks"].toCBBool()
         val allowAllToStop = params["allowAllToStop"].toCBBool()
@@ -63,8 +61,6 @@ object SettingsController {
 
         val settings = duncteApis.getGuildSetting(request.guildId!!.toLong())
             .setCustomPrefix(prefix)
-            .setWelcomeLeaveChannel(welcomeChannel)
-            .setEnableJoinMessage(welcomeLeaveEnabled)
             .setAutoroleRole(autorole)
             .setAnnounceTracks(announceTracks)
             .setLeaveTimeout(leaveTimeout)
@@ -88,7 +84,7 @@ object SettingsController {
         val muteRole = params["muteRole"].toSafeLong()
         val spamFilter = params["spamFilter"].toCBBool()
         val kickMode = params["kickMode"].toCBBool()
-        val spamThreshold = (params["spamThreshold"] ?: "7").toInt()
+        val spamThreshold = params["spamThreshold"]?.toIntOrNull() ?: 7
         val filterType = params["filterType"]
 
         val logBan = params["logBan"].toCBBool()
@@ -99,6 +95,9 @@ object SettingsController {
 
         val aiSensitivity = ((params["ai-sensitivity"] ?: "0.7").toFloatOrNull() ?: 0.7f).minMax(0f, 1f)
         val rateLimits = parseRateLimits(request, params) ?: return response.redirect(request.url())
+
+        val youngAccountThreshold = params["young_account_threshold"]?.toIntOrNull() ?: 10
+        val youngAccountBanEnable = params["young_account_ban_enabled"].toCBBool()
 
         val guild = request.fetchGuild()!!
         val guildId = guild.idLong
@@ -122,6 +121,8 @@ object SettingsController {
             .setWarnLogging(logWarn)
             .setAiSensitivity(aiSensitivity)
             .setWarnActions(warnActionsList)
+            .setYoungAccountThreshold(youngAccountThreshold)
+            .setYoungAccountBanEnabled(youngAccountBanEnable)
 
         sendSettingUpdate(settings)
 
@@ -135,7 +136,8 @@ object SettingsController {
     fun saveMessages(request: Request, response: Response): Any {
         val params = request.paramsMap
 
-        val welcomeLeaveEnabled = params["welcomeChannelCB"].toCBBool()
+        val welcomeEnabled = params["welcomeChannelCB"].toCBBool()
+        val leaveEnabled = params["leaveChannelCB"].toCBBool()
         val welcomeMessage = params["welcomeMessage"]
         val leaveMessage = params["leaveMessage"]
         val serverDescription = params["serverDescription"]
@@ -146,7 +148,8 @@ object SettingsController {
             .setWelcomeLeaveChannel(welcomeChannel)
             .setCustomJoinMessage(welcomeMessage)
             .setCustomLeaveMessage(leaveMessage)
-            .setEnableJoinMessage(welcomeLeaveEnabled)
+            .setEnableJoinMessage(welcomeEnabled)
+            .setEnableLeaveMessage(leaveEnabled)
 
         sendSettingUpdate(settings)
 

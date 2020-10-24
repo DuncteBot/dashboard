@@ -22,6 +22,12 @@
 
         #parse('/views/dashboard/includes/moderation/warnActions.vm')
 
+        <div class="row">
+            <hr>
+        </div>
+
+        #parse('/views/dashboard/includes/moderation/autoBanAccounts.vm')
+
         <button type="submit" class="btn waves-effect waves-light waves-ripple blue accent-4 white" value="submit">
             Save
         </button>

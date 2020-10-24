@@ -7,11 +7,9 @@
 #define ($content)
 <div class="row">
     <div class="right">
-
         <a href="#" class="btn btn-large waves-effect waves-light valign-wrapper"
            onclick="prepareCreateNew(); return false;"><i class="left tiny material-icons">add</i> Create new
             command</a>
-
     </div>
 
     <div class="clearfix"></div>
