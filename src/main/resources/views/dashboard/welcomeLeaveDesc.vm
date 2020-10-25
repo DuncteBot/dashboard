@@ -33,7 +33,7 @@
                 ## Welcome/Leave
                 <div class="input-field col s12 m3">
                     <select id="welcomeChannel" name="welcomeChannel"
-                            onchange="checkSelect(this.id, 'welcomeChannelCB');">
+                            onchange="checkSelect(this.id, ['welcomeChannelCB', 'leaveChannelCB']);">
                         <option value="" selected disabled>Select a channel</option>
                         #foreach($textChannel in $goodChannels)
                             #if($settings.getWelcomeLeaveChannel() == $textChannel.getIdLong())
@@ -88,16 +88,25 @@
 <script>
     M.FormSelect.init(document.querySelectorAll('select'));
 
+    /**
+     *
+     * @param {String} selectId
+     * @param {Array<string>} checkBox
+     */
     function checkSelect(selectId, checkBox) {
-        let box = id(checkBox);
+        let boxes = checkBox.map(id);
         let select = id(selectId);
 
         if (select.value) {
-            box.checked = true;
-            box.disabled = false;
+            boxes.forEach((box) => {
+                box.checked = true;
+                box.disabled = false;
+            });
         } else {
-            box.checked = false;
-            box.disabled = true;
+            boxes.forEach((box) => {
+                box.checked = false;
+                box.disabled = true;
+            });
         }
     }
 </script>
