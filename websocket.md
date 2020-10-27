@@ -17,7 +17,7 @@ Send an "Authorization" header with the correct token (one that is for the bot r
 
 #### Internal data exchange
 Request (from-bot):
-```json
+```json5
 {
   "t": "ROLES_PUT_HASH",
   "d": {
@@ -27,7 +27,7 @@ Request (from-bot):
 }
 ```
 Response (to-bot):
-```json
+```json5
 {
   "t": "ROLES_PUT_HASH",
   "data": {
@@ -43,7 +43,7 @@ Response (to-bot):
 Request:
 
 TODO: also do guild settings in here? 
-```json
+```json5
 {
   "t": "DATA_UPDATE",
   "d": {
@@ -63,7 +63,7 @@ TODO: also do guild settings in here?
 ```
 
 ##### to dashboard
-```json
+```json5
 {
   "t": "DATA_UPDATE",
   "d": {
@@ -80,7 +80,7 @@ TODO: also do guild settings in here?
 Request (to-bot):
 
 both update and add send the full guild settings object to the bot
-```json
+```json5
 {
   "t": "GUILD_SETTINGS",
   "d":{
@@ -100,7 +100,7 @@ both update and add send the full guild settings object to the bot
   } 
 }
 ```
-```json
+```json5
 {
   "t": "CUSTOM_COMMANDS",
   "d": {
@@ -133,7 +133,7 @@ Response (from-bot): None
 
 #### getting command info
 Request (to-bot):
-```json
+```json5
 {
   "t": "FETCH_DATA",
   "identifier": "Identifier for finding the data we requested",
@@ -141,7 +141,7 @@ Request (to-bot):
 }
 ```
 Response (from-bot):
-```json
+```json5
 {
   "t": "FETCH_DATA",
   "identifier": "Identifier for finding the data we requested",
@@ -157,7 +157,7 @@ Response (from-bot):
 All data fields are optional
 
 Request (to-bot):
-```json
+```json5
 {
   "t": "FETCH_DATA",
   "d": {
@@ -175,7 +175,7 @@ Request (to-bot):
 }
 ```
 Response (from-bot):
-```json
+```json5
 {
   "t": "FETCH_DATA",
   "d": {
