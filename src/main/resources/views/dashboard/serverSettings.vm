@@ -7,6 +7,14 @@
     .menu.active {
         display: block;
     }
+
+    #embedColor {
+        display: none;
+    }
+
+    #embedPreview {
+        background: $guildColor;
+    }
 </style>
 #end
 
@@ -17,7 +25,7 @@
             #parse('/views/dashboard/basicSettings.vm')
         </div>
         <div class="menu" id="tab2">
-            <h1>Moderation settings</h1>
+            #parse('/views/dashboard/moderationSettings.vm')
         </div>
         <div class="menu" id="tab3">
             <h1>Custom commands</h1>
@@ -27,10 +35,18 @@
         </div>
     </div>
     ## save button here
+    <div class="row">
+        <div class="divider"></div>
+    </div>
+
+    <button type="submit" class="btn waves-effect waves-light waves-ripple blue accent-4 white" value="submit">
+        Save
+    </button>
 </form>
 #end
 
 #define ($scripts)
+<script src="/js/warnactions.js"></script>
 <script>
     // <editor-fold desc="TABS" defaultstate="collapsed">
     const ul = document.getElementById('server-setting-selection2');
@@ -119,7 +135,61 @@
         return null;
     }
     // </editor-fold>
+
+    // <editor-fold desc="CUSTOM COMMAND SETTINGS" defaultstate="uncollapsed">
+    ///
+    // </editor-fold>
+
+    // <editor-fold desc="..... SETTINGS" defaultstate="uncollapsed">
+    ///
+    // </editor-fold>
 </script>
+    #if($guild_patron)
+    <script>
+        // <editor-fold desc="MODERATION SETTINGS" defaultstate="collapsed">
+        function addWarnAction() {
+            if (actions.children.length + 1 > maxActions) {
+                return;
+            }
+
+            // Extra safe check so we hide the button on 3 but still add the action
+            if (actions.children.length + 1 >= maxActions) {
+                hide('add_warn_action');
+            }
+
+            const li = buildLi(null);
+
+            actions.appendChild(li);
+
+            M.FormSelect.init(li.querySelector('select'));
+            M.updateTextFields();
+        }
+
+        function removeWarnAction(itemId) {
+            id(getLiId(itemId)).remove();
+
+            if (actions.children.length < maxActions) {
+                unHide('add_warn_action');
+            }
+        }
+        // </editor-fold>
+    </script>
+    #else
+    #[[
+    <script>
+        const addWarnAction = () => alert('Free servers only get one warn action\n' +
+            'Want more warn actions?\n' +
+            'Consider supporting the bot by making your server a patron server');
+        const removeWarnAction = (itemId) => {
+            const element = document.querySelector(`button[data-remove-action="${itemId}"]`);
+
+            element.classList.add('disabled');
+            element.disabled = true;
+        };
+    </script>
+    ]]#
+    #end
+<script src="/js/moderation.js"></script>
 #end
 
 #parse('/views/templates/base.vm')

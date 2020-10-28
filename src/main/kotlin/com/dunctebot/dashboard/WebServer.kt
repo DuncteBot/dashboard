@@ -181,6 +181,10 @@ class WebServer(private val env: Dotenv) {
             getWithGuildData(
                 "",
                 WebVariables().put("title", "Dashboard")
+                    .put("filterValues", ProfanityFilterType.values())
+                    .put("warnActionTypes", WarnAction.Type.values())
+                    .put("loggingTypes", GuildSetting.LOGGING_TYPES)
+                    .put("patronMaxWarnActions", WarnAction.PATRON_MAX_ACTIONS)
                     .put("hide_settings", true)
                     .put("show_new_settings", true),
                 "dashboard/serverSettings.vm"

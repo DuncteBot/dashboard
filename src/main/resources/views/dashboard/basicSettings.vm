@@ -1,15 +1,5 @@
-<style>
-    #embedColor {
-        display: none;
-    }
-
-    #embedPreview {
-        background: $guildColor;
-    }
-</style>
-
 <div class="row">
-    <form class="col s12" method="post">
+    <div class="col s12">
         ## Basic settings
         <div class="row section">
             <div class="input-field col s12 m1">
@@ -55,13 +45,5 @@
                 Seconds
             </div>
         </div>
-
-        <div class="row">
-            <div class="divider"></div>
-        </div>
-
-        <button type="submit" class="btn waves-effect waves-light waves-ripple blue accent-4 white" value="submit">
-            Save
-        </button>
-    </form>
+    </div>
 </div>
