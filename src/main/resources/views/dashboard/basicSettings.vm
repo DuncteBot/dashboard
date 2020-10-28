@@ -8,7 +8,6 @@
                 <label for="prefix">Prefix</label>
             </div>
 
-            #parse('/views/dashboard/includes/basic/welcomeLeave.vm')
             #parse('/views/dashboard/includes/basic/autoRole.vm')
         </div>
 

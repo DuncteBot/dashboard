@@ -1,9 +1,0 @@
-## Welcome/Leave
-<div class="col s12 m5">
-    <div class="input-field">
-        <select>
-            <option value="" selected disabled>Removed from this page</option>
-        </select>
-        <label for="welcomeChannel">Welcome/Leave Channel</label>
-    </div>
-</div>
