@@ -178,13 +178,13 @@ class WebServer(private val env: Dotenv) {
                 return@get response.redirect("/server/${request.guildId}/basic")
             }*/
 
-            get("") { _, _ ->
-                return@get WebVariables()
-                    .put("title", "Dashboard")
+            getWithGuildData(
+                "",
+                WebVariables().put("title", "Dashboard")
                     .put("hide_settings", true)
-                    .put("show_new_settings", true)
-                    .toModelAndView("dashboard/serverSettings.vm")
-            }
+                    .put("show_new_settings", true),
+                "dashboard/serverSettings.vm"
+            )
 
             // basic settings
             getWithGuildData(
@@ -337,7 +337,7 @@ class WebServer(private val env: Dotenv) {
                 map.put("guild_patron", fetchGuildPatronStatus(request.guildId!!))
             }
 
-            map.put("hide_settings", false)
+//            map.put("hide_settings", false)
 
             val session = request.session()
             val message: String? = session.attribute(FLASH_MESSAGE)

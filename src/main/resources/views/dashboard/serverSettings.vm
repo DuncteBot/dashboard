@@ -14,7 +14,7 @@
 <form action="" class="row" method="post">
     <div class="db-menus">
         <div class="menu active" id="tab1">
-            <h1>Basic settings</h1>
+            #parse('/views/dashboard/basicSettings.vm')
         </div>
         <div class="menu" id="tab2">
             <h1>Moderation settings</h1>
@@ -32,6 +32,7 @@
 
 #define ($scripts)
 <script>
+    // <editor-fold desc="TABS" defaultstate="collapsed">
     const ul = document.getElementById('server-setting-selection2');
     const tabs = document.querySelector('.db-menus').children;
 
@@ -60,6 +61,64 @@
 
         document.querySelector(item).classList.add('active');
     }
+    // </editor-fold>
+
+    // <editor-fold desc="BASIC SETTINGS" defaultstate="collapsed">
+    M.FormSelect.init(document.querySelectorAll('select'));
+
+    function displayColor(value) {
+        console.log(brightnessByColor(value))
+
+        const preview = id('embedPreview');
+
+        preview.style.background = value;
+
+        if (brightnessByColor(value) >= 150) {
+            preview.classList.add('black-text');
+            preview.classList.remove('white-text');
+        } else {
+            preview.classList.remove('black-text');
+            preview.classList.add('white-text');
+        }
+    }
+
+    displayColor('$guildColor');
+
+    function showColorPicker() {
+        id('embedColor').click()
+    }
+
+    function checkSelect(selectId, checkBox) {
+        let box = id(checkBox);
+        let select = id(selectId);
+        if (select.value) {
+            box.checked = true;
+            box.disabled = false;
+        } else {
+            box.checked = false;
+            box.disabled = true;
+        }
+    }
+
+    // Adapted from https://gist.github.com/w3core/e3d9b5b6d69a3ba8671cc84714cca8a4
+    function brightnessByColor (color) {
+        const match = color.substr(1).match(color.length === 7 ? /(\S{2})/g : /(\S)/g);
+
+        if (match) {
+            const r = parseInt(match[0], 16);
+            const g = parseInt(match[1], 16);
+            const b = parseInt(match[2], 16);
+
+            return (
+                (r * 299) +
+                (g * 587) +
+                (b * 114)
+            ) /1000;
+        }
+
+        return null;
+    }
+    // </editor-fold>
 </script>
 #end
 
