@@ -32,9 +32,9 @@ import com.dunctebot.models.settings.WarnAction
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.github.benmanes.caffeine.cache.Caffeine
-import okhttp3.Request
-import okhttp3.RequestBody
+import okhttp3.*
 import org.slf4j.LoggerFactory
+import java.io.IOException
 import java.util.concurrent.TimeUnit
 
 class DuncteApi(val apiKey: String) {
@@ -78,7 +78,12 @@ class DuncteApi(val apiKey: String) {
     fun saveGuildSetting(setting: GuildSetting) {
         val json = setting.toJson(jsonMapper)
 
-        patchJSON("guildsettings/${setting.guildId}", json)
+        patchJSONAsync("guildsettings/${setting.guildId}", json) {
+            if (!it["success"].asBoolean()) {
+                logger.error("Failed to update guild settings for ${setting.guildId}\n" +
+                    "Response: {}", it["error"].toString())
+            }
+        }
     }
 
     fun updateWarnActions(guildId: Long, actions: List<WarnAction>) {
@@ -144,6 +149,14 @@ class DuncteApi(val apiKey: String) {
         return executeRequest(request)
     }
 
+    private fun patchJSONAsync(path: String, json: JsonNode, prefixBot: Boolean = true, callback: (JsonNode) -> Unit = {}) {
+        val body = RequestBody.create(null, json.toJsonString())
+        val request = defaultRequest(path, prefixBot)
+            .patch(body).addHeader("Content-Type", JSON)
+
+        executeAsyncRequest(request, callback)
+    }
+
     private fun postJSON(path: String, json: JsonNode, prefixBot: Boolean = true): JsonNode {
         val body = RequestBody.create(null, json.toJsonString())
         val request = defaultRequest(path, prefixBot)
@@ -175,6 +188,22 @@ class DuncteApi(val apiKey: String) {
             .execute().use {
                 return jsonMapper.readTree(it.body()!!.byteStream())
             }
+    }
+
+    private fun executeAsyncRequest(request: Request.Builder, callback: (JsonNode) -> Unit) {
+        httpClient.newCall(request.build())
+            .enqueue(object : Callback {
+                override fun onFailure(call: Call, e: IOException) {
+                    logger.error("Error when making api request", e)
+                }
+
+                override fun onResponse(call: Call, response: Response) {
+                    response.use {
+                        callback(jsonMapper.readTree(it.body()!!.byteStream()))
+                    }
+                }
+
+            })
     }
 
     private fun parseTripleResponse(response: JsonNode): Triple<Boolean, Boolean, Boolean> {

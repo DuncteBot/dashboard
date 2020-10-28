@@ -35,6 +35,8 @@ class FetchDataHandler : SocketHandler() {
 
         if (waitingMap.containsKey(identifier)) {
             waitingMap[identifier]!!(data)
+
+            waitingMap.remove(identifier)
         }
     }
 }

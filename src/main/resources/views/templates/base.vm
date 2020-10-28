@@ -26,6 +26,13 @@
     <link href="/img/favicon.png" rel="shortcut icon" type="image/png"/>
     <link href="/img/favicon.png" rel="apple-touch-icon" type="image/png"/>
 
+    <!--Import Google Icon Font-->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://dunctebot.com/css/materialize.custom.css"/>
+    <link rel="stylesheet" href="https://dunctebot.com/css/style.css"/>
+    <link rel="stylesheet" href="https://dunctebot.com/css/animate.css"/>
+
     <style>
         * {
             --color: #0751c6;
@@ -74,13 +81,11 @@
         select {
             display: none;
         }
+
+        .page-footer {
+            padding-top: 0;
+        }
     </style>
-    <!--Import Google Icon Font-->
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
-    <!-- Compiled and minified CSS -->
-    <link rel="stylesheet" href="https://dunctebot.com/css/materialize.custom.css"/>
-    <link rel="stylesheet" href="https://dunctebot.com/css/style.css"/>
-    <link rel="stylesheet" href="https://dunctebot.com/css/animate.css"/>
 
     <title>$title</title>
 
@@ -176,28 +181,6 @@
 </main>
 
 <footer class="page-footer indigo">
-    <div class="container">
-        <div class="row">
-            <div class="col l6 s12">
-                <h5 class="white-text">DuncteBot</h5>
-                <p class="grey-text text-lighten-4">A fast multipurpose discord bot that plays music from Spotify</p>
-                <a href="https://twitter.com/DuncteBot?ref_src=twsrc%5Etfw" class="twitter-follow-button"
-                   data-show-count="true">Follow @DuncteBot</a>
-            </div>
-            <div class="col l4 offset-l2 s12">
-                <h5 class="white-text">Links</h5>
-                <ul>
-                    <li><a class="grey-text text-lighten-3" href="https://dunctebot.link/invite" target="_blank">Invite bot</a></li>
-                    <li><a class="grey-text text-lighten-3" href="https://dunctebot.link/server" target="_blank">Join server</a></li>
-                    <li><a class="grey-text text-lighten-3" href="https://paypal.me/duncte123"
-                           target="_blank">Donate</a></li>
-                    <li><a class="grey-text text-lighten-3" href="https://patreon.com/DuncteBot"
-                           target="_blank">Patreon</a></li>
-##                    <li><a href="https://www.patreon.com/bePatron?u=6419542" data-patreon-widget-type="become-patron-button">Become a Patron!</a></li>
-                </ul>
-            </div>
-        </div>
-    </div>
     <div class="footer-copyright indigo darken-3">
         <div class="container">
             &copy; 2017-<span id="year"></span> DuncteBot Team
