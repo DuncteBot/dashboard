@@ -174,9 +174,7 @@ class WebServer(private val env: Dotenv) {
 //                return@before DashboardController.before(request, response)
 //            }
 
-            /*get("") { request, response ->
-                return@get response.redirect("/server/${request.guildId}/basic")
-            }*/
+            // TODO: saving the settings
 
             getWithGuildData(
                 "",
@@ -190,28 +188,9 @@ class WebServer(private val env: Dotenv) {
                 "dashboard/serverSettings.vm"
             )
 
-            // basic settings
-            getWithGuildData(
-                "/basic",
-                WebVariables().put("title", "Dashboard"),
-                "dashboard/basicSettings.vm"
-            )
-
             post("/basic") { request, response ->
                 return@post SettingsController.saveBasic(request, response)
             }
-
-            // Moderation settings
-            getWithGuildData(
-                "/moderation",
-                WebVariables()
-                    .put("filterValues", ProfanityFilterType.values())
-                    .put("warnActionTypes", WarnAction.Type.values())
-                    .put("title", "Dashboard")
-                    .put("loggingTypes", GuildSetting.LOGGING_TYPES)
-                    .put("patronMaxWarnActions", WarnAction.PATRON_MAX_ACTIONS),
-                "dashboard/moderationSettings.vm"
-            )
 
             post("/moderation") { request, response ->
                 return@post SettingsController.saveModeration(request, response)
@@ -220,15 +199,10 @@ class WebServer(private val env: Dotenv) {
             // Custom command settings
             getWithGuildData(
                 "/custom-commands",
-                WebVariables().put("title", "Dashboard"),
+                WebVariables().put("title", "Dashboard")
+                    .put("hide_settings", false)
+                    .put("show_new_settings", false),
                 "dashboard/customCommandSettings.vm"
-            )
-
-            // Message settings
-            getWithGuildData(
-                "/messages",
-                WebVariables().put("title", "Dashboard"),
-                "dashboard/welcomeLeaveDesc.vm"
             )
 
             post("/messages") { request, response ->

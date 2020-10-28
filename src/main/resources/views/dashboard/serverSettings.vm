@@ -21,18 +21,18 @@
 #define ($content)
 <form action="" class="row" method="post">
     <div class="db-menus">
-        <div class="menu active" id="tab1">
+        <div class="menu active" id="basic">
             #parse('/views/dashboard/basicSettings.vm')
         </div>
-        <div class="menu" id="tab2">
+        <div class="menu" id="moderation">
             #parse('/views/dashboard/moderationSettings.vm')
         </div>
-        <div class="menu" id="tab3">
+        <div class="menu" id="tab5">
             ## TODO: custom commands still on own page (cuz different settings interface)
             ## TODO: allow tabs to be selected with hash in url
             <h1>Custom commands</h1>
         </div>
-        <div class="menu" id="tab4">
+        <div class="menu" id="welcome-leave">
             #parse('/views/dashboard/welcomeLeaveDesc.vm')
         </div>
     </div>
@@ -59,12 +59,20 @@
             return;
         }
 
-        e.preventDefault();
-
         setActive(e.target.getAttribute('href'));
     });
 
+    if (window.location.hash) {
+        setActive(window.location.hash);
+    }
+
     function setActive(item) {
+        const targetTab = document.querySelector(item);
+
+        if (!targetTab) {
+            return;
+        }
+
         for (const li of ul.children) {
             if (li.firstElementChild.getAttribute('href') === item) {
                 li.classList.add('active');
@@ -77,11 +85,15 @@
             tab.classList.remove('active');
         }
 
-        document.querySelector(item).classList.add('active');
+        targetTab.classList.add('active');
 
         document.querySelectorAll('textarea').forEach((it) => {
             M.textareaAutoResize(it);
         });
+
+        setTimeout(() => {
+            window.scrollTo(0, 0);
+        }, 10);
     }
     // </editor-fold>
 
@@ -89,8 +101,6 @@
     M.FormSelect.init(document.querySelectorAll('select'));
 
     function displayColor(value) {
-        console.log(brightnessByColor(value))
-
         const preview = id('embedPreview');
 
         preview.style.background = value;
@@ -142,7 +152,7 @@
     }
     // </editor-fold>
 
-    // <editor-fold desc="WELCOME/LEAVE SETTINGS" defaultstate="uncollapsed">
+    // <editor-fold desc="WELCOME/LEAVE SETTINGS" defaultstate="collapsed">
     /**
      *
      * @param {String} selectId

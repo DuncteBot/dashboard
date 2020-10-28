@@ -112,16 +112,16 @@
         #if(!$hide_settings)
             <ul id="server-setting-selection" class="discord not-black sidenav sidenav-fixed">
                 <li class="bold">
-                    <a class="white-text" href="/server/$guild.getIdLong()/basic">Basic Settings</a>
+                    <a class="white-text" href="/server/$guild.getIdLong()#basic">Basic Settings</a>
                 </li>
                 <li class="bold">
-                    <a class="white-text" href="/server/$guild.getIdLong()/moderation">Moderation Settings</a>
+                    <a class="white-text" href="/server/$guild.getIdLong()#moderation">Moderation Settings</a>
+                </li>
+                <li class="bold">
+                    <a class="white-text" href="/server/$guild.getIdLong()#welcome-leave">Welcome/Leave message</a>
                 </li>
                 <li class="bold">
                     <a class="white-text" href="/server/$guild.getIdLong()/custom-commands">Custom Commnds</a>
-                </li>
-                <li class="bold">
-                    <a class="white-text" href="/server/$guild.getIdLong()/messages">Welcome/Leave message</a>
                 </li>
             </ul>
 
@@ -142,16 +142,16 @@
         #if($show_new_settings)
             <ul id="server-setting-selection2" class="discord not-black sidenav sidenav-fixed">
                 <li class="bold active">
-                    <a class="white-text" href="#tab1">Basic Settings</a>
+                    <a class="white-text" href="#basic">Basic Settings</a>
                 </li>
                 <li class="bold">
-                    <a class="white-text" href="#tab2">Moderation Settings</a>
+                    <a class="white-text" href="#moderation">Moderation Settings</a>
                 </li>
                 <li class="bold">
-                    <a class="white-text" href="#tab3">Custom Commnds</a>
+                    <a class="white-text" href="#welcome-leave">Welcome/Leave message</a>
                 </li>
                 <li class="bold">
-                    <a class="white-text" href="#tab4">Welcome/Leave message</a>
+                    <a class="white-text" href="/server/$guild.getIdLong()/custom-commands">Custom Commnds</a>
                 </li>
             </ul>
         #end
