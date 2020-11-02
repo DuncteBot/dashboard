@@ -17,7 +17,7 @@
 
                 <!-- Switch -->
                 <div class="switch">
-                    Leave message (non-functional):
+                    Leave message:
                     <label>
                         Disabled
                         <input type="checkbox" name="leaveChannelCB" id="leaveChannelCB"
