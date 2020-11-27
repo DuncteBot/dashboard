@@ -37,12 +37,12 @@ object DataController {
 
         // parse the data to make sure that it is proper json
         val updateData = jsonMapper.readTree(request.bodyAsBytes())
-        val request = jsonMapper.createObjectNode()
-            .put("t", "UPDATE_DATA")
+        val wsRequest = jsonMapper.createObjectNode()
+            .put("t", "DATA_UPDATE")
             .set<ObjectNode>("d", updateData)
 
         // send the data to all instances that are connected
-        webSocket.broadcast(request)
+        webSocket.broadcast(wsRequest)
 
         return jsonMapper.createObjectNode().put("success", true)
     }
