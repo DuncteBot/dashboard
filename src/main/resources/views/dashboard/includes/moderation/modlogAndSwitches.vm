@@ -34,17 +34,28 @@
             </div>
 
             <div class="col s12 m5">
+##                Invite logging:
+##                <label>
+##                    Disabled
+##                    <input type="checkbox" name="logInvite" id="logInvite"
+##                           #if(!$guild_patron)disabled#end
+##                           #if($settings.isInviteLogging())checked="checked"#{end}>
+##                    <span class="lever"></span>
+##                    Enabled
+##                </label>
                 #foreach($logType in $loggingTypes)
-                    <div class="switch">
-                        $logType logging:
-                        <label>
-                            Disabled
-                            <input type="checkbox" name="log$logType" id="log$logType"
-                                   #if($settings.call("is${logType}Logging"))checked="checked"#{end}>
-                            <span class="lever"></span>
-                            Enabled
-                        </label>
-                    </div>
+                    #if($logType != "Invite")
+                        <div class="switch">
+                            $logType logging:
+                            <label>
+                                Disabled
+                                <input type="checkbox" name="log$logType" id="log$logType"
+                                       #if($settings.call("is${logType}Logging"))checked="checked"#{end}>
+                                <span class="lever"></span>
+                                Enabled
+                            </label>
+                        </div>
+                    #end
                 #end
             </div>
             <br>
