@@ -120,7 +120,6 @@ object SettingsController {
             .setMuteLogging(logMute)
             .setKickLogging(logKick)
             .setWarnLogging(logWarn)
-            // TODO: needs to be seperate stuff
             .setInviteLogging(logInvite)
             .setAiSensitivity(aiSensitivity)
             .setWarnActions(warnActionsList)

@@ -22,7 +22,7 @@
                         #foreach($textChannel in $goodChannels)
                             #if($settings.getLogChannel() == $textChannel.getIdLong())
                                 <option value="$textChannel.getIdLong()"
-                                selected>#$textChannel.getName()</option>
+                                        selected>#$textChannel.getName()</option>
                             #else
                                 <option value="$textChannel.getIdLong()">#$textChannel.getName()</option>
                             #end
@@ -33,16 +33,18 @@
                 </div>
             </div>
 
-            <div class="col s12 m5">
-##                Invite logging:
-##                <label>
-##                    Disabled
-##                    <input type="checkbox" name="logInvite" id="logInvite"
-##                           #if(!$guild_patron)disabled#end
-##                           #if($settings.isInviteLogging())checked="checked"#{end}>
-##                    <span class="lever"></span>
-##                    Enabled
-##                </label>
+            <div class="col s12 l7">
+                <div class="switch">
+                    Invite logging:
+                    <label>
+                        Disabled
+                        <input type="checkbox" name="logInvite" id="logInvite"
+                               #if(!$guild_patron)disabled #end
+                               #if($settings.isInviteLogging() && $guild_patron)checked="checked"#{end}>
+                        <span class="lever"></span>
+                        Enabled
+                    </label>
+                </div>
                 #foreach($logType in $loggingTypes)
                     #if($logType != "Invite")
                         <div class="switch">
@@ -76,10 +78,10 @@
     <div class="row">
         <div class="col s12 m5">
             <p><a
-                    href="https://github.com/DuncteBot/SkyBot/wiki/What-filter-type-do-I-choose%3F"
-                    target="_blank"
-                    title="Explanation of the models"
-                >What type do I choose?</a></p>
+                href="https://github.com/DuncteBot/SkyBot/wiki/What-filter-type-do-I-choose%3F"
+                target="_blank"
+                title="Explanation of the models"
+            >What type do I choose?</a></p>
             <div class="input-field">
                 <select id="filterType" name="filterType">
                     #foreach($profanityType in $filterValues)
@@ -99,7 +101,7 @@
                 <label for="ai-sensitivity">Sensitivity</label>
                 <input type="range" id="ai-sensitivity" name="ai-sensitivity"
                        value="$settings.getAiSensitivity()"
-                       min="0" max="1" step="0.01" />
+                       min="0" max="1" step="0.01"/>
             </div>
         </div>
     </div>
