@@ -54,7 +54,7 @@ object SettingsController {
 
         sendSettingUpdate(settings)
 
-        request.session().attribute(FLASH_MESSAGE, "<h6>All settings updated</h6>")
+        request.session().attribute(FLASH_MESSAGE, "All settings updated!")
 
         return response.redirect(request.url())
     }

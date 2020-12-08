@@ -37,6 +37,7 @@
         <div class="divider"></div>
     </div>
 
+    <p>This saves the Basic Settings, Moderation Settings and Welcome/Leave settings.<br>Changes are kept when switching between those three.</p>
     <button type="submit" class="btn waves-effect waves-light waves-ripple blue accent-4 white" value="submit">
         Save
     </button>
@@ -44,9 +45,9 @@
 #end
 
 #define ($scripts)
-<script src="/js/dashboard/tabs.js" async></script>
-<script src="/js/dashboard/warnactions.js" async></script>
-<script src="/js/dashboard/basicSettings.js" async></script>
+<script src="/js/dashboard/tabs.js"></script>
+<script src="/js/dashboard/warnactions.js"></script>
+<script src="/js/dashboard/basicSettings.js"></script>
     #if($guild_patron)
     <script>
         // <editor-fold desc="MODERATION SETTINGS" defaultstate="collapsed">
@@ -92,7 +93,7 @@
     </script>
     ]]#
     #end
-<script src="/js/dashboard/moderation.js" async></script>
+<script src="/js/dashboard/moderation.js"></script>
 #end
 
 #parse('/views/templates/base.vm')

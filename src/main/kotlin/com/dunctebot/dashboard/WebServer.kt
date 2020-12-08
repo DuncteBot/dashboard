@@ -174,6 +174,10 @@ class WebServer(private val env: Dotenv) {
                 return@before DashboardController.before(request, response)
             }
 
+            before("") { request, response ->
+                return@before DashboardController.before(request, response)
+            }
+
             getWithGuildData(
                 "",
                 WebVariables().put("title", "Dashboard")
@@ -185,7 +189,7 @@ class WebServer(private val env: Dotenv) {
                 "dashboard/serverSettings.vm"
             )
 
-            post("/") { request, response ->
+            post("") { request, response ->
                 return@post SettingsController.saveSettings(request, response)
             }
 

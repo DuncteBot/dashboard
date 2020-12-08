@@ -22,8 +22,6 @@
  * SOFTWARE.
  */
 
-M.FormSelect.init(document.querySelectorAll('select'));
-
 function displayColor(value) {
     const preview = id('embedPreview');
 

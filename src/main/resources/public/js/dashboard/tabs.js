@@ -38,6 +38,11 @@ if (window.location.hash) {
 }
 
 function setActive(item) {
+    // skip that one url
+    if (item[0] === '/') {
+        return;
+    }
+
     const targetTab = document.querySelector(item);
 
     if (!targetTab) {
@@ -45,6 +50,10 @@ function setActive(item) {
     }
 
     for (const li of ul.children) {
+        if (li.classList.contains('divider')) {
+            continue;
+        }
+
         if (li.firstElementChild.getAttribute('href') === item) {
             li.classList.add('active');
         } else {
@@ -58,11 +67,18 @@ function setActive(item) {
 
     targetTab.classList.add('active');
 
-    document.querySelectorAll('textarea').forEach((it) => {
-        M.textareaAutoResize(it);
-    });
+    const nav = M.Sidenav.getInstance(document.querySelector('.sidenav'));
+
+    // close the sidenav if it's open
+    if (nav && window.navOpen) {
+        nav.close();
+    }
 
     setTimeout(() => {
         window.scrollTo(0, 0);
+
+        document.querySelectorAll('textarea').forEach((it) => {
+            M.textareaAutoResize(it);
+        });
     }, 10);
 }
