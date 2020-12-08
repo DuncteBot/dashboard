@@ -38,23 +38,7 @@
             --color: #0751c6;
         }
 
-        #if(!$hide_settings)
-        header, main, footer {
-            padding-left: 300px;
-        }
-
-        @media only screen and (max-width : 992px) {
-            header, main, footer {
-                padding-left: 0;
-            }
-        }
-
-        .sidenav .sidenav-fixed {
-            top: 20px;
-        }
-        #end
-
-        #if($show_new_settings)
+        #if(!$hide_menu)
         header, main, footer {
             padding-left: 300px;
         }
@@ -109,50 +93,52 @@
             </div>
         </nav>
 
-        #if($using_tabs)
-            <ul id="server-setting-tabs" class="discord not-black sidenav sidenav-fixed">
-                <li class="bold active">
-                    <a class="white-text" href="#basic">Basic Settings</a>
-                </li>
-                <li class="bold">
-                    <a class="white-text" href="#moderation">Moderation Settings</a>
-                </li>
-                <li class="bold">
-                    <a class="white-text" href="#welcome-leave">Welcome/Leave message</a>
-                </li>
-                <li class="bold">
-                    <a class="white-text" href="/server/$guild.getIdLong()/custom-commands">Custom Commnds</a>
-                </li>
-            </ul>
-        #else
-            ## TODO: use a different tactic for this
-            <ul id="server-setting-selection" class="discord not-black sidenav sidenav-fixed">
-                <li class="bold">
-                    <a class="white-text" href="/server/$guild.getIdLong()#basic">Basic Settings</a>
-                </li>
-                <li class="bold">
-                    <a class="white-text" href="/server/$guild.getIdLong()#moderation">Moderation Settings</a>
-                </li>
-                <li class="bold">
-                    <a class="white-text" href="/server/$guild.getIdLong()#welcome-leave">Welcome/Leave message</a>
-                </li>
-                <li class="bold">
-                    <a class="white-text" href="/server/$guild.getIdLong()/custom-commands">Custom Commnds</a>
-                </li>
-            </ul>
+        #if(!$hide_menu)
+            #if($using_tabs)
+                <ul id="server-setting-tabs" class="discord not-black sidenav sidenav-fixed">
+                    <li class="bold active">
+                        <a class="white-text" href="#basic">Basic Settings</a>
+                    </li>
+                    <li class="bold">
+                        <a class="white-text" href="#moderation">Moderation Settings</a>
+                    </li>
+                    <li class="bold">
+                        <a class="white-text" href="#welcome-leave">Welcome/Leave message</a>
+                    </li>
+                    <li class="bold">
+                        <a class="white-text" href="/server/$guild.getIdLong()/custom-commands">Custom Commnds</a>
+                    </li>
+                </ul>
+            #else
+                ## TODO: use a different tactic for this
+                <ul id="server-setting-selection" class="discord not-black sidenav sidenav-fixed">
+                    <li class="bold">
+                        <a class="white-text" href="/server/$guild.getIdLong()#basic">Basic Settings</a>
+                    </li>
+                    <li class="bold">
+                        <a class="white-text" href="/server/$guild.getIdLong()#moderation">Moderation Settings</a>
+                    </li>
+                    <li class="bold">
+                        <a class="white-text" href="/server/$guild.getIdLong()#welcome-leave">Welcome/Leave message</a>
+                    </li>
+                    ## assuming that we're always on the custom commands page here
+                    <li class="bold active">
+                        <a class="white-text" href="/server/$guild.getIdLong()/custom-commands">Custom Commnds</a>
+                    </li>
+                </ul>
 
-            <script>
-                const ul = document.getElementById('server-setting-selection');
-                const path = window.location.href;
+                #*<script>
+                    const ul = document.getElementById('server-setting-selection');
+                    const path = window.location.href;
 
-                for (const li of ul.children) {
-                    console.log(li.firstElementChild.href, path)
-                    if (li.firstElementChild.href === path) {
-                        li.classList.add('active');
-                        break;
+                    for (const li of ul.children) {
+                        if (li.firstElementChild.href === path) {
+                            li.classList.add('active');
+                            break;
+                        }
                     }
-                }
-            </script>
+                </script>*#
+            #end
         #end
     </div>
 </header>

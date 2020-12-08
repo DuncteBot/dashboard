@@ -112,7 +112,7 @@ class WebServer(private val env: Dotenv) {
 
         get("/register-server") { _, _ ->
             WebVariables()
-                .put("hide_settings", true)
+                .put("hide_menu", true)
                 .put("title", "Register your server for patron perks")
                 .put("captcha_sitekey", env["CAPTCHA_SITEKEY"]!!)
                 .toModelAndView("oneGuildRegister.vm")
@@ -164,7 +164,7 @@ class WebServer(private val env: Dotenv) {
             get("") { _, _ ->
                 return@get WebVariables()
                     .put("title", "Dashboard")
-                    .put("hide_settings", true)
+                    .put("hide_menu", true)
                     .toModelAndView("dashboard/index.vm")
             }
         }
@@ -173,8 +173,6 @@ class WebServer(private val env: Dotenv) {
             before("/*") { request, response ->
                 return@before DashboardController.before(request, response)
             }
-
-            // TODO: saving the settings
 
             getWithGuildData(
                 "",
@@ -314,6 +312,8 @@ class WebServer(private val env: Dotenv) {
             } else {
                 map.put("message", false)
             }
+
+            map.put("hide_menu", false)
 
             map.toModelAndView(view)
         }

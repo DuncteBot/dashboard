@@ -52,5 +52,12 @@ class DashboardTasks {
             30,
             TimeUnit.MINUTES
         )
+        // Clean the security keys on a daily basis
+        threadPool.scheduleAtFixedRate(
+            GuildController.securityKeys::clear,
+            1,
+            1,
+            TimeUnit.DAYS
+        )
     }
 }
