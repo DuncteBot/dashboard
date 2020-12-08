@@ -170,9 +170,9 @@ class WebServer(private val env: Dotenv) {
         }
 
         path("/server/$GUILD_ID") {
-//            before("/*") { request, response ->
-//                return@before DashboardController.before(request, response)
-//            }
+            before("/*") { request, response ->
+                return@before DashboardController.before(request, response)
+            }
 
             // TODO: saving the settings
 
