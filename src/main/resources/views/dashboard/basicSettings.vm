@@ -1,7 +1,7 @@
 #define ($styles)
 <style>
     #embedColor {
-        display: none;
+        visibility: hidden;
     }
 
     #embedPreview {
@@ -28,16 +28,14 @@
         <div class="row">
             #parse('/views/dashboard/includes/basic/switches.vm')
 
-            <div class="input-field col s12 m3">
-
-                <input type="color" id="embedColor" name="embedColor"
-                       onchange="displayColor(this.value);" value="$guildColor"/>
-
+            <div class="input-field col s12 m5">
                 <button type="button" id="embedPreview" onclick="showColorPicker()"
                         class="btn-large waves-effect waves-light waves-ripple white-text">
                     Embed color
                 </button>
 
+                <input type="color" id="embedColor" name="embedColor"
+                       onchange="displayColor(this.value);" value="$guildColor"/>
             </div>
         </div>
 
@@ -75,8 +73,6 @@
     M.FormSelect.init(document.querySelectorAll('select'));
 
     function displayColor(value) {
-        console.log(brightnessByColor(value))
-
         const preview = id('embedPreview');
 
         preview.style.background = value;
