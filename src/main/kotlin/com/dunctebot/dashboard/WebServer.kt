@@ -183,31 +183,21 @@ class WebServer(private val env: Dotenv) {
                     .put("warnActionTypes", WarnAction.Type.values())
                     .put("loggingTypes", GuildSetting.LOGGING_TYPES)
                     .put("patronMaxWarnActions", WarnAction.PATRON_MAX_ACTIONS)
-                    .put("hide_settings", true)
-                    .put("show_new_settings", true),
+                    .put("using_tabs", true),
                 "dashboard/serverSettings.vm"
             )
 
-            post("/basic") { request, response ->
-                return@post SettingsController.saveBasic(request, response)
-            }
-
-            post("/moderation") { request, response ->
-                return@post SettingsController.saveModeration(request, response)
+            post("/") { request, response ->
+                return@post SettingsController.saveSettings(request, response)
             }
 
             // Custom command settings
             getWithGuildData(
                 "/custom-commands",
                 WebVariables().put("title", "Dashboard")
-                    .put("hide_settings", false)
-                    .put("show_new_settings", false),
+                    .put("using_tabs", false),
                 "dashboard/customCommandSettings.vm"
             )
-
-            post("/messages") { request, response ->
-                return@post SettingsController.saveMessages(request, response)
-            }
 
 
             // Soon tm?
@@ -314,8 +304,6 @@ class WebServer(private val env: Dotenv) {
 
                 map.put("guild_patron", fetchGuildPatronStatus(request.guildId!!))
             }
-
-//            map.put("hide_settings", false)
 
             val session = request.session()
             val message: String? = session.attribute(FLASH_MESSAGE)

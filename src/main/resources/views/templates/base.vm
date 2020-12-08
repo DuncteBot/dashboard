@@ -109,7 +109,23 @@
             </div>
         </nav>
 
-        #if(!$hide_settings)
+        #if($using_tabs)
+            <ul id="server-setting-tabs" class="discord not-black sidenav sidenav-fixed">
+                <li class="bold active">
+                    <a class="white-text" href="#basic">Basic Settings</a>
+                </li>
+                <li class="bold">
+                    <a class="white-text" href="#moderation">Moderation Settings</a>
+                </li>
+                <li class="bold">
+                    <a class="white-text" href="#welcome-leave">Welcome/Leave message</a>
+                </li>
+                <li class="bold">
+                    <a class="white-text" href="/server/$guild.getIdLong()/custom-commands">Custom Commnds</a>
+                </li>
+            </ul>
+        #else
+            ## TODO: use a different tactic for this
             <ul id="server-setting-selection" class="discord not-black sidenav sidenav-fixed">
                 <li class="bold">
                     <a class="white-text" href="/server/$guild.getIdLong()#basic">Basic Settings</a>
@@ -137,23 +153,6 @@
                     }
                 }
             </script>
-        #end
-
-        #if($show_new_settings)
-            <ul id="server-setting-selection2" class="discord not-black sidenav sidenav-fixed">
-                <li class="bold active">
-                    <a class="white-text" href="#basic">Basic Settings</a>
-                </li>
-                <li class="bold">
-                    <a class="white-text" href="#moderation">Moderation Settings</a>
-                </li>
-                <li class="bold">
-                    <a class="white-text" href="#welcome-leave">Welcome/Leave message</a>
-                </li>
-                <li class="bold">
-                    <a class="white-text" href="/server/$guild.getIdLong()/custom-commands">Custom Commnds</a>
-                </li>
-            </ul>
         #end
     </div>
 </header>
