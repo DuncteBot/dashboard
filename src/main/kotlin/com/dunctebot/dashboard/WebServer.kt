@@ -105,6 +105,14 @@ class WebServer(private val env: Dotenv) {
 
         defaultResponseTransformer(responseTransformer)
 
+        /*get("/test") { request, response ->
+            println(request.host())
+            println(request.url()) // split on the last / and append callback
+            println(request.uri())
+
+            "check console"
+        }*/
+
         // Non settings related routes
         get("/roles/:hash") { request, response ->
             return@get GuildController.showGuildRoles(request, response)
