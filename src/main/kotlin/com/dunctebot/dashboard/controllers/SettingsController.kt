@@ -39,17 +39,19 @@ import kotlin.math.min
 object SettingsController {
     fun saveSettings(request: Request, response: Response): Any {
         val params = request.paramsMap
-        val settings = duncteApis.getGuildSetting(request.guildId!!.toLong())
+        val rateLimits = parseRateLimits(params)
 
-        setBasic(params, settings)
-
-        // will return false ONLY if there are invalid rateLimits
-        if (!setModeration(params, settings)) {
+        // rate limits are null when parsing failed
+        if (rateLimits == null) {
             request.session().attribute(FLASH_MESSAGE, "<h4>Rate limits are invalid</h4>")
 
             return response.redirect(request.url())
         }
 
+        val settings = duncteApis.getGuildSetting(request.guildId!!.toLong())
+
+        setBasic(params, settings)
+        setModeration(params, rateLimits, settings)
         setMessages(params, settings)
 
         sendSettingUpdate(settings)
@@ -85,7 +87,7 @@ object SettingsController {
             .setEmbedColor(color)
     }
 
-    private fun setModeration(params: Map<String, String>, settings: GuildSetting): Boolean {
+    private fun setModeration(params: Map<String, String>, rateLimits: LongArray, settings: GuildSetting) {
         val modLogChannel = params["modChannel"].toSafeLong()
         val autoDeHoist = params["autoDeHoist"].toCBBool()
         val filterInvites = params["filterInvites"].toCBBool()
@@ -104,7 +106,6 @@ object SettingsController {
         val logInvite = params["logInvite"].toCBBool()
 
         val aiSensitivity = ((params["ai-sensitivity"] ?: "0.7").toFloatOrNull() ?: 0.7f).minMax(0f, 1f)
-        val rateLimits = parseRateLimits(params) ?: return false
 
         val youngAccountThreshold = params["young_account_threshold"]?.toIntOrNull() ?: 10
         val youngAccountBanEnable = params["young_account_ban_enabled"].toCBBool()
@@ -133,8 +134,6 @@ object SettingsController {
             .setWarnActions(warnActionsList)
             .setYoungAccountThreshold(youngAccountThreshold)
             .setYoungAccountBanEnabled(youngAccountBanEnable)
-
-        return true
     }
 
     private fun setMessages(params: Map<String, String>, settings: GuildSetting) {

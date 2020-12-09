@@ -50,6 +50,7 @@ function setActive(item) {
     }
 
     for (const li of ul.children) {
+        // since we are looping over all LI elements we need to check if it contains the a-tag
         if (li.classList.contains('divider')) {
             continue;
         }
