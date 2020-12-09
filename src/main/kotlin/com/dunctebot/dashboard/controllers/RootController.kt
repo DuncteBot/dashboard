@@ -86,7 +86,7 @@ object RootController {
             val userId = oAuth2Client.getUser(oauthses).complete().id
 
             // TODO: remove when final
-            if (request.host() == "olddash.dunctebot.com" && duncteApis.isPatreon(userId)) {
+            if (request.host() == "olddash.dunctebot.com" && !duncteApis.isPatreon(userId)) {
                 return ""
             }
 
