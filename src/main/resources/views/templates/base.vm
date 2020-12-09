@@ -107,7 +107,7 @@
                     </li>
                     <li class="divider grey darken-2"></li>
                     <li class="bold">
-                        <a class="white-text" href="/server/$guild.getIdLong()/custom-commands">Custom Commnds</a>
+                        <a class="white-text" href="/server/$guild.getIdLong()/custom-commands">Custom Commands</a>
                     </li>
                 </ul>
             #else
@@ -125,7 +125,7 @@
                     <li class="divider grey darken-2"></li>
                     ## assuming that we're always on the custom commands page here
                     <li class="bold active">
-                        <a class="white-text" href="/server/$guild.getIdLong()/custom-commands">Custom Commnds</a>
+                        <a class="white-text" href="/server/$guild.getIdLong()/custom-commands">Custom Commands</a>
                     </li>
                 </ul>
 
