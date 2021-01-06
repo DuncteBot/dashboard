@@ -1,6 +1,5 @@
-#define ($content)
 <div class="row">
-    <form class="col s12" method="post">
+    <div class="col s12">
         <div class="section">
             <div class="row">
                 <!-- Switch -->
@@ -76,40 +75,5 @@
                 <label for="serverDescription">Server Description</label>
             </div>
         </div>
-
-        <button type="submit" class="btn waves-effect waves-light waves-ripple blue accent-4 white" value="submit">
-            Save
-        </button>
-    </form>
+    </div>
 </div>
-#end
-
-#define ($scripts)
-<script>
-    M.FormSelect.init(document.querySelectorAll('select'));
-
-    /**
-     *
-     * @param {String} selectId
-     * @param {Array<string>} checkBox
-     */
-    function checkSelect(selectId, checkBox) {
-        let boxes = checkBox.map(id);
-        let select = id(selectId);
-
-        if (select.value) {
-            boxes.forEach((box) => {
-                box.checked = true;
-                box.disabled = false;
-            });
-        } else {
-            boxes.forEach((box) => {
-                box.checked = false;
-                box.disabled = true;
-            });
-        }
-    }
-</script>
-#end
-
-#parse('/views/templates/base.vm')

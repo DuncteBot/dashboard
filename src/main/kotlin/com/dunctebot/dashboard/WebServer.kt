@@ -105,6 +105,14 @@ class WebServer(private val env: Dotenv) {
 
         defaultResponseTransformer(responseTransformer)
 
+        /*get("/test") { request, response ->
+            println(request.host())
+            println(request.url()) // split on the last / and append callback
+            println(request.uri())
+
+            "check console"
+        }*/
+
         // Non settings related routes
         get("/roles/:hash") { request, response ->
             return@get GuildController.showGuildRoles(request, response)
@@ -112,7 +120,7 @@ class WebServer(private val env: Dotenv) {
 
         get("/register-server") { _, _ ->
             WebVariables()
-                .put("hide_settings", true)
+                .put("hide_menu", true)
                 .put("title", "Register your server for patron perks")
                 .put("captcha_sitekey", env["CAPTCHA_SITEKEY"]!!)
                 .toModelAndView("oneGuildRegister.vm")
@@ -164,7 +172,7 @@ class WebServer(private val env: Dotenv) {
             get("") { _, _ ->
                 return@get WebVariables()
                     .put("title", "Dashboard")
-                    .put("hide_settings", true)
+                    .put("hide_menu", true)
                     .toModelAndView("dashboard/index.vm")
             }
         }
@@ -174,54 +182,32 @@ class WebServer(private val env: Dotenv) {
                 return@before DashboardController.before(request, response)
             }
 
-            get("") { request, response ->
-                return@get response.redirect("/server/${request.guildId}/basic")
+            before("") { request, response ->
+                return@before DashboardController.before(request, response)
             }
 
-            // basic settings
             getWithGuildData(
-                "/basic",
-                WebVariables().put("title", "Dashboard"),
-                "dashboard/basicSettings.vm"
-            )
-
-            post("/basic") { request, response ->
-                return@post SettingsController.saveBasic(request, response)
-            }
-
-            // Moderation settings
-            getWithGuildData(
-                "/moderation",
-                WebVariables()
+                "",
+                WebVariables().put("title", "Dashboard")
                     .put("filterValues", ProfanityFilterType.values())
                     .put("warnActionTypes", WarnAction.Type.values())
-                    .put("title", "Dashboard")
                     .put("loggingTypes", GuildSetting.LOGGING_TYPES)
-                    .put("patronMaxWarnActions", WarnAction.PATRON_MAX_ACTIONS),
-                "dashboard/moderationSettings.vm"
+                    .put("patronMaxWarnActions", WarnAction.PATRON_MAX_ACTIONS)
+                    .put("using_tabs", true),
+                "dashboard/serverSettings.vm"
             )
 
-            post("/moderation") { request, response ->
-                return@post SettingsController.saveModeration(request, response)
+            post("") { request, response ->
+                return@post SettingsController.saveSettings(request, response)
             }
 
             // Custom command settings
             getWithGuildData(
                 "/custom-commands",
-                WebVariables().put("title", "Dashboard"),
+                WebVariables().put("title", "Dashboard")
+                    .put("using_tabs", false),
                 "dashboard/customCommandSettings.vm"
             )
-
-            // Message settings
-            getWithGuildData(
-                "/messages",
-                WebVariables().put("title", "Dashboard"),
-                "dashboard/welcomeLeaveDesc.vm"
-            )
-
-            post("/messages") { request, response ->
-                return@post SettingsController.saveMessages(request, response)
-            }
 
 
             // Soon tm?
@@ -329,8 +315,6 @@ class WebServer(private val env: Dotenv) {
                 map.put("guild_patron", fetchGuildPatronStatus(request.guildId!!))
             }
 
-            map.put("hide_settings", false)
-
             val session = request.session()
             val message: String? = session.attribute(FLASH_MESSAGE)
 
@@ -340,6 +324,8 @@ class WebServer(private val env: Dotenv) {
             } else {
                 map.put("message", false)
             }
+
+            map.put("hide_menu", false)
 
             map.toModelAndView(view)
         }

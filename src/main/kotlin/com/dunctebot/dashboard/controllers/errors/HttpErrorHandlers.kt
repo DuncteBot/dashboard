@@ -31,7 +31,7 @@ object HttpErrorHandlers {
             response.type(ContentType.HTML)
 
             return WebVariables()
-                .put("hide_settings", true)
+                .put("hide_menu", true)
                 .put("title", "404 - Page Not Found")
                 .toModelAndView("errors/404.vm")
         }
@@ -49,7 +49,7 @@ object HttpErrorHandlers {
             response.type(ContentType.HTML)
 
             return WebVariables()
-                .put("hide_settings", true)
+                .put("hide_menu", true)
                 .put("title", "500 - Internal Server error")
                 .toModelAndView("errors/500.vm")
         }

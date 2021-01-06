@@ -40,7 +40,14 @@ function unHide(itemId) {
 
 document.addEventListener('DOMContentLoaded', () => {
     id('year').innerHTML = `${(new Date()).getFullYear()}`;
-    M.Sidenav.init(document.querySelectorAll('.sidenav'));
+    M.Sidenav.init(document.querySelectorAll('.sidenav'), {
+        onOpenEnd: () => {
+            window.navOpen = true;
+        },
+        onCloseEnd: () => {
+            window.navOpen = false;
+        },
+    });
 
     // M.AutoInit();
 

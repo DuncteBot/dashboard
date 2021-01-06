@@ -100,7 +100,7 @@ object GuildController {
         vars(map)
 
         map.put("title", "Register your server for patron perks")
-            .put("hide_settings", true)
+            .put("hide_menu", true)
             .put("captcha_sitekey", env["CAPTCHA_SITEKEY"]!!)
 
         return map.toModelAndView("oneGuildRegister.vm")
@@ -124,7 +124,7 @@ object GuildController {
 //        println("Actual count: ${members.size}")
 
         return WebVariables()
-            .put("hide_settings", true)
+            .put("hide_menu", true)
             .put("title", "Roles for ${guild.name}")
             .put("guild_name", guild.name)
             .put("roles", guild.roles.map { CustomRole(it, members) })

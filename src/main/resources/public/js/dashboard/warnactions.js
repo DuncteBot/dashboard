@@ -93,7 +93,9 @@ function buildTemplate(warnAction, num) {
         
         <div class="col s1">
             <button type="button" class="btn red"
-                    data-remove-action="${num}">remove</button>
+                    data-remove-action="${num}">
+                        <i class="material-icons">delete_forever</i>
+                    </button>
         </div>
     `;
 }

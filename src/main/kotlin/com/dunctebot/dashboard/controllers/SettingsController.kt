@@ -30,7 +30,6 @@ import com.dunctebot.dashboard.utils.fetchGuildPatronStatus
 import com.dunctebot.models.settings.GuildSetting
 import com.dunctebot.models.settings.WarnAction
 import com.dunctebot.models.utils.Utils.colorToInt
-import net.dv8tion.jda.api.entities.Guild
 import spark.Request
 import spark.Response
 import spark.Spark
@@ -38,9 +37,31 @@ import kotlin.math.max
 import kotlin.math.min
 
 object SettingsController {
-    fun saveBasic(request: Request, response: Response): Any {
+    fun saveSettings(request: Request, response: Response): Any {
         val params = request.paramsMap
+        val rateLimits = parseRateLimits(params)
 
+        // rate limits are null when parsing failed
+        if (rateLimits == null) {
+            request.session().attribute(FLASH_MESSAGE, "<h4>Rate limits are invalid</h4>")
+
+            return response.redirect(request.url())
+        }
+
+        val settings = duncteApis.getGuildSetting(request.guildId!!.toLong())
+
+        setBasic(params, settings)
+        setModeration(params, rateLimits, settings)
+        setMessages(params, settings)
+
+        sendSettingUpdate(settings)
+
+        request.session().attribute(FLASH_MESSAGE, "All settings updated!")
+
+        return response.redirect(request.url())
+    }
+
+    private fun setBasic(params: Map<String, String>, settings: GuildSetting) {
         var prefix = params["prefix"] ?: "db!"
 
         if (prefix.length > 10) {
@@ -58,25 +79,15 @@ object SettingsController {
         }
 
         // never really over
-
-        val settings = duncteApis.getGuildSetting(request.guildId!!.toLong())
-            .setCustomPrefix(prefix)
+            settings.setCustomPrefix(prefix)
             .setAutoroleRole(autorole)
             .setAnnounceTracks(announceTracks)
             .setLeaveTimeout(leaveTimeout)
             .setAllowAllToStop(allowAllToStop)
             .setEmbedColor(color)
-
-        sendSettingUpdate(settings)
-
-        request.session().attribute(FLASH_MESSAGE, "<h4>Settings updated</h4>")
-
-        return response.redirect(request.url())
     }
 
-    fun saveModeration(request: Request, response: Response): Any {
-        val params = request.paramsMap
-
+    private fun setModeration(params: Map<String, String>, rateLimits: LongArray, settings: GuildSetting) {
         val modLogChannel = params["modChannel"].toSafeLong()
         val autoDeHoist = params["autoDeHoist"].toCBBool()
         val filterInvites = params["filterInvites"].toCBBool()
@@ -95,16 +106,14 @@ object SettingsController {
         val logInvite = params["logInvite"].toCBBool()
 
         val aiSensitivity = ((params["ai-sensitivity"] ?: "0.7").toFloatOrNull() ?: 0.7f).minMax(0f, 1f)
-        val rateLimits = parseRateLimits(request, params) ?: return response.redirect(request.url())
 
         val youngAccountThreshold = params["young_account_threshold"]?.toIntOrNull() ?: 10
         val youngAccountBanEnable = params["young_account_ban_enabled"].toCBBool()
 
-        val guild = request.fetchGuild()!!
-        val guildId = guild.idLong
-        val warnActionsList = parseWarnActions(guild, params)
+        val guildId = settings.guildId
+        val warnActionsList = parseWarnActions(guildId, params)
 
-        val settings = duncteApis.getGuildSetting(request.guildId!!.toLong())
+        settings
             .setLogChannel(modLogChannel)
             .setAutoDeHoist(autoDeHoist)
             .setFilterInvites(filterInvites)
@@ -125,19 +134,9 @@ object SettingsController {
             .setWarnActions(warnActionsList)
             .setYoungAccountThreshold(youngAccountThreshold)
             .setYoungAccountBanEnabled(youngAccountBanEnable)
-
-        sendSettingUpdate(settings)
-
-        duncteApis.updateWarnActions(guildId, settings.warnActions)
-
-        request.session().attribute(FLASH_MESSAGE, "<h4>Settings updated</h4>")
-
-        return response.redirect(request.url())
     }
 
-    fun saveMessages(request: Request, response: Response): Any {
-        val params = request.paramsMap
-
+    private fun setMessages(params: Map<String, String>, settings: GuildSetting) {
         val welcomeEnabled = params["welcomeChannelCB"].toCBBool()
         val leaveEnabled = params["leaveChannelCB"].toCBBool()
         val welcomeMessage = params["welcomeMessage"]
@@ -145,19 +144,12 @@ object SettingsController {
         val serverDescription = params["serverDescription"]
         val welcomeChannel = params["welcomeChannel"].toSafeLong()
 
-        val settings = duncteApis.getGuildSetting(request.guildId!!.toLong())
-            .setServerDesc(serverDescription)
+        settings.setServerDesc(serverDescription)
             .setWelcomeLeaveChannel(welcomeChannel)
             .setCustomJoinMessage(welcomeMessage)
             .setCustomLeaveMessage(leaveMessage)
             .setEnableJoinMessage(welcomeEnabled)
             .setEnableLeaveMessage(leaveEnabled)
-
-        sendSettingUpdate(settings)
-
-        request.session().attribute(FLASH_MESSAGE, "<h4>Settings updated</h4>")
-
-        return response.redirect(request.url())
     }
 
     private fun sendSettingUpdate(setting: GuildSetting) {
@@ -173,7 +165,7 @@ object SettingsController {
         duncteApis.saveGuildSetting(setting)
     }
 
-    private fun parseRateLimits(request: Request, params: Map<String, String>): LongArray? {
+    private fun parseRateLimits(params: Map<String, String>): LongArray? {
         val rateLimits = LongArray(6)
 
         for (i in 0..5) {
@@ -181,8 +173,6 @@ object SettingsController {
             val value = params.getValue("rateLimits[$reqItemId]")
 
             if (value.isEmpty()) {
-                request.session().attribute(FLASH_MESSAGE, "<h4>Rate limits are invalid</h4>")
-
                 return null
             }
 
@@ -192,9 +182,9 @@ object SettingsController {
         return rateLimits
     }
 
-    private fun parseWarnActions(guild: Guild, params: Map<String, String>): List<WarnAction> {
+    private fun parseWarnActions(guildId: Long, params: Map<String, String>): List<WarnAction> {
         val warnActionsList = arrayListOf<WarnAction>()
-        val isGuildPatron = fetchGuildPatronStatus(guild.id)
+        val isGuildPatron = fetchGuildPatronStatus(guildId.toString())
         val maxWarningActionCount = if(isGuildPatron) WarnAction.PATRON_MAX_ACTIONS else 1
 
 

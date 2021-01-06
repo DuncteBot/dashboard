@@ -38,7 +38,7 @@
             --color: #0751c6;
         }
 
-        #if(!$hide_settings)
+        #if(!$hide_menu)
         header, main, footer {
             padding-left: 300px;
         }
@@ -82,7 +82,7 @@
     <div class="navbar-fixed">
         <nav class="indigo">
             <div class="nav-wrapper container">
-                <a href="#" data-target="server-setting-selection" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+                <a href="#" data-target="server-setting-tabs" class="sidenav-trigger"><i class="material-icons">menu</i></a>
                 <a href="/" class="brand-logo truncate">
                     #if($guild)
                         <i class="material-icons">arrow_back</i> Editing $guild.getName()
@@ -93,53 +93,59 @@
             </div>
         </nav>
 
-        #if(!$hide_settings)
-            <ul id="server-setting-selection" class="discord not-black sidenav sidenav-fixed">
-                <li class="bold">
-                    <a class="white-text" href="/server/$guild.getIdLong()/basic">Basic Settings</a>
-                </li>
-                <li class="bold">
-                    <a class="white-text" href="/server/$guild.getIdLong()/moderation">Moderation Settings</a>
-                </li>
-                <li class="bold">
-                    <a class="white-text" href="/server/$guild.getIdLong()/custom-commands">Custom Commnds</a>
-                </li>
-                <li class="bold">
-                    <a class="white-text" href="/server/$guild.getIdLong()/messages">Welcome/Leave message</a>
-                </li>
-            </ul>
+        #if(!$hide_menu)
+            #if($using_tabs)
+                <ul id="server-setting-tabs" class="discord not-black sidenav sidenav-fixed">
+                    <li class="bold active">
+                        <a class="white-text" href="#basic">Basic Settings</a>
+                    </li>
+                    <li class="bold">
+                        <a class="white-text" href="#moderation">Moderation Settings</a>
+                    </li>
+                    <li class="bold">
+                        <a class="white-text" href="#welcome-leave">Welcome/Leave message</a>
+                    </li>
+                    <li class="divider grey darken-2"></li>
+                    <li class="bold">
+                        <a class="white-text" href="/server/$guild.getIdLong()/custom-commands">Custom Commands</a>
+                    </li>
+                </ul>
+            #else
+                ## TODO: use a different tactic for this
+                <ul id="server-setting-tabs" class="discord not-black sidenav sidenav-fixed">
+                    <li class="bold">
+                        <a class="white-text" href="/server/$guild.getIdLong()#basic">Basic Settings</a>
+                    </li>
+                    <li class="bold">
+                        <a class="white-text" href="/server/$guild.getIdLong()#moderation">Moderation Settings</a>
+                    </li>
+                    <li class="bold">
+                        <a class="white-text" href="/server/$guild.getIdLong()#welcome-leave">Welcome/Leave message</a>
+                    </li>
+                    <li class="divider grey darken-2"></li>
+                    ## assuming that we're always on the custom commands page here
+                    <li class="bold active">
+                        <a class="white-text" href="/server/$guild.getIdLong()/custom-commands">Custom Commands</a>
+                    </li>
+                </ul>
 
-            <script>
-                const ul = document.getElementById('server-setting-selection');
-                const path = window.location.href;
+                #*<script>
+                    const ul = document.getElementById('server-setting-selection');
+                    const path = window.location.href;
 
-                for (const li of ul.children) {
-                    console.log(li.firstElementChild.href, path)
-                    if (li.firstElementChild.href === path) {
-                        li.classList.add('active');
-                        break;
+                    for (const li of ul.children) {
+                        if (li.firstElementChild.href === path) {
+                            li.classList.add('active');
+                            break;
+                        }
                     }
-                }
-            </script>
+                </script>*#
+            #end
         #end
     </div>
 </header>
 
 <main>
-    #if($message)
-        <div class="container">
-            <div class="row">
-                <div class="col s5">
-                    <div class="card white">
-                        <div class="card-content black-text">
-                            <p>$message</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    #end
-
     <div class="${containerClass|'container'}">
 
         $!content
@@ -171,6 +177,11 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"
         integrity="sha256-U/cHDMTIHCeMcvehBv1xQ052bPSbJtbuiw4QA9cTKz0=" crossorigin="anonymous"></script>
 <script src="/js/main.js"></script>
+#if($message)
+<script>
+    M.toast({html: '$message'})
+</script>
+#end
 $!scripts
 </body>
 </html>

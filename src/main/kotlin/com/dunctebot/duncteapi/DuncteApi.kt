@@ -141,6 +141,15 @@ class DuncteApi(val apiKey: String) {
         return parseTripleResponse(response)
     }
 
+    fun isPatreon(userId: String): Boolean {
+        val request = defaultRequest("")
+            .url("https://apis.beta.duncte123.me/bot/patrons/$userId")
+
+        val response = executeRequest(request)
+
+        return response.get("success").asBoolean();
+    }
+
     private fun patchJSON(path: String, json: JsonNode, prefixBot: Boolean = true): JsonNode {
         val body = RequestBody.create(null, json.toJsonString())
         val request = defaultRequest(path, prefixBot)
