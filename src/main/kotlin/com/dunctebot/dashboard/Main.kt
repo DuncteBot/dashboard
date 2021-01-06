@@ -33,5 +33,7 @@ fun main() {
     // start tasks
     DashboardTasks()
 
-    logger.info("Application ready: http://{}:{}/", env["SERVER_IP"], env["SERVER_PORT"])
+    server.start()
+
+    logger.info("Dashboard ready")
 }

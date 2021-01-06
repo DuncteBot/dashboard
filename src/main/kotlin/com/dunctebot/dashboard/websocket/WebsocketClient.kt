@@ -25,7 +25,6 @@
 package com.dunctebot.dashboard.websocket
 
 import com.dunctebot.dashboard.duncteApis
-import com.dunctebot.dashboard.env
 import com.dunctebot.dashboard.jsonMapper
 import com.dunctebot.dashboard.tasks.ReconnectTask
 import com.dunctebot.dashboard.utils.HashUtils
@@ -60,7 +59,7 @@ class WebsocketClient : WebSocketAdapter(), WebSocketListener {
 
     private val factory = WebSocketFactory()
         .setConnectionTimeout(10000)
-        .setServerName(IOUtil.getHost(env["WS_URL"]))
+        .setServerName(IOUtil.getHost(System.getenv("WS_URL")))
     lateinit var socket: WebSocket
 
     var mayReconnect = true
@@ -185,7 +184,7 @@ class WebsocketClient : WebSocketAdapter(), WebSocketListener {
     }
 
     private fun connect() {
-        socket = factory.createSocket(env["WS_URL"])
+        socket = factory.createSocket(System.getenv("WS_URL"))
 
         socket.setDirectTextMessage(true)
             .addHeader("X-DuncteBot", "dashboard")

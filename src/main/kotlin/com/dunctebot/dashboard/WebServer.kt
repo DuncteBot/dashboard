@@ -42,18 +42,17 @@ import com.dunctebot.models.settings.WarnAction
 import com.dunctebot.models.utils.Utils
 import com.fasterxml.jackson.databind.JsonNode
 import com.jagrosh.jdautilities.oauth2.OAuth2Client
-import io.github.cdimascio.dotenv.Dotenv
 import net.dv8tion.jda.api.entities.TextChannel
 import spark.ModelAndView
 import spark.Spark.*
 
 // The socket server will be used to communicate with DuncteBot himself
 // NGINX can secure the websocket (hopefully it does this by default as we are using the same domain)
-class WebServer(private val env: Dotenv) {
-    private val engine = VelocityRenderer(env)
+class WebServer {
+    private val engine = VelocityRenderer()
     private val oAuth2Client = OAuth2Client.Builder()
-        .setClientId(env["OAUTH_CLIENT_ID"]!!.toLong())
-        .setClientSecret(env["OAUTH_CLIENT_SECRET"]!!)
+        .setClientId(System.getenv("OAUTH_CLIENT_ID").toLong())
+        .setClientSecret(System.getenv("OAUTH_CLIENT_SECRET"))
         /*.setOkHttpClient(
             OkHttpClient.Builder()
                 // hack until JDA-Utils fixes the domain
@@ -78,10 +77,7 @@ class WebServer(private val env: Dotenv) {
         .build()
 
     init {
-        port(env["SERVER_PORT"]!!.toInt())
-        ipAddress(env["SERVER_IP"])
-
-        if (env["IS_LOCAL"]!!.toBoolean()) {
+        if (System.getenv("IS_LOCAL").toBoolean()) {
             val projectDir = System.getProperty("user.dir")
             val staticDir = "/src/main/resources/public"
             staticFiles.externalLocation(projectDir + staticDir)
@@ -122,7 +118,7 @@ class WebServer(private val env: Dotenv) {
             WebVariables()
                 .put("hide_menu", true)
                 .put("title", "Register your server for patron perks")
-                .put("captcha_sitekey", env["CAPTCHA_SITEKEY"]!!)
+                .put("captcha_sitekey", System.getenv("CAPTCHA_SITEKEY"))
                 .toModelAndView("oneGuildRegister.vm")
         }
 
@@ -166,7 +162,7 @@ class WebServer(private val env: Dotenv) {
 
         path("/") {
             before("") { request, response ->
-                return@before RootController.beforeRoot(request, response, oAuth2Client, env)
+                return@before RootController.beforeRoot(request, response, oAuth2Client)
             }
 
             get("") { _, _ ->
@@ -285,6 +281,10 @@ class WebServer(private val env: Dotenv) {
                 }
             }
         }
+    }
+
+    fun start() {
+        // dummy method for class loading
     }
 
     fun shutdown() {

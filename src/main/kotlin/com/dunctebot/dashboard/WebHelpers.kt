@@ -109,7 +109,7 @@ fun haltNotFound(request: Request, response: Response) {
 
 fun verifyCaptcha(response: String): JsonNode {
     val body = FormBody.Builder()
-        .add("secret", env["CAPTCHA_SECRET"]!!)
+        .add("secret", System.getenv("CAPTCHA_SECRET"))
         .add("response", response)
         .build()
 

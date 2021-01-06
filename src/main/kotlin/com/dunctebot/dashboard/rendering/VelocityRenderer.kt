@@ -24,7 +24,6 @@
 
 package com.dunctebot.dashboard.rendering
 
-import io.github.cdimascio.dotenv.Dotenv
 import org.apache.velocity.VelocityContext
 import org.apache.velocity.app.VelocityEngine
 import org.apache.velocity.runtime.RuntimeConstants
@@ -33,13 +32,13 @@ import spark.TemplateEngine
 import java.io.StringWriter
 import java.util.*
 
-class VelocityRenderer(env: Dotenv) : TemplateEngine() {
+class VelocityRenderer : TemplateEngine() {
     private val velocityEngine: VelocityEngine
 
     init {
         val properties = Properties()
 
-        if (env["IS_LOCAL"]!!.toBoolean()) {
+        if (System.getenv("IS_LOCAL").toBoolean()) {
             // load templates from file for instant-reload when developing
             properties.setProperty(RuntimeConstants.RESOURCE_LOADERS, "file")
             properties.setProperty(

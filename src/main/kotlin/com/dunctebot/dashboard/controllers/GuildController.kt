@@ -101,7 +101,7 @@ object GuildController {
 
         map.put("title", "Register your server for patron perks")
             .put("hide_menu", true)
-            .put("captcha_sitekey", env["CAPTCHA_SITEKEY"]!!)
+            .put("captcha_sitekey", System.getenv("CAPTCHA_SITEKEY"))
 
         return map.toModelAndView("oneGuildRegister.vm")
     }

@@ -14,33 +14,15 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2.3.4
-      - name: Set up JDK 11
+      - name: Set up JDK 15
         uses: actions/setup-java@v1.4.3
         with:
-          java-version: 11
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-      - name: Build with Gradle
-        run: ./gradlew build
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          java-version: 15
+    -   name: Push to GitHub Packages
+        uses: docker/build-push-action@v1
         with:
-          tag_name: v${{ github.run_number }}
-          release_name: Release ${{ github.run_number }}
-          body: |
-            Automated release
-          draft: false
-          prerelease: false
-      - name: Upload Release Asset
-        id: upload-release-asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
-          asset_path: ./build/libs/dunctebot-dashboard-1.0.jar
-          asset_name: dunctebot-dashboard-1.0.jar
-          asset_content_type: application/java-archive
+            username: ${{ github.actor }}
+            password: ${{ secrets.GITHUB_TOKEN }}
+            registry: docker.pkg.github.com
+            repository: DuncteBot/dashboard/dashboard
+            tags: latest

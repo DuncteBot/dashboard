@@ -32,7 +32,6 @@ import com.dunctebot.dashboard.duncteApis
 import com.jagrosh.jdautilities.oauth2.OAuth2Client
 import com.jagrosh.jdautilities.oauth2.Scope
 import com.jagrosh.jdautilities.oauth2.exceptions.InvalidStateException
-import io.github.cdimascio.dotenv.Dotenv
 import net.dv8tion.jda.api.exceptions.HttpException
 import org.slf4j.LoggerFactory
 import spark.Request
@@ -41,12 +40,12 @@ import spark.Response
 object RootController {
     private val logger = LoggerFactory.getLogger(RootController::class.java)
 
-    fun beforeRoot(request: Request, response: Response, oAuth2Client: OAuth2Client, env: Dotenv) {
+    fun beforeRoot(request: Request, response: Response, oAuth2Client: OAuth2Client) {
         val ses = request.session()
 
         if (ses.attribute<String?>(SESSION_ID) == null) {
             val url = oAuth2Client.generateAuthorizationURL(
-                env["OAUTH_REDIRECT_URI"]!!,
+                System.getenv("OAUTH_REDIRECT_URI"),
                 Scope.IDENTIFY, Scope.GUILDS
             )
 

@@ -28,16 +28,13 @@ import com.dunctebot.dashboard.websocket.WebsocketClient
 import com.dunctebot.duncteapi.DuncteApi
 import com.dunctebot.jda.JDARestClient
 import com.fasterxml.jackson.databind.json.JsonMapper
-import io.github.cdimascio.dotenv.dotenv
 import okhttp3.OkHttpClient
 
-val env = dotenv()
-
-val restJDA = JDARestClient(env["BOT_TOKEN"]!!)
-val duncteApis = DuncteApi("Bot ${env["BOT_TOKEN"]!!}")
+val restJDA = JDARestClient(System.getenv("BOT_TOKEN"))
+val duncteApis = DuncteApi("Bot ${System.getenv("BOT_TOKEN")}")
 
 val httpClient = OkHttpClient()
 val jsonMapper = JsonMapper()
 val webSocket = WebsocketClient()
 
-val server = WebServer(env)
+val server = WebServer()

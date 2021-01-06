@@ -49,7 +49,6 @@ dependencies {
     implementation(group = "com.dunctebot", name = "dunctebot-models", version = "0.0.12")
 
     implementation(group = "ch.qos.logback", name = "logback-classic", version = "1.2.3")
-    implementation(group = "io.github.cdimascio", name = "java-dotenv", version = "5.2.1")
 
     implementation(group = "com.sparkjava", name = "spark-core", version = "2.9.2")
     implementation(group = "org.apache.velocity", name = "velocity-engine-core", version = "2.2")
@@ -73,8 +72,8 @@ dependencies {
 }
 
 configure<JavaPluginConvention> {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+    sourceCompatibility = JavaVersion.VERSION_13
+    targetCompatibility = JavaVersion.VERSION_13
 
 }
 
@@ -85,11 +84,11 @@ application {
 tasks {
     compileKotlin {
         kotlinOptions {
-            jvmTarget = "11"
+            jvmTarget = "13"
         }
     }
     wrapper {
-        gradleVersion = "6.1.1"
+        gradleVersion = "6.7.1"
         distributionType = Wrapper.DistributionType.ALL
     }
     shadowJar {
