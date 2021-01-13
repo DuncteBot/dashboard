@@ -44,10 +44,16 @@ object RootController {
         val ses = request.session()
 
         if (ses.attribute<String?>(SESSION_ID) == null) {
-            val url = oAuth2Client.generateAuthorizationURL(
+            var url = oAuth2Client.generateAuthorizationURL(
                 System.getenv("OAUTH_REDIRECT_URI"),
                 Scope.IDENTIFY, Scope.GUILDS
             )
+
+            val debug = request.queryParamOrDefault("debug", null)
+
+            if (!debug.isNullOrBlank()) {
+                url = url.replace("discord.com", "$debug.discord.com").replace("/api/v6", "")
+            }
 
             ses.attribute(SESSION_ID, "session_${System.currentTimeMillis()}")
 

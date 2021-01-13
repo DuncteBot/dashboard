@@ -39,8 +39,8 @@ jobs:
             file: ./Dockerfile
             pull: true
             push: true
-            cache-from: type=registry,ref=dunctebot/dashboard:latest
-            cache-to: type=inline
+#            cache-from: type=registry,ref=dunctebot/dashboard:latest
+#            cache-to: type=inline
             tags: dunctebot/dashboard/dashboard:latest
 
 #      - name: Push to GitHub Packages
