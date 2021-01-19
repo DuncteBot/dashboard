@@ -1,3 +1,11 @@
+#define($styles)
+<style>
+    table {
+        margin-bottom: 20px;
+    }
+</style>
+#end
+
 #define ($content)
 <h1>List of roles for $guild_name</h1>
 <table class="striped centered">
@@ -18,6 +26,32 @@
         #end
     </tbody>
 </table>
+#end
+
+#define($scripts)
+<script>
+    const defaultColor = '536870911';
+
+    // https://stackoverflow.com/questions/11866781/how-do-i-convert-an-integer-to-a-javascript-color/11866980
+    function toColor(num) {
+        if (num === defaultColor) {
+            // default discord role color
+            return 'rgb(153, 170, 181)';
+        }
+
+        const b = num & 0xFF;
+        const g = (num & 0xFF00) >>> 8;
+        const r = (num & 0xFF0000) >>> 16;
+
+        return 'rgb(' + [r, g, b].join(',') + ')';
+    }
+
+    window.eventBus.once('loaded', () => {
+        document.querySelectorAll('tr[data-color]').forEach((tr) => {
+            tr.style.backgroundColor = toColor(tr.dataset.color);
+        });
+    });
+</script>
 #end
 
 #parse('/views/templates/base.vm')

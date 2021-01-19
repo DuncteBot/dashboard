@@ -42,6 +42,9 @@ object GuildController {
     val guildHashes = Caffeine.newBuilder()
         .expireAfterWrite(2, TimeUnit.HOURS)
         .build<String, Long>()
+    val guildRoleCache = Caffeine.newBuilder()
+        .expireAfterWrite(1, TimeUnit.HOURS)
+        .build<Long, List<CustomRole>>()
 
     fun handleOneGuildRegister(request: Request): Any {
         val params = request.paramsMap
@@ -118,16 +121,17 @@ object GuildController {
             return haltNotFound(request, response)
         }
 
-        val members = restJDA.retrieveAllMembers(guild).stream().toList()
+        val roles = guildRoleCache.get(guild.idLong) {
+            val members = restJDA.retrieveAllMembers(guild).stream().toList()
 
-//        println("Approximate count: ${guild.memberCount}")
-//        println("Actual count: ${members.size}")
+            guild.roles.map { CustomRole(it, members) }
+        }!!
 
         return WebVariables()
             .put("hide_menu", true)
             .put("title", "Roles for ${guild.name}")
             .put("guild_name", guild.name)
-            .put("roles", guild.roles.map { CustomRole(it, members) })
+            .put("roles", roles)
             .toModelAndView("guildRoles.vm")
     }
 

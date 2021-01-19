@@ -45,6 +45,12 @@ class DashboardTasks {
             1,
             TimeUnit.HOURS
         )
+        threadPool.scheduleAtFixedRate(
+            GuildController.guildRoleCache::cleanUp,
+            1,
+            1,
+            TimeUnit.HOURS
+        )
         // Clean the guilds pool every 30 minutes
         threadPool.scheduleAtFixedRate(
             OtherAPi.guildsRequests::cleanUp,
