@@ -81,6 +81,7 @@ class WebServer {
             val projectDir = System.getProperty("user.dir")
             val staticDir = "/src/main/resources/public"
             staticFiles.externalLocation(projectDir + staticDir)
+            port(2000)
         } else {
             staticFiles.location("/public")
         }
