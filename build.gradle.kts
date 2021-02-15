@@ -59,7 +59,7 @@ dependencies {
 
     implementation(group = "net.sf.trove4j", name = "trove4j", version = "3.0.3")
     implementation(group = "com.jagrosh", name = "jda-utilities-oauth2", version = "3.0.4")
-    implementation(group = "net.dv8tion", name = "JDA", version = "4.2.0_198") {
+    implementation(group = "net.dv8tion", name = "JDA", version = "4.2.0_227") {
         exclude(module = "opus-java")
     }
 
@@ -72,8 +72,8 @@ dependencies {
 }
 
 configure<JavaPluginConvention> {
-    sourceCompatibility = JavaVersion.VERSION_13
-    targetCompatibility = JavaVersion.VERSION_13
+    sourceCompatibility = JavaVersion.VERSION_15
+    targetCompatibility = JavaVersion.VERSION_15
 
 }
 
@@ -84,7 +84,7 @@ application {
 tasks {
     compileKotlin {
         kotlinOptions {
-            jvmTarget = "13"
+            jvmTarget = "15"
         }
     }
     wrapper {

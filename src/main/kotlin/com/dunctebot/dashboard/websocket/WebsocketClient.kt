@@ -58,7 +58,7 @@ class WebsocketClient : WebSocketAdapter(), WebSocketListener {
     }
 
     private val factory = WebSocketFactory()
-        .setConnectionTimeout(10000)
+        .setConnectionTimeout(5000)
         .setServerName(IOUtil.getHost(System.getenv("WS_URL")))
     lateinit var socket: WebSocket
 
@@ -82,6 +82,10 @@ class WebsocketClient : WebSocketAdapter(), WebSocketListener {
 
     override fun onConnected(websocket: WebSocket, headers: MutableMap<String, MutableList<String>>) {
         logger.info("Connected to WebSocket")
+    }
+
+    override fun onError(websocket: WebSocket, cause: WebSocketException) {
+        logger.error("Error in websocket", cause)
     }
 
     override fun onDisconnected(websocket: WebSocket, serverCloseFrame: WebSocketFrame?, clientCloseFrame: WebSocketFrame?, closedByServer: Boolean) {
@@ -114,12 +118,8 @@ class WebsocketClient : WebSocketAdapter(), WebSocketListener {
     }
 
     override fun onTextMessage(websocket: WebSocket, text: String) {
-        println("message: $text")
-    }
-
-    override fun onTextMessage(websocket: WebSocket, data: ByteArray) {
         try {
-            val raw = jsonMapper.readTree(data)
+            val raw = jsonMapper.readTree(text)
 
             logger.debug("<- {}", raw)
 
@@ -186,7 +186,7 @@ class WebsocketClient : WebSocketAdapter(), WebSocketListener {
     private fun connect() {
         socket = factory.createSocket(System.getenv("WS_URL"))
 
-        socket.setDirectTextMessage(true)
+        socket.setDirectTextMessage(false) // decode to string
             .addHeader("X-DuncteBot", "dashboard")
             .addHeader("Accept-Encoding", "gzip")
             .addHeader("Authorization", duncteApis.apiKey)
