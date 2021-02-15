@@ -7,7 +7,7 @@ RUN ./gradlew --no-daemon dependencies
 COPY . .
 RUN ./gradlew --no-daemon build
 
-FROM adoptopenjdk:15-jdk-hotspot
+FROM adoptopenjdk:15-jre-hotspot
 
 WORKDIR /dunctebot-dashboard
 COPY --from=builder /dunctebot-dashboard/build/libs/dunctebot-dashboard*.jar ./dashboard.jar
