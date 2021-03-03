@@ -24,7 +24,7 @@ eventBus.once('loaded', () => {
 
             for (const guild of json.guilds) {
                 let members = 'Bot not in server';
-                let settingsLink = `<a href="https://r.duncte.bot/inv&guild_id=${guild.id}" target="_blank">Invite Bot</a>`;
+                let settingsLink = `<a href="https://r.duncte.bot/inv?guild_id=${guild.id}" target="_blank">Invite Bot</a>`;
 
                 if (guild.members > -1) {
                     members = `${guild.members} members`;
