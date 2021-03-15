@@ -36,7 +36,7 @@ dependencies {
 
     implementation(group = "net.sf.trove4j", name = "trove4j", version = "3.0.3")
     implementation(group = "com.jagrosh", name = "jda-utilities-oauth2", version = "3.0.4")
-    implementation(group = "net.dv8tion", name = "JDA", version = "4.2.0_227") {
+    implementation(group = "net.dv8tion", name = "JDA", version = "4.2.0_241") {
         exclude(module = "opus-java")
     }
 

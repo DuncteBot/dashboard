@@ -45,6 +45,7 @@ fun Request.fetchGuild(): Guild? {
     return try {
         restJDA.retrieveGuildById(guildId).complete()
     } catch (e: Exception) {
+        e.printStackTrace()
         null
     }
 }

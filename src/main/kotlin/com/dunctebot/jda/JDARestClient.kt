@@ -107,7 +107,7 @@ class JDARestClient(token: String) {
         // Temp cache
         val cachedGuild = guildCache.getIfPresent(id)
 
-        if (cachedGuild != null) {
+        if (cachedGuild != null && cachedGuild.channels.isNotEmpty()) {
             return CompletedRestAction(jda, cachedGuild)
         }
 

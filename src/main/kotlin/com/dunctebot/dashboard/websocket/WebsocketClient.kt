@@ -3,9 +3,11 @@ package com.dunctebot.dashboard.websocket
 import com.dunctebot.dashboard.duncteApis
 import com.dunctebot.dashboard.jsonMapper
 import com.dunctebot.dashboard.tasks.ReconnectTask
+import com.dunctebot.dashboard.tasks.WSPingTask
 import com.dunctebot.dashboard.utils.HashUtils
 import com.dunctebot.dashboard.websocket.handlers.DataUpdateHandler
 import com.dunctebot.dashboard.websocket.handlers.FetchDataHandler
+import com.dunctebot.dashboard.websocket.handlers.PongHandler
 import com.dunctebot.dashboard.websocket.handlers.RolesHashHandler
 import com.dunctebot.dashboard.websocket.handlers.base.SocketHandler
 import com.fasterxml.jackson.databind.JsonNode
@@ -53,6 +55,13 @@ class WebsocketClient : WebSocketAdapter(), WebSocketListener {
             0L,
             500L,
             TimeUnit.MILLISECONDS
+        )
+
+        reconnectThread.scheduleWithFixedDelay(
+            WSPingTask(this),
+            1L,
+            1L,
+            TimeUnit.MINUTES
         )
     }
 
@@ -151,6 +160,7 @@ class WebsocketClient : WebSocketAdapter(), WebSocketListener {
         handlersMap["ROLES_PUT_HASH"] = RolesHashHandler()
         handlersMap["DATA_UPDATE"] = DataUpdateHandler()
         handlersMap["FETCH_DATA"] = FetchDataHandler()
+        handlersMap["PONG"] = PongHandler()
     }
 
     fun attemptReconnect() {
