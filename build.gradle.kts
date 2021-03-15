@@ -23,7 +23,7 @@ repositories {
 
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
-    implementation(group = "com.dunctebot", name = "dunctebot-models", version = "0.1.20")
+    implementation(group = "com.dunctebot", name = "dunctebot-models", version = "0.1.21")
 
     implementation(group = "ch.qos.logback", name = "logback-classic", version = "1.2.3")
 
