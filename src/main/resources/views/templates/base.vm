@@ -168,9 +168,9 @@
 </footer>
 
 <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-##<script async src="https://c6.patreon.com/becomePatronButton.bundle.js"></script>
-## Why is this needed?
-## {#<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>#}
+<!-- Cloudflare Web Analytics -->
+<script async defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "25f915de0b044c90a1fe610906b1ca19"}'></script>
+<!-- End Cloudflare Web Analytics -->
 <!-- Compiled and minified JavaScript -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/eventemitter3/4.0.4/index.min.js"
         integrity="sha256-bFwL2rD40dqBZsSyKL35Z5KgclBS7QCnxf2LBvbN48E=" crossorigin="anonymous"></script>
