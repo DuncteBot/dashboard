@@ -6,6 +6,7 @@ import com.dunctebot.dashboard.WebServer.Companion.SESSION_ID
 import com.dunctebot.dashboard.WebServer.Companion.USER_ID
 import com.dunctebot.dashboard.duncteApis
 import com.jagrosh.jdautilities.oauth2.OAuth2Client
+import com.jagrosh.jdautilities.oauth2.OAuth2Client.DISCORD_REST_VERSION
 import com.jagrosh.jdautilities.oauth2.Scope
 import com.jagrosh.jdautilities.oauth2.exceptions.InvalidStateException
 import net.dv8tion.jda.api.exceptions.HttpException
@@ -21,14 +22,16 @@ object RootController {
 
         if (ses.attribute<String?>(SESSION_ID) == null) {
             var url = oAuth2Client.generateAuthorizationURL(
-                System.getenv("OAUTH_REDIRECT_URI"),
+                // Is this safe? Yes, you could change the query param anyway and oauth prevents that
+                "${request.scheme()}://${request.host()}/callback",
                 Scope.IDENTIFY, Scope.GUILDS
             )
 
             val debug = request.queryParamOrDefault("debug", null)
 
             if (!debug.isNullOrBlank()) {
-                url = url.replace("discord.com", "$debug.discord.com").replace("/api/v6", "")
+                url = url.replace("discord.com", "$debug.discord.com")
+                    .replace("/api/v$DISCORD_REST_VERSION", "")
             }
 
             ses.attribute(SESSION_ID, "session_${System.currentTimeMillis()}")
