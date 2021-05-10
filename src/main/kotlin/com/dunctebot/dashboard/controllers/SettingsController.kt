@@ -80,6 +80,7 @@ object SettingsController {
         val logKick = params["logKick"].toCBBool()
         val logWarn = params["logWarn"].toCBBool()
         val logInvite = params["logInvite"].toCBBool()
+        val logMember = params["logMember"].toCBBool()
 
         val aiSensitivity = ((params["ai-sensitivity"] ?: "0.7").toFloatOrNull() ?: 0.7f).minMax(0f, 1f)
 
@@ -106,6 +107,7 @@ object SettingsController {
             .setKickLogging(logKick)
             .setWarnLogging(logWarn)
             .setInviteLogging(logInvite)
+            .setMemberLogging(logMember)
             .setAiSensitivity(aiSensitivity)
             .setWarnActions(warnActionsList)
             .setYoungAccountThreshold(youngAccountThreshold)
