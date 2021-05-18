@@ -4,7 +4,6 @@ import com.dunctebot.dashboard.WebServer.Companion.HOMEPAGE
 import com.dunctebot.dashboard.WebServer.Companion.OLD_PAGE
 import com.dunctebot.dashboard.WebServer.Companion.SESSION_ID
 import com.dunctebot.dashboard.WebServer.Companion.USER_ID
-import com.dunctebot.dashboard.duncteApis
 import com.jagrosh.jdautilities.oauth2.OAuth2Client
 import com.jagrosh.jdautilities.oauth2.OAuth2Client.DISCORD_REST_VERSION
 import com.jagrosh.jdautilities.oauth2.Scope
@@ -68,11 +67,6 @@ object RootController {
 
             // Fetch the user from discord
             val userId = oAuth2Client.getUser(oauthses).complete().id
-
-            // TODO: remove when final
-            if (request.host() == "olddash.dunctebot.com" && !duncteApis.isPatreon(userId)) {
-                return ""
-            }
 
             // Store the user id in the session
             session.attribute(USER_ID, userId)

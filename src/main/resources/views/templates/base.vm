@@ -169,8 +169,6 @@
 
 <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 <!-- Cloudflare Web Analytics -->
-<!-- this one is for dunctebot.com -->
-<script async defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "25f915de0b044c90a1fe610906b1ca19", "spa": false}'></script>
 <!-- this one is for duncte.bot -->
 <script async defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "085d795bab7548109bb66dd76d87371a", "spa": false}'></script>
 <!-- End Cloudflare Web Analytics -->

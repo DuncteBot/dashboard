@@ -1,4 +1,4 @@
-FROM adoptopenjdk:15-jdk-hotspot AS builder
+FROM adoptopenjdk:16-jdk-hotspot AS builder
 
 WORKDIR /dunctebot-dashboard
 COPY gradle ./gradle
@@ -7,7 +7,7 @@ RUN ./gradlew --no-daemon dependencies
 COPY . .
 RUN ./gradlew --no-daemon build
 
-FROM adoptopenjdk:15-jre-hotspot
+FROM adoptopenjdk:16-jre-hotspot
 
 WORKDIR /dunctebot-dashboard
 COPY --from=builder /dunctebot-dashboard/build/libs/dunctebot-dashboard*.jar ./dashboard.jar
