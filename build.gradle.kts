@@ -1,8 +1,8 @@
 plugins {
 //    java
     application
-    kotlin("jvm") version "1.4.30"
-    id("com.github.johnrengelman.shadow") version "6.1.0"
+    kotlin("jvm") version "1.5.0"
+    id("com.github.johnrengelman.shadow") version "7.0.0"
 }
 
 group = "com.dunctebot"
@@ -10,11 +10,11 @@ version = "1.0"
 
 repositories {
     mavenCentral()
-    jcenter()
 
     maven {
         url = uri("https://duncte123.jfrog.io/artifactory/maven")
     }
+    maven("https://m2.dv8tion.net/releases")
 
     maven {
         url = uri("https://jitpack.io")
@@ -35,8 +35,15 @@ dependencies {
     implementation(group = "com.fasterxml.jackson.core", name = "jackson-databind", version = "2.10.1")
 
     implementation(group = "net.sf.trove4j", name = "trove4j", version = "3.0.3")
-    implementation(group = "com.jagrosh", name = "jda-utilities-oauth2", version = "3.0.4")
-    implementation(group = "net.dv8tion", name = "JDA", version = "4.2.0_241") {
+   // implementation(group = "com.jagrosh", name = "jda-utilities-oauth2", version = "3.0.5")
+    implementation(group = "com.github.JDA-Applications", name = "JDA-Utilities", version = "804d58a") {
+        // This is fine
+        exclude(module = "jda-utilities-examples")
+        exclude(module = "jda-utilities-doc")
+        exclude(module = "jda-utilities-command")
+        exclude(module = "jda-utilities-menu")
+    }
+    implementation(group = "net.dv8tion", name = "JDA", version = "4.2.1_264") {
         exclude(module = "opus-java")
     }
 
@@ -49,23 +56,23 @@ dependencies {
 }
 
 configure<JavaPluginConvention> {
-    sourceCompatibility = JavaVersion.VERSION_15
-    targetCompatibility = JavaVersion.VERSION_15
+    sourceCompatibility = JavaVersion.VERSION_16
+    targetCompatibility = JavaVersion.VERSION_16
 
 }
 
 application {
-    mainClassName = "com.dunctebot.dashboard.MainKt"
+    mainClass.set("com.dunctebot.dashboard.MainKt")
 }
 
 tasks {
     compileKotlin {
         kotlinOptions {
-            jvmTarget = "15"
+            jvmTarget = "16"
         }
     }
     wrapper {
-        gradleVersion = "6.7.1"
+        gradleVersion = "7.0.1"
         distributionType = Wrapper.DistributionType.ALL
     }
     shadowJar {
