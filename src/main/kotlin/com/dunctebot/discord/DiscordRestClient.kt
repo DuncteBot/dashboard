@@ -37,8 +37,9 @@ class DiscordRestClient(token: String) {
         return this.client.getUserById(Snowflake.of(id))
     }
 
+    // TODO: cache this
     fun retrieveD4JSelfUser(): Mono<UserData> {
-        return this.client.userService.currentUser
+        return this.client.self
     }
 
     fun retrieveGuildData(guildId: Long): GuildUpdateData {

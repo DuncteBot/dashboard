@@ -18,7 +18,11 @@ import com.dunctebot.models.settings.WarnAction
 import com.dunctebot.models.utils.Utils
 import com.fasterxml.jackson.databind.JsonNode
 import com.jagrosh.jdautilities.oauth2.OAuth2Client
-import net.dv8tion.jda.api.entities.TextChannel
+import discord4j.common.util.Snowflake
+import discord4j.core.`object`.entity.channel.TextChannel
+import discord4j.rest.util.Permission
+import discord4j.rest.util.PermissionSet
+import net.dv8tion.jda.api.entities.TextChannel as JDATextChannel
 import spark.ModelAndView
 import spark.Spark.*
 
@@ -275,11 +279,22 @@ class WebServer {
             if (guild != null) {
                 val guildId = guild.id.asLong()
 
-                // TODO: rewrite
-                val tcs = guild.textChannelCache.filter(TextChannel::canTalk).toList()
-                val goodRoles = guild.roleCache.filter {
+                val tcs = guild.channels
+                    .ofType(TextChannel::class.java)
+                    // TODO: selfMember
+                    .filter {
+                        it.getEffectivePermissions(Snowflake.of(0L)).map { p ->
+                            p.containsAll(PermissionSet.of(
+                                Permission.SEND_MESSAGES, Permission.VIEW_CHANNEL /* read messages */
+                            ))
+                        }.block()!!
+                    }
+
+                val goodRoles = guild.roles
+
+                /*val goodRoles_old = guild.roleCache.filter {
                     guild.selfMember.canInteract(it) && it.name != "@everyone" && it.name != "@here"
-                }.filter { !it.isManaged }.toList()
+                }.filter { !it.isManaged }.toList()*/
 
                 map.put("goodChannels", tcs)
                 map.put("goodRoles", goodRoles)
