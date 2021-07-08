@@ -2,6 +2,10 @@ package com.dunctebot.jda
 
 import com.dunctebot.jda.impl.MemberPaginationActionImpl
 import com.github.benmanes.caffeine.cache.Caffeine
+import discord4j.common.util.Snowflake
+import discord4j.core.DiscordClient
+import discord4j.discordjson.json.UserData
+import discord4j.rest.entity.RestUser
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.Member
 import net.dv8tion.jda.api.entities.SelfUser
@@ -18,6 +22,7 @@ import net.dv8tion.jda.internal.utils.config.AuthorizationConfig
 import net.dv8tion.jda.internal.utils.config.MetaConfig
 import net.dv8tion.jda.internal.utils.config.SessionConfig
 import net.dv8tion.jda.internal.utils.config.ThreadingConfig
+import reactor.core.publisher.Mono
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
@@ -27,7 +32,7 @@ import java.util.concurrent.TimeUnit
  *
  * This class has been inspired by GivawayBot and all credit goes to them https://github.com/jagrosh/GiveawayBot
  */
-class JDARestClient(token: String) {
+class DiscordRestClient(token: String) {
     // create a guild cache that keeps the guilds in cache for 30 minutes
     // When we stop accessing the guild it will be removed from the cache
     private val guildCache = Caffeine.newBuilder()
@@ -35,8 +40,11 @@ class JDARestClient(token: String) {
         .build<String, Guild>()
 
     private val jda: JDAImpl
+    private val client: DiscordClient
 
     init {
+        client = DiscordClient.create(token)
+
         val authConfig = AuthorizationConfig(token)
         val sessionConfig = SessionConfig.getDefault()
         val threadConfig = ThreadingConfig.getDefault()
@@ -59,6 +67,15 @@ class JDARestClient(token: String) {
     fun invalidateGuild(guildId: Long) {
         jda.guildsView.remove(guildId)
         guildCache.invalidate(guildId.toString())
+    }
+
+    // Note: instantly starts the request
+    fun retrieveD4JUserById(id: Long): Mono<UserData> {
+        return client.userService.getUser(id)
+    }
+
+    fun retrieveD4JSelfUser(): Mono<UserData> {
+        return client.userService.currentUser
     }
 
     fun retrieveUserById(id: String): RestAction<User> {
