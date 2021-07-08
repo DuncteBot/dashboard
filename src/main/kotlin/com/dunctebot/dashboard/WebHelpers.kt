@@ -49,10 +49,10 @@ val Request.guild: RestGuild?
     }
 
 fun Request.fetchGuild(): GuildUpdateData? {
-    val guildId: String = this.guildId ?: return null
+    val guild: RestGuild = this.guild ?: return null
 
     return try {
-        discordClient.retrieveGuildData(guildId.toLong())
+        guild.data.block()
     } catch (e: Exception) {
         e.printStackTrace()
         null

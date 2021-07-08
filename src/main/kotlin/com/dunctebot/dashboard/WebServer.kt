@@ -22,7 +22,6 @@ import discord4j.common.util.Snowflake
 import discord4j.core.`object`.entity.channel.TextChannel
 import discord4j.rest.util.Permission
 import discord4j.rest.util.PermissionSet
-import net.dv8tion.jda.api.entities.TextChannel as JDATextChannel
 import spark.ModelAndView
 import spark.Spark.*
 
@@ -278,12 +277,13 @@ class WebServer {
 
             if (guild != null) {
                 val guildId = guild.id.asLong()
+                val self = guild.selfMember.block()!!
+                val selfId = Snowflake.of(self.user().id())
 
                 val tcs = guild.channels
                     .ofType(TextChannel::class.java)
-                    // TODO: selfMember
                     .filter {
-                        it.getEffectivePermissions(Snowflake.of(0L)).map { p ->
+                        it.getEffectivePermissions(selfId).map { p ->
                             p.containsAll(PermissionSet.of(
                                 Permission.SEND_MESSAGES, Permission.VIEW_CHANNEL /* read messages */
                             ))
@@ -291,6 +291,9 @@ class WebServer {
                     }
 
                 val goodRoles = guild.roles
+                    .filter { !it.managed() }
+                    .filter { it.name() != "@everyone" && it.name() != "@here" }
+                    // TODO: check if can interact
 
                 /*val goodRoles_old = guild.roleCache.filter {
                     guild.selfMember.canInteract(it) && it.name != "@everyone" && it.name != "@here"
