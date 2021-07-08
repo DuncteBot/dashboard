@@ -6,6 +6,8 @@ import com.dunctebot.dashboard.WebServer.Companion.USER_ID
 import com.fasterxml.jackson.databind.JsonNode
 import com.jagrosh.jdautilities.oauth2.OAuth2Client
 import com.jagrosh.jdautilities.oauth2.session.Session
+import discord4j.discordjson.json.GuildUpdateData
+import discord4j.rest.entity.RestGuild
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.internal.utils.IOUtil
 import okhttp3.FormBody
@@ -39,11 +41,18 @@ val Request.userId: String
 val Request.guildId: String?
     get() = this.params(GUILD_ID)
 
-fun Request.fetchGuild(): Guild? {
+val Request.guild: RestGuild?
+    get() {
+        val guildId = this.guildId ?: return null
+
+        return discordClient.getGuild(guildId.toLong())
+    }
+
+fun Request.fetchGuild(): GuildUpdateData? {
     val guildId: String = this.guildId ?: return null
 
     return try {
-        discordClient.retrieveGuildById(guildId).complete()
+        discordClient.retrieveGuildData(guildId.toLong())
     } catch (e: Exception) {
         e.printStackTrace()
         null

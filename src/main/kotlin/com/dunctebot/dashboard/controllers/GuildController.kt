@@ -86,6 +86,7 @@ object GuildController {
     fun showGuildRoles(request: Request, response: Response): Any {
         val hash = request.params("hash")
         val guildId = guildHashes.getIfPresent(hash) ?: return haltNotFound(request, response)
+        val guild = discordClient.retrieveGuildData(guildId)
 
         val roles = guildRoleCache.get(guildId) {
             val internalRoles = discordClient.retrieveGuildRoles(guildId)
@@ -94,7 +95,7 @@ object GuildController {
             internalRoles.map { CustomRole(it, members) }.collectList().block()
         }!!
 
-        val guildName = "TEMP GUILD NAME"
+        val guildName = guild.name()
 
         return WebVariables()
             .put("hide_menu", true)

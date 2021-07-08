@@ -270,11 +270,12 @@ class WebServer {
 
     private fun getWithGuildData(path: String, map: WebVariables, view: String) {
         get(path) { request, _ ->
-            val guild = request.fetchGuild()
+            val guild = request.guild
 
             if (guild != null) {
-                val guildId = guild.idLong
+                val guildId = guild.id.asLong()
 
+                // TODO: rewrite
                 val tcs = guild.textChannelCache.filter(TextChannel::canTalk).toList()
                 val goodRoles = guild.roleCache.filter {
                     guild.selfMember.canInteract(it) && it.name != "@everyone" && it.name != "@here"
