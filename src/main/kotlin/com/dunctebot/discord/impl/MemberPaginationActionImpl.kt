@@ -1,6 +1,6 @@
-package com.dunctebot.jda.impl
+package com.dunctebot.discord.impl
 
-import com.dunctebot.jda.MemberPaginationAction
+import com.dunctebot.discord.MemberPaginationAction
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.Member
 import net.dv8tion.jda.api.exceptions.ParsingException

@@ -1,10 +1,10 @@
-package com.dunctebot.jda
+package com.dunctebot.discord
 
-import com.dunctebot.jda.impl.MemberPaginationActionImpl
 import com.github.benmanes.caffeine.cache.Caffeine
 import discord4j.common.util.Snowflake
 import discord4j.core.DiscordClient
-import discord4j.discordjson.json.UserData
+import discord4j.discordjson.json.*
+import discord4j.rest.entity.RestGuild
 import discord4j.rest.entity.RestUser
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.Member
@@ -22,6 +22,7 @@ import net.dv8tion.jda.internal.utils.config.AuthorizationConfig
 import net.dv8tion.jda.internal.utils.config.MetaConfig
 import net.dv8tion.jda.internal.utils.config.SessionConfig
 import net.dv8tion.jda.internal.utils.config.ThreadingConfig
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -40,11 +41,9 @@ class DiscordRestClient(token: String) {
         .build<String, Guild>()
 
     private val jda: JDAImpl
-    private val client: DiscordClient
+    private val client = DiscordClient.create(token)
 
     init {
-        client = DiscordClient.create(token)
-
         val authConfig = AuthorizationConfig(token)
         val sessionConfig = SessionConfig.getDefault()
         val threadConfig = ThreadingConfig.getDefault()
@@ -70,12 +69,24 @@ class DiscordRestClient(token: String) {
     }
 
     // Note: instantly starts the request
-    fun retrieveD4JUserById(id: Long): Mono<UserData> {
-        return client.userService.getUser(id)
+    fun retrieveD4JUserById(id: String): RestUser {
+        return client.getUserById(Snowflake.of(id))
     }
 
     fun retrieveD4JSelfUser(): Mono<UserData> {
         return client.userService.currentUser
+    }
+
+    fun retrieveD4JGuild(guildId: Long): RestGuild {
+        return client.getGuildById(Snowflake.of(guildId))
+    }
+
+    fun retrieveGuildRoles(guildId: Long): Flux<RoleData> {
+        return client.getGuildById(Snowflake.of(guildId)).roles
+    }
+
+    fun retrieveGuildMembers(guildId: Long): Flux<MemberData> {
+        return client.getGuildById(Snowflake.of(guildId)).members
     }
 
     fun retrieveUserById(id: String): RestAction<User> {
@@ -93,8 +104,6 @@ class DiscordRestClient(token: String) {
             response, _ -> jda.entityBuilder.createSelfUser(response.getObject())
         }
     }
-
-    fun retrieveAllMembers(guild: Guild): MemberPaginationAction = MemberPaginationActionImpl(guild)
 
     private fun retrieveGuildChannelsArray(guildId: String): RestAction<DataArray> {
         val route = Route.Guilds.GET_CHANNELS.compile(guildId)

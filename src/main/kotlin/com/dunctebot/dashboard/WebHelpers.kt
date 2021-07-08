@@ -43,7 +43,7 @@ fun Request.fetchGuild(): Guild? {
     val guildId: String = this.guildId ?: return null
 
     return try {
-        restJDA.retrieveGuildById(guildId).complete()
+        discordClient.retrieveGuildById(guildId).complete()
     } catch (e: Exception) {
         e.printStackTrace()
         null
@@ -80,8 +80,9 @@ fun String?.toSafeLong(): Long {
     }
 }
 
+@Throws(HaltException::class)
 fun haltNotFound(request: Request, response: Response) {
-    Spark.halt(404, CustomErrorPages.getFor(404, request, response) as String)
+    throw Spark.halt(404, CustomErrorPages.getFor(404, request, response) as String)
 }
 
 fun verifyCaptcha(response: String): JsonNode {

@@ -5,7 +5,7 @@ import com.dunctebot.dashboard.WebServer.Companion.SESSION_ID
 import com.dunctebot.dashboard.WebServer.Companion.USER_ID
 import com.dunctebot.dashboard.fetchGuild
 import com.dunctebot.dashboard.guildId
-import com.dunctebot.dashboard.restJDA
+import com.dunctebot.dashboard.discordClient
 import com.dunctebot.dashboard.userId
 import net.dv8tion.jda.api.Permission
 import spark.Request
@@ -27,7 +27,7 @@ object DashboardController {
                     "&scope=bot&permissions=1609952470\" target=\"_blank\">invite it</a>?")
 
         val member = try {
-            restJDA.retrieveMemberById(guild, request.userId).complete()
+            discordClient.retrieveMemberById(guild, request.userId).complete()
         } catch (e: Exception) {
             e.printStackTrace()
             throw Spark.halt(200, "<h1>Either discord did a fucky wucky or you are not in the server that you are trying to edit</h1>")

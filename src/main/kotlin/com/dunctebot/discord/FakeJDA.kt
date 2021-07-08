@@ -1,4 +1,4 @@
-package com.dunctebot.jda
+package com.dunctebot.discord
 
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.entities.User
