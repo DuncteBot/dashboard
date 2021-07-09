@@ -11,14 +11,17 @@ import spark.Response
 import java.util.concurrent.TimeUnit
 
 object GuildController {
+    private const val DEFAULT_ROLE_COLOUR = 0x1FFFFFFF
+
     // some hash -> "$userId-$guildId"
+    // TODO: convert to expiring map
     val securityKeys = mutableMapOf<String, String>()
     val guildHashes = Caffeine.newBuilder()
         .expireAfterWrite(2, TimeUnit.HOURS)
         .build<String, Long>()
     val guildRoleCache = Caffeine.newBuilder()
         .expireAfterWrite(1, TimeUnit.HOURS)
-        .build<Long, List<CustomRole>>()
+        .build<Long, Pair<String, List<CustomRole>>>()
 
     fun handleOneGuildRegister(request: Request): Any {
         val params = request.paramsMap
@@ -85,17 +88,18 @@ object GuildController {
 
     fun showGuildRoles(request: Request, response: Response): Any {
         val hash = request.params("hash")
-        val guildId = guildHashes.getIfPresent(hash) ?: return haltNotFound(request, response)
-        val guild = discordClient.retrieveGuildData(guildId)
+//        val guildId = guildHashes.getIfPresent(hash) ?: return haltNotFound(request, response)
+        val guildId = hash.toLong() // cheat :D
 
-        val roles = guildRoleCache.get(guildId) {
+        val (guildName, roles) = guildRoleCache.get(guildId) {
             val internalRoles = discordClient.retrieveGuildRoles(guildId)
             val members = discordClient.retrieveGuildMembers(guildId).collectList().block()!!
+            val guild = discordClient.retrieveGuildData(guildId)
 
-            internalRoles.map { CustomRole(it, members) }.collectList().block()
+            guild.name() to internalRoles.map { CustomRole(it, members) }
+                .sort { o1, o2 -> o2.position() - o1.position() }
+                .collectList().block()!!
         }!!
-
-        val guildName = guild.name()
 
         return WebVariables()
             .put("hide_menu", true)
@@ -105,9 +109,14 @@ object GuildController {
             .toModelAndView("guildRoles.vm")
     }
 
+    // Accessed by our templating engine
+    @Suppress("unused")
     class CustomRole(private val realRole: RoleData, allMembers: List<MemberData>) : RoleData by realRole {
-        // Accessed by our templating engine
-        @Suppress("unused")
-        val memberCount = allMembers.filter { it.roles().contains(realRole.id()) }
+        val memberCount = allMembers.filter { it.roles().contains(realRole.id()) }.size
+
+        // overloads mimicking JDA names for easy access in the template
+        val idLong = realRole.id().asLong()
+        val name: String = realRole.name()
+        val colorRaw = if (realRole.color() == 0) DEFAULT_ROLE_COLOUR else realRole.color()
     }
 }

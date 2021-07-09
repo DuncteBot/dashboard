@@ -48,7 +48,7 @@ class WebsocketClient : WebSocketAdapter(), WebSocketListener {
 
     init {
         setupHandlers()
-        connect()
+        /*connect()
 
         reconnectThread.scheduleWithFixedDelay(
             ReconnectTask(this),
@@ -62,7 +62,7 @@ class WebsocketClient : WebSocketAdapter(), WebSocketListener {
             1L,
             1L,
             TimeUnit.MINUTES
-        )
+        )*/
     }
 
     override fun onConnected(websocket: WebSocket, headers: MutableMap<String, MutableList<String>>) {

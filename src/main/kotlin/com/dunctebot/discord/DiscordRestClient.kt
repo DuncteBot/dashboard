@@ -42,6 +42,7 @@ class DiscordRestClient(token: String) {
         return this.client.self
     }
 
+    // TODO: cache this
     fun retrieveGuildData(guildId: Long): GuildUpdateData {
         return this.getGuild(guildId).data.block()!!
     }
