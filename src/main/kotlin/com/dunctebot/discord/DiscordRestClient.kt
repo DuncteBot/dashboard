@@ -6,11 +6,9 @@ import discord4j.core.DiscordClient
 import discord4j.discordjson.json.*
 import discord4j.rest.entity.RestGuild
 import discord4j.rest.entity.RestUser
-import net.dv8tion.jda.api.entities.Guild
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.util.concurrent.TimeUnit
-
 
 /**
  * Custom jda rest client that allows for rest-only usage of JDA
@@ -23,7 +21,7 @@ class DiscordRestClient(token: String) {
     // TODO: use expiring map instead
     private val guildCache = Caffeine.newBuilder()
         .expireAfterAccess(30, TimeUnit.MINUTES)
-        .build<String, Guild>()
+        .build<Long, GuildUpdateData>()
 
     private val client = DiscordClient.create(token)
 
@@ -33,22 +31,18 @@ class DiscordRestClient(token: String) {
     }
 
     // Note: instantly starts the request
-    fun retrieveD4JUserById(id: String): RestUser {
+    fun getUser(id: String): RestUser {
         return this.client.getUserById(Snowflake.of(id))
-    }
-
-    // TODO: cache this
-    fun retrieveD4JSelfUser(): Mono<UserData> {
-        return this.client.self
-    }
-
-    // TODO: cache this
-    fun retrieveGuildData(guildId: Long): GuildUpdateData {
-        return this.getGuild(guildId).data.block()!!
     }
 
     fun getGuild(guildId: Long): RestGuild {
         return this.client.getGuildById(Snowflake.of(guildId))
+    }
+
+    fun retrieveGuildData(guildId: Long): GuildUpdateData {
+        return guildCache.get(guildId) {
+            this.getGuild(guildId).data.block()!!
+        }!!
     }
 
     fun retrieveGuildRoles(guildId: Long): Flux<RoleData> {

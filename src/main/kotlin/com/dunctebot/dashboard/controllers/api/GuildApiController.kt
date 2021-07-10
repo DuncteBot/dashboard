@@ -47,7 +47,7 @@ object GuildApiController {
         }
 
         val user: UserData? = try {
-            discordClient.retrieveD4JUserById(data["user_id"].asText()).data.block()
+            discordClient.getUser(data["user_id"].asText()).data.block()
         } catch (e: Exception) {
             e.printStackTrace()
             null

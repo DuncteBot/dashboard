@@ -8,7 +8,6 @@ import com.jagrosh.jdautilities.oauth2.OAuth2Client
 import com.jagrosh.jdautilities.oauth2.OAuth2Client.DISCORD_REST_VERSION
 import com.jagrosh.jdautilities.oauth2.Scope
 import com.jagrosh.jdautilities.oauth2.exceptions.InvalidStateException
-import net.dv8tion.jda.api.exceptions.HttpException
 import org.slf4j.LoggerFactory
 import spark.Request
 import spark.Response
@@ -80,7 +79,7 @@ object RootController {
             response.redirect("/")
         } catch (stateEx: InvalidStateException) {
             "<h1>${stateEx.message}</h1><br /><a href=\"${HOMEPAGE}\">Click here to go back home</a>"
-        } catch (e: HttpException) {
+        } catch (e: Exception) {
             logger.error("Failed to log user in with discord", e)
 
             // If we fail to log in we will return the user back home

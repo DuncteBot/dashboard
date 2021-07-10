@@ -334,6 +334,6 @@ class WebServer {
         const val SESSION_ID = "sessionId"
         const val USER_ID = "USER_SESSION"
         const val GUILD_ID = ":guildid"
-        const val HOMEPAGE = "https://dunctebot.com/"
+        const val HOMEPAGE = "https://www.duncte.bot/"
     }
 }

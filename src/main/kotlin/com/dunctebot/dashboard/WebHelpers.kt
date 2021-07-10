@@ -8,8 +8,6 @@ import com.jagrosh.jdautilities.oauth2.OAuth2Client
 import com.jagrosh.jdautilities.oauth2.session.Session
 import discord4j.discordjson.json.GuildUpdateData
 import discord4j.rest.entity.RestGuild
-import net.dv8tion.jda.api.entities.Guild
-import net.dv8tion.jda.internal.utils.IOUtil
 import okhttp3.FormBody
 import spark.*
 import java.net.URLDecoder
@@ -106,8 +104,9 @@ fun verifyCaptcha(response: String): JsonNode {
             .post(body)
             .build()
     ).execute().use {
-        val readFully = IOUtil.readFully(IOUtil.getBody(it))
-
-        return jsonMapper.readTree(readFully)
+        it.body().use { body ->
+            // reads the entire body into memory
+            return jsonMapper.readTree(body!!.bytes())
+        }
     }
 }

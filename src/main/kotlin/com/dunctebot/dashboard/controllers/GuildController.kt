@@ -88,8 +88,8 @@ object GuildController {
 
     fun showGuildRoles(request: Request, response: Response): Any {
         val hash = request.params("hash")
-//        val guildId = guildHashes.getIfPresent(hash) ?: return haltNotFound(request, response)
-        val guildId = hash.toLong() // cheat :D
+        val guildId = guildHashes.getIfPresent(hash) ?: return haltNotFound(request, response)
+//        val guildId = hash.toLong() // cheat :D
 
         val (guildName, roles) = guildRoleCache.get(guildId) {
             val internalRoles = discordClient.retrieveGuildRoles(guildId)
