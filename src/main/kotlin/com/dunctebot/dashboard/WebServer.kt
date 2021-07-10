@@ -289,11 +289,17 @@ class WebServer {
                             ))
                         }.block()!!
                     }
+                    .collectList()
+                    .block()!!
+
+                println(tcs)
 
                 val goodRoles = guild.roles
                     .filter { !it.managed() }
                     .filter { it.name() != "@everyone" && it.name() != "@here" }
                     // TODO: check if can interact
+                    .collectList()
+                    .block()!!
 
                 /*val goodRoles_old = guild.roleCache.filter {
                     guild.selfMember.canInteract(it) && it.name != "@everyone" && it.name != "@here"
@@ -301,7 +307,7 @@ class WebServer {
 
                 map.put("goodChannels", tcs)
                 map.put("goodRoles", goodRoles)
-                map.put("guild", guild)
+                map.put("guild", discordClient.retrieveGuildData(guildId))
 
                 val settings = duncteApis.getGuildSetting(guildId)
 

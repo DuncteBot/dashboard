@@ -7,6 +7,7 @@ import com.dunctebot.dashboard.fetchGuild
 import com.dunctebot.dashboard.guildId
 import com.dunctebot.dashboard.discordClient
 import com.dunctebot.dashboard.userId
+import com.dunctebot.discord.extensions.hasPermission
 import discord4j.rest.util.Permission
 import spark.Request
 import spark.Response
@@ -26,20 +27,16 @@ object DashboardController {
                     "/authorize?client_id=210363111729790977&guild_id=${request.guildId}" +
                     "&scope=bot&permissions=1609952470\" target=\"_blank\">invite it</a>?")
 
+        val guildId = guild.id().asLong()
+
         val member = try {
-            discordClient.retrieveMemberById(guild.id().asLong(), request.userId).block()!!
+            discordClient.retrieveMemberById(guildId, request.userId).block()!!
         } catch (e: Exception) {
             e.printStackTrace()
             throw Spark.halt(409, "<h1>Either discord did a fucky wucky or you are not in the server that you are trying to edit</h1>")
         }
 
-        println("---------------------------------------")
-        println(member)
-        println("Permissions")
-        println(member.permissions().get())
-        println("---------------------------------------")
-
-        if (!member.permissions().get().contains(Permission.MANAGE_GUILD.name)) {
+        if (!member.hasPermission(guildId, Permission.MANAGE_GUILD)) {
             Spark.halt(403, "<h1>You do not have permission to edit this server</h1>")
         }
     }

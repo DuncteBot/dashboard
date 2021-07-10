@@ -56,4 +56,8 @@ class DiscordRestClient(token: String) {
     fun retrieveMemberById(guildId: Long, memberId: String): Mono<MemberData> {
         return this.getGuild(guildId).getMember(Snowflake.of(memberId))
     }
+
+    fun retrieveRole(guildId: Long, roleId: Long): Mono<RoleData> {
+        return client.getRoleById(Snowflake.of(guildId), Snowflake.of(roleId)).data
+    }
 }
