@@ -1,28 +1,33 @@
 package com.dunctebot.discord.extensions
 
+import com.dunctebot.discord.isPermissionApplied
 import discord4j.discordjson.json.MemberData
 import discord4j.discordjson.json.RoleData
 import discord4j.rest.util.Permission
 import reactor.core.publisher.Flux
 
-fun MemberData.getPermissions(guildRoles: Flux<RoleData>): Set<Permission> {
+fun MemberData.hasPermission(guildRoles: Flux<RoleData>, perm: Permission): Boolean {
+    return isPermissionApplied(this.getPermissionsRaw(guildRoles), perm.value)
+}
+
+fun MemberData.getPermissionsRaw(guildRoles: Flux<RoleData>): Long {
     val roles = this.roles()
 
     if (roles.isEmpty()) {
-        return setOf()
+        return 0L
     }
 
-    val perms = mutableSetOf<Permission>()
+    var perms = 0L
 
-    val memberRoles = guildRoles.filter { roles.contains(it.id()) }
+    guildRoles.filter { roles.contains(it.id()) }
         .map { it.permissions() }
         .collectList().block()!!
-
-    Permission.values().forEach {
-        if (memberRoles.contains(it.value)) {
-            perms.add(it)
+        .forEach {
+            // If the permission is not applied yet
+            if (!isPermissionApplied(perms, it)) {
+                perms = perms or it
+            }
         }
-    }
 
     return perms
 }
