@@ -1,12 +1,9 @@
 package com.dunctebot.dashboard.controllers
 
+import com.dunctebot.dashboard.*
 import com.dunctebot.dashboard.WebServer.Companion.OLD_PAGE
 import com.dunctebot.dashboard.WebServer.Companion.SESSION_ID
 import com.dunctebot.dashboard.WebServer.Companion.USER_ID
-import com.dunctebot.dashboard.fetchGuild
-import com.dunctebot.dashboard.guildId
-import com.dunctebot.dashboard.discordClient
-import com.dunctebot.dashboard.userId
 import com.dunctebot.discord.extensions.hasPermission
 import discord4j.rest.util.Permission
 import spark.Request
@@ -37,7 +34,7 @@ object DashboardController {
         }
 
         if (!member.hasPermission(guildId, Permission.MANAGE_GUILD)) {
-            Spark.halt(403, "<h1>You do not have permission to edit this server</h1>")
+            throw haltDiscordError(DiscordError.NO_PERMS)
         }
     }
 }

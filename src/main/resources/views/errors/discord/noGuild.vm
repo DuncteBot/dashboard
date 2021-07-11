@@ -1,0 +1,12 @@
+#define ($content)
+<h4 class="center">
+    Server not found!
+</h4>
+
+<p class="center">
+    DuncteBot is currently not in the server that you are trying to edit, ......
+</p>
+#end
+
+#parse('/views/templates/base.vm')
+
