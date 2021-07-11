@@ -202,11 +202,6 @@ class WebServer {
                 return@get OtherAPi.uptimeRobot()
             }
 
-            // keep?
-            get("/commands.json") { _, _ ->
-                "TODO: setup websocket to bot"
-            }
-
             post("/update-data") { request, _ ->
                 return@post DataController.updateData(request)
             }
@@ -265,7 +260,9 @@ class WebServer {
                 val tcs = guild.channels
                     .ofType(TextChannel::class.java)
                     .filter {
+                        println("Channel $it")
                         it.getEffectivePermissions(selfId).map { p ->
+                            println("Permissions $p")
                             p.containsAll(PermissionSet.of(
                                 Permission.SEND_MESSAGES, Permission.VIEW_CHANNEL /* read messages */
                             ))
@@ -274,7 +271,7 @@ class WebServer {
                     .collectList()
                     .block()!!
 
-                println(tcs)
+                println("channels $tcs")
 
                 val goodRoles = guild.roles
                     .filter { !it.managed() }

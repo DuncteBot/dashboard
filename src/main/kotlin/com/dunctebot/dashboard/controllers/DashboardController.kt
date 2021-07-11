@@ -16,7 +16,9 @@ object DashboardController {
 
         if (ses.attribute<String?>(USER_ID) == null || ses.attribute<String?>(SESSION_ID) == null) {
             request.session().attribute(OLD_PAGE, request.pathInfo())
-            return response.redirect("/")
+            response.redirect("/")
+
+            throw Spark.halt()
         }
 
         val guild = request.fetchGuild() ?: throw haltDiscordError(DiscordError.NO_GUILD, request.guildId!!)
