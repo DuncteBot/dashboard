@@ -88,13 +88,14 @@ fun String?.toSafeLong(): Long {
     }
 }
 
-fun haltDiscordError(error: DiscordError): HaltException {
+fun haltDiscordError(error: DiscordError, guildId: String = ""): HaltException {
     throw Spark.halt(
         403,
         transformResponse(
             WebVariables()
                 .put("hide_menu", true)
                 .put("title", error.title)
+                .put("guildId", guildId)
                 .toModelAndView(error.viewPath)
         )
     )

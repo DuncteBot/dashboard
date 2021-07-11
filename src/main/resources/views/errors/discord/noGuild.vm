@@ -1,10 +1,13 @@
+#set( $url = "https://r.duncte.bot/inv?guild_id=$guildId" )
+
 #define ($content)
 <h4 class="center">
     Server not found!
 </h4>
 
 <p class="center">
-    DuncteBot is currently not in the server that you are trying to edit, ......
+    DuncteBot is currently not in the server that you are trying to edit. <br/>
+    If you want to invite DuncteBot to this server you can click this link: <a href="$url" target="_blank">$url</a>
 </p>
 #end
 
