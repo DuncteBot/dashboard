@@ -19,18 +19,14 @@ object DashboardController {
             return response.redirect("/")
         }
 
-        val guild = request.fetchGuild()
-                ?: throw Spark.halt(404, "DuncteBot is not in the requested server, why don't you <a href=\"https://discord.com/oauth2" +
-                    "/authorize?client_id=210363111729790977&guild_id=${request.guildId}" +
-                    "&scope=bot&permissions=1609952470\" target=\"_blank\">invite it</a>?")
-
+        val guild = request.fetchGuild() ?: throw haltDiscordError(DiscordError.NO_GUILD, request.guildId!!)
         val guildId = guild.id().asLong()
 
         val member = try {
             discordClient.retrieveMemberById(guildId, request.userId).block()!!
         } catch (e: Exception) {
             e.printStackTrace()
-            throw Spark.halt(409, "<h1>Either discord did a fucky wucky or you are not in the server that you are trying to edit</h1>")
+            throw haltDiscordError(DiscordError.WAT)
         }
 
         if (!member.hasPermission(guildId, Permission.MANAGE_GUILD)) {
