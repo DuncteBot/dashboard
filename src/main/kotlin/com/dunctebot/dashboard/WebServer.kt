@@ -11,13 +11,13 @@ import com.dunctebot.dashboard.controllers.api.OtherAPi
 import com.dunctebot.dashboard.controllers.errors.HttpErrorHandlers
 import com.dunctebot.dashboard.rendering.WebVariables
 import com.dunctebot.dashboard.utils.fetchGuildPatronStatus
+import com.dunctebot.dashboard.utils.getEffectivePermissions
 import com.dunctebot.models.settings.GuildSetting
 import com.dunctebot.models.settings.ProfanityFilterType
 import com.dunctebot.models.settings.WarnAction
 import com.dunctebot.models.utils.Utils
 import com.jagrosh.jdautilities.oauth2.OAuth2Client
 import discord4j.common.util.Snowflake
-import discord4j.core.`object`.entity.channel.TextChannel
 import discord4j.rest.util.Permission
 import discord4j.rest.util.PermissionSet
 import spark.Spark.*
@@ -258,10 +258,8 @@ class WebServer {
                 val selfId = Snowflake.of(self.user().id())
 
                 val tcs = guild.channels
-                    .ofType(TextChannel::class.java)
                     .filter {
-                        println("Channel $it")
-                        it.getEffectivePermissions(selfId).map { p ->
+                        it.getEffectivePermissions(guild, self).map { p ->
                             println("Permissions $p")
                             p.containsAll(PermissionSet.of(
                                 Permission.SEND_MESSAGES, Permission.VIEW_CHANNEL /* read messages */
