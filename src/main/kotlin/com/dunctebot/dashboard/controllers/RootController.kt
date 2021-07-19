@@ -80,7 +80,7 @@ object RootController {
             response.redirect("/")
         } catch (stateEx: InvalidStateException) {
             "<h1>${stateEx.message}</h1><br /><a href=\"${HOMEPAGE}\">Click here to go back home</a>"
-        } catch (e: HttpException) {
+        } catch (e: Exception) {
             logger.error("Failed to log user in with discord", e)
 
             // If we fail to log in we will return the user back home

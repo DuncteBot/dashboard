@@ -82,7 +82,9 @@
     <div class="navbar-fixed">
         <nav class="indigo">
             <div class="nav-wrapper container">
-                <a href="#" data-target="server-setting-tabs" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+                #if(!$hide_menu)
+                    <a href="#" data-target="server-setting-tabs" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+                #end
                 <a href="/" class="brand-logo truncate">
                     #if($guild)
                         <i class="material-icons">arrow_back</i> Editing $guild.getName()

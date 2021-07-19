@@ -25,7 +25,6 @@ import spark.Spark.*
 // The socket server will be used to communicate with DuncteBot himself
 // NGINX can secure the websocket (hopefully it does this by default as we are using the same domain)
 class WebServer {
-    private val engine = VelocityRenderer()
     private val oAuth2Client = OAuth2Client.Builder()
         .setClientId(System.getenv("OAUTH_CLIENT_ID").toLong())
         .setClientSecret(System.getenv("OAUTH_CLIENT_SECRET"))
@@ -62,21 +61,7 @@ class WebServer {
             staticFiles.location("/public")
         }
 
-        val responseTransformer: (Any) -> String = {
-            when (it) {
-                is JsonNode -> {
-                    jsonMapper.writeValueAsString(it)
-                }
-                is ModelAndView -> {
-                    engine.render(it)
-                }
-                else -> {
-                    it.toString()
-                }
-            }
-        }
-
-        defaultResponseTransformer(responseTransformer)
+        defaultResponseTransformer { transformResponse(it) }
 
         /*get("/test") { request, response ->
             println(request.host())
@@ -109,13 +94,13 @@ class WebServer {
         notFound { request, response ->
             val result = HttpErrorHandlers.notFound(request, response)
 
-            return@notFound responseTransformer(result)
+            return@notFound transformResponse(result)
         }
 
         internalServerError { request, response ->
             val result = HttpErrorHandlers.internalServerError(request, response)
 
-            return@internalServerError responseTransformer(result)
+            return@internalServerError transformResponse(result)
         }
 
         // I hate how they made it varargs
@@ -315,6 +300,6 @@ class WebServer {
         const val SESSION_ID = "sessionId"
         const val USER_ID = "USER_SESSION"
         const val GUILD_ID = ":guildid"
-        const val HOMEPAGE = "https://dunctebot.com/"
+        const val HOMEPAGE = "https://www.duncte.bot/"
     }
 }

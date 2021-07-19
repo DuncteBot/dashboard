@@ -43,7 +43,7 @@ dependencies {
         exclude(module = "jda-utilities-command")
         exclude(module = "jda-utilities-menu")
     }
-    implementation(group = "net.dv8tion", name = "JDA", version = "4.2.1_264") {
+    implementation(group = "net.dv8tion", name = "JDA", version = "4.3.0_298") {
         exclude(module = "opus-java")
     }
 

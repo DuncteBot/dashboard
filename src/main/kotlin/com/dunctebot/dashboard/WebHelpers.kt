@@ -3,6 +3,8 @@ package com.dunctebot.dashboard
 import com.dunctebot.dashboard.WebServer.Companion.GUILD_ID
 import com.dunctebot.dashboard.WebServer.Companion.SESSION_ID
 import com.dunctebot.dashboard.WebServer.Companion.USER_ID
+import com.dunctebot.dashboard.rendering.VelocityRenderer
+import com.dunctebot.dashboard.rendering.WebVariables
 import com.fasterxml.jackson.databind.JsonNode
 import com.jagrosh.jdautilities.oauth2.OAuth2Client
 import com.jagrosh.jdautilities.oauth2.session.Session
@@ -12,6 +14,8 @@ import okhttp3.FormBody
 import spark.*
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
+
+private val engine = VelocityRenderer()
 
 private fun String.decodeUrl() = URLDecoder.decode(this, StandardCharsets.UTF_8)
 
@@ -80,8 +84,35 @@ fun String?.toSafeLong(): Long {
     }
 }
 
-fun haltNotFound(request: Request, response: Response) {
-    Spark.halt(404, CustomErrorPages.getFor(404, request, response) as String)
+fun haltDiscordError(error: DiscordError, guildId: String = ""): HaltException {
+    throw Spark.halt(
+        403,
+        transformResponse(
+            WebVariables()
+                .put("hide_menu", true)
+                .put("title", error.title)
+                .put("guildId", guildId)
+                .toModelAndView(error.viewPath)
+        )
+    )
+}
+
+fun haltNotFound(request: Request, response: Response): HaltException {
+    throw Spark.halt(404, CustomErrorPages.getFor(404, request, response) as String)
+}
+
+fun transformResponse(it: Any): String {
+    return when (it) {
+        is JsonNode -> {
+            jsonMapper.writeValueAsString(it)
+        }
+        is ModelAndView -> {
+            engine.render(it)
+        }
+        else -> {
+            it.toString()
+        }
+    }
 }
 
 fun verifyCaptcha(response: String): JsonNode {
