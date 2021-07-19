@@ -3,6 +3,7 @@ package com.dunctebot.dashboard
 import com.dunctebot.dashboard.WebServer.Companion.GUILD_ID
 import com.dunctebot.dashboard.WebServer.Companion.SESSION_ID
 import com.dunctebot.dashboard.WebServer.Companion.USER_ID
+import com.dunctebot.dashboard.rendering.VelocityRenderer
 import com.dunctebot.dashboard.rendering.WebVariables
 import com.fasterxml.jackson.databind.JsonNode
 import com.jagrosh.jdautilities.oauth2.OAuth2Client
@@ -13,6 +14,8 @@ import okhttp3.FormBody
 import spark.*
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
+
+private val engine = VelocityRenderer()
 
 private fun String.decodeUrl() = URLDecoder.decode(this, StandardCharsets.UTF_8)
 

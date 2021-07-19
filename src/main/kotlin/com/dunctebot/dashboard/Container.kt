@@ -1,6 +1,5 @@
 package com.dunctebot.dashboard
 
-import com.dunctebot.dashboard.rendering.VelocityRenderer
 import com.dunctebot.dashboard.websocket.WebsocketClient
 import com.dunctebot.duncteapi.DuncteApi
 import com.dunctebot.discord.DiscordRestClient
@@ -12,7 +11,6 @@ val duncteApis = DuncteApi("Bot ${System.getenv("BOT_TOKEN")}")
 
 val httpClient = OkHttpClient()
 val jsonMapper = JsonMapper()
-val engine = VelocityRenderer()
 val webSocket = WebsocketClient()
 
 val server = WebServer()
