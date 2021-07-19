@@ -27,7 +27,7 @@ dependencies {
 
     implementation(group = "ch.qos.logback", name = "logback-classic", version = "1.2.3")
 
-    implementation(group = "com.sparkjava", name = "spark-core", version = "2.9.2")
+    implementation(group = "com.sparkjava", name = "spark-core", version = "2.9.3")
     implementation(group = "org.apache.velocity", name = "velocity-engine-core", version = "2.2")
 
     implementation(group = "com.github.ben-manes.caffeine", name = "caffeine", version = "2.8.5")
@@ -35,6 +35,16 @@ dependencies {
     implementation(group = "com.fasterxml.jackson.core", name = "jackson-databind", version = "2.10.1")
 
     implementation(group = "net.sf.trove4j", name = "trove4j", version = "3.0.3")
+
+    implementation(group = "com.discord4j", name = "discord4j-core", version = "3.1.6")
+
+    // TODO: remove after switch to d4j
+    implementation(group = "net.dv8tion", name = "JDA", version = "4.2.1_264") {
+        exclude(module = "opus-java")
+    }
+
+    // TODO: remove after switch to d4j
+    // TODO: custom oauth client?
    // implementation(group = "com.jagrosh", name = "jda-utilities-oauth2", version = "3.0.5")
     implementation(group = "com.github.JDA-Applications", name = "JDA-Utilities", version = "804d58a") {
         // This is fine
@@ -43,16 +53,6 @@ dependencies {
         exclude(module = "jda-utilities-command")
         exclude(module = "jda-utilities-menu")
     }
-    implementation(group = "net.dv8tion", name = "JDA", version = "4.3.0_298") {
-        exclude(module = "opus-java")
-    }
-
-    // Yes, this is JDA
-    // We're running this PR https://github.com/DV8FromTheWorld/JDA/pull/1178
-    // but it is broken atm
-    /*implementation(group = "com.github.dv8fromtheworld", name = "JDA", version = "68f4c4b") {
-        exclude(module = "opus-java")
-    }*/
 }
 
 configure<JavaPluginConvention> {

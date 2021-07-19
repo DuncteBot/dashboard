@@ -87,7 +87,7 @@
                 #end
                 <a href="/" class="brand-logo truncate">
                     #if($guild)
-                        <i class="material-icons">arrow_back</i> Editing $guild.getName()
+                        <i class="material-icons">arrow_back</i> Editing $guild.name()
                     #else
                         Dashboard
                     #end
@@ -109,25 +109,25 @@
                     </li>
                     <li class="divider grey darken-2"></li>
                     <li class="bold">
-                        <a class="white-text" href="/server/$guild.getIdLong()/custom-commands">Custom Commands</a>
+                        <a class="white-text" href="/server/$guild.id().asLong()/custom-commands">Custom Commands</a>
                     </li>
                 </ul>
             #else
                 ## TODO: use a different tactic for this
                 <ul id="server-setting-tabs" class="discord not-black sidenav sidenav-fixed">
                     <li class="bold">
-                        <a class="white-text" href="/server/$guild.getIdLong()#basic">Basic Settings</a>
+                        <a class="white-text" href="/server/$guild.id().asLong()#basic">Basic Settings</a>
                     </li>
                     <li class="bold">
-                        <a class="white-text" href="/server/$guild.getIdLong()#moderation">Moderation Settings</a>
+                        <a class="white-text" href="/server/$guild.id().asLong()#moderation">Moderation Settings</a>
                     </li>
                     <li class="bold">
-                        <a class="white-text" href="/server/$guild.getIdLong()#welcome-leave">Welcome/Leave message</a>
+                        <a class="white-text" href="/server/$guild.id().asLong()#welcome-leave">Welcome/Leave message</a>
                     </li>
                     <li class="divider grey darken-2"></li>
                     ## assuming that we're always on the custom commands page here
                     <li class="bold active">
-                        <a class="white-text" href="/server/$guild.getIdLong()/custom-commands">Custom Commands</a>
+                        <a class="white-text" href="/server/$guild.id().asLong()/custom-commands">Custom Commands</a>
                     </li>
                 </ul>
 

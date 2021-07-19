@@ -13,9 +13,9 @@ import com.dunctebot.dashboard.websocket.handlers.base.SocketHandler
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.neovisionaries.ws.client.*
-import net.dv8tion.jda.internal.utils.IOUtil
 import org.slf4j.LoggerFactory
 import java.io.IOException
+import java.net.URI
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
@@ -37,7 +37,7 @@ class WebsocketClient : WebSocketAdapter(), WebSocketListener {
 
     private val factory = WebSocketFactory()
         .setConnectionTimeout(5000)
-        .setServerName(IOUtil.getHost(System.getenv("WS_URL")))
+        .setServerName(URI.create(System.getenv("WS_URL")).host)
     lateinit var socket: WebSocket
 
     var mayReconnect = true

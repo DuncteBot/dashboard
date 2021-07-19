@@ -20,11 +20,11 @@
                     <select id="modChannel" name="modChannel">
                         <option value="" disabled selected>Select a channel</option>
                         #foreach($textChannel in $goodChannels)
-                            #if($settings.getLogChannel() == $textChannel.getIdLong())
-                                <option value="$textChannel.getIdLong()"
-                                        selected>#$textChannel.getName()</option>
+                            #if($settings.getLogChannel() == $textChannel.id().asLong())
+                                <option value="$textChannel.id().asLong()"
+                                        selected>#$textChannel.name()</option>
                             #else
-                                <option value="$textChannel.getIdLong()">#$textChannel.getName()</option>
+                                <option value="$textChannel.id().asLong()">#$textChannel.name()</option>
                             #end
                         #end
                         <option value="">Disable</option>

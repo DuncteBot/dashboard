@@ -4,23 +4,24 @@ import com.dunctebot.dashboard.*
 import com.dunctebot.dashboard.rendering.DbModelAndView
 import com.dunctebot.dashboard.rendering.WebVariables
 import com.github.benmanes.caffeine.cache.Caffeine
-import net.dv8tion.jda.api.entities.Member
-import net.dv8tion.jda.api.entities.Role
-import net.dv8tion.jda.api.exceptions.ErrorResponseException
+import discord4j.discordjson.json.MemberData
+import discord4j.discordjson.json.RoleData
 import spark.Request
 import spark.Response
 import java.util.concurrent.TimeUnit
-import kotlin.streams.toList
 
 object GuildController {
+    private const val DEFAULT_ROLE_COLOUR = 0x1FFFFFFF
+
     // some hash -> "$userId-$guildId"
+    // TODO: convert to expiring map
     val securityKeys = mutableMapOf<String, String>()
     val guildHashes = Caffeine.newBuilder()
         .expireAfterWrite(2, TimeUnit.HOURS)
         .build<String, Long>()
     val guildRoleCache = Caffeine.newBuilder()
         .expireAfterWrite(1, TimeUnit.HOURS)
-        .build<Long, List<CustomRole>>()
+        .build<Long, Pair<String, List<CustomRole>>>()
 
     fun handleOneGuildRegister(request: Request): Any {
         val params = request.paramsMap
@@ -87,33 +88,35 @@ object GuildController {
 
     fun showGuildRoles(request: Request, response: Response): Any {
         val hash = request.params("hash")
-        val guildId = guildHashes.getIfPresent(hash) ?: return haltNotFound(request, response)
-        val guild = try {
-            // TODO: do we want to do this?
-            // Maybe only cache for a short time as it will get outdated data
-            restJDA.fakeJDA.getGuildById(guildId) ?: restJDA.retrieveGuildById(guildId.toString()).complete()
-        } catch (e: ErrorResponseException) {
-            e.printStackTrace()
-            return haltNotFound(request, response)
-        }
+        val guildId = guildHashes.getIfPresent(hash) ?: throw haltNotFound(request, response)
+//        val guildId = hash.toLong() // cheat :D
 
-        val roles = guildRoleCache.get(guild.idLong) {
-            val members = restJDA.retrieveAllMembers(guild).stream().toList()
+        val (guildName, roles) = guildRoleCache.get(guildId) {
+            val internalRoles = discordClient.retrieveGuildRoles(guildId)
+            val members = discordClient.retrieveGuildMembers(guildId).collectList().block()!!
+            val guild = discordClient.retrieveGuildData(guildId)
 
-            guild.roles.map { CustomRole(it, members) }
+            guild.name() to internalRoles.map { CustomRole(it, members) }
+                .sort { o1, o2 -> o2.position() - o1.position() }
+                .collectList().block()!!
         }!!
 
         return WebVariables()
             .put("hide_menu", true)
-            .put("title", "Roles for ${guild.name}")
-            .put("guild_name", guild.name)
+            .put("title", "Roles for $guildName")
+            .put("guild_name", guildName)
             .put("roles", roles)
             .toModelAndView("guildRoles.vm")
     }
 
-    class CustomRole(private val realRole: Role, allMembers: List<Member>) : Role by realRole {
-        // Accessed by our templating engine
-        @Suppress("unused")
-        val memberCount = allMembers.filter { it.roles.contains(realRole) }.size
+    // Accessed by our templating engine
+    @Suppress("unused")
+    class CustomRole(private val realRole: RoleData, allMembers: List<MemberData>) : RoleData by realRole {
+        val memberCount = allMembers.filter { it.roles().contains(realRole.id()) }.size
+
+        // overloads mimicking JDA names for easy access in the template
+        val idLong = realRole.id().asLong()
+        val name: String = realRole.name()
+        val colorRaw = if (realRole.color() == 0) DEFAULT_ROLE_COLOUR else realRole.color()
     }
 }

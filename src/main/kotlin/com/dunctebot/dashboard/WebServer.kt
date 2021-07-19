@@ -9,17 +9,17 @@ import com.dunctebot.dashboard.controllers.api.DataController
 import com.dunctebot.dashboard.controllers.api.GuildApiController
 import com.dunctebot.dashboard.controllers.api.OtherAPi
 import com.dunctebot.dashboard.controllers.errors.HttpErrorHandlers
-import com.dunctebot.dashboard.rendering.VelocityRenderer
 import com.dunctebot.dashboard.rendering.WebVariables
 import com.dunctebot.dashboard.utils.fetchGuildPatronStatus
+import com.dunctebot.dashboard.utils.getEffectivePermissions
 import com.dunctebot.models.settings.GuildSetting
 import com.dunctebot.models.settings.ProfanityFilterType
 import com.dunctebot.models.settings.WarnAction
 import com.dunctebot.models.utils.Utils
-import com.fasterxml.jackson.databind.JsonNode
 import com.jagrosh.jdautilities.oauth2.OAuth2Client
-import net.dv8tion.jda.api.entities.TextChannel
-import spark.ModelAndView
+import discord4j.common.util.Snowflake
+import discord4j.rest.util.Permission
+import discord4j.rest.util.PermissionSet
 import spark.Spark.*
 
 // The socket server will be used to communicate with DuncteBot himself
@@ -202,11 +202,6 @@ class WebServer {
                 return@get OtherAPi.uptimeRobot()
             }
 
-            // keep?
-            get("/commands.json") { _, _ ->
-                "TODO: setup websocket to bot"
-            }
-
             post("/update-data") { request, _ ->
                 return@post DataController.updateData(request)
             }
@@ -255,19 +250,41 @@ class WebServer {
 
     private fun getWithGuildData(path: String, map: WebVariables, view: String) {
         get(path) { request, _ ->
-            val guild = request.fetchGuild()
+            val guild = request.guild
 
             if (guild != null) {
-                val guildId = guild.idLong
+                val guildId = guild.id.asLong()
+                val self = guild.selfMember.block()!!
+                val selfId = Snowflake.of(self.user().id())
 
-                val tcs = guild.textChannelCache.filter(TextChannel::canTalk).toList()
-                val goodRoles = guild.roleCache.filter {
+                val tcs = guild.channels
+                    .filter {
+                        it.getEffectivePermissions(guild, self).map { p ->
+                            println("Permissions $p")
+                            p.containsAll(PermissionSet.of(
+                                Permission.SEND_MESSAGES, Permission.VIEW_CHANNEL /* read messages */
+                            ))
+                        }.block()!!
+                    }
+                    .collectList()
+                    .block()!!
+
+                println("channels $tcs")
+
+                val goodRoles = guild.roles
+                    .filter { !it.managed() }
+                    .filter { it.name() != "@everyone" && it.name() != "@here" }
+                    // TODO: check if can interact
+                    .collectList()
+                    .block()!!
+
+                /*val goodRoles_old = guild.roleCache.filter {
                     guild.selfMember.canInteract(it) && it.name != "@everyone" && it.name != "@here"
-                }.filter { !it.isManaged }.toList()
+                }.filter { !it.isManaged }.toList()*/
 
                 map.put("goodChannels", tcs)
                 map.put("goodRoles", goodRoles)
-                map.put("guild", guild)
+                map.put("guild", discordClient.retrieveGuildData(guildId))
 
                 val settings = duncteApis.getGuildSetting(guildId)
 

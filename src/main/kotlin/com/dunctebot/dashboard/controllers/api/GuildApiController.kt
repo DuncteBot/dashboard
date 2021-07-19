@@ -3,9 +3,10 @@ package com.dunctebot.dashboard.controllers.api
 import com.dunctebot.dashboard.*
 import com.dunctebot.dashboard.controllers.GuildController
 import com.dunctebot.dashboard.utils.HashUtils
+import com.dunctebot.discord.extensions.asTag
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
-import net.dv8tion.jda.api.entities.User
+import discord4j.discordjson.json.UserData
 import spark.Request
 import spark.Response
 import java.util.concurrent.CompletableFuture
@@ -45,8 +46,8 @@ object GuildApiController {
                 .put("code", response.status())
         }
 
-        val user: User? = try {
-            restJDA.retrieveUserById(data["user_id"].asText()).complete()
+        val user: UserData? = try {
+            discordClient.getUser(data["user_id"].asText()).data.block()
         } catch (e: Exception) {
             e.printStackTrace()
             null
@@ -101,12 +102,13 @@ object GuildApiController {
             .put("id", guildId)
             .put("name", guild["name"].asText())
 
+        val userId = user.id().asString()
         val userJson = jsonMapper.createObjectNode()
-            .put("id", user.id)
-            .put("name", user.name)
+            .put("id", userId)
+            .put("name", user.username())
             .put("formatted", user.asTag)
 
-        val theKey = "${user.idLong}-${guildId}"
+        val theKey = "$userId-$guildId"
         val theHash = HashUtils.sha1(theKey + System.currentTimeMillis())
 
         GuildController.securityKeys[theHash] = theKey

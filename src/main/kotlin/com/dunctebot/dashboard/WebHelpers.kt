@@ -8,8 +8,8 @@ import com.dunctebot.dashboard.rendering.WebVariables
 import com.fasterxml.jackson.databind.JsonNode
 import com.jagrosh.jdautilities.oauth2.OAuth2Client
 import com.jagrosh.jdautilities.oauth2.session.Session
-import net.dv8tion.jda.api.entities.Guild
-import net.dv8tion.jda.internal.utils.IOUtil
+import discord4j.discordjson.json.GuildUpdateData
+import discord4j.rest.entity.RestGuild
 import okhttp3.FormBody
 import spark.*
 import java.net.URLDecoder
@@ -43,11 +43,18 @@ val Request.userId: String
 val Request.guildId: String?
     get() = this.params(GUILD_ID)
 
-fun Request.fetchGuild(): Guild? {
-    val guildId: String = this.guildId ?: return null
+val Request.guild: RestGuild?
+    get() {
+        val guildId = this.guildId ?: return null
+
+        return discordClient.getGuild(guildId.toLong())
+    }
+
+fun Request.fetchGuild(): GuildUpdateData? {
+    val guild: RestGuild = this.guild ?: return null
 
     return try {
-        restJDA.retrieveGuildById(guildId).complete()
+        guild.data.block()
     } catch (e: Exception) {
         e.printStackTrace()
         null
@@ -127,8 +134,9 @@ fun verifyCaptcha(response: String): JsonNode {
             .post(body)
             .build()
     ).execute().use {
-        val readFully = IOUtil.readFully(IOUtil.getBody(it))
-
-        return jsonMapper.readTree(readFully)
+        it.body().use { body ->
+            // reads the entire body into memory
+            return jsonMapper.readTree(body!!.bytes())
+        }
     }
 }

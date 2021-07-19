@@ -8,7 +8,6 @@ import com.jagrosh.jdautilities.oauth2.OAuth2Client
 import com.jagrosh.jdautilities.oauth2.OAuth2Client.DISCORD_REST_VERSION
 import com.jagrosh.jdautilities.oauth2.Scope
 import com.jagrosh.jdautilities.oauth2.exceptions.InvalidStateException
-import net.dv8tion.jda.api.exceptions.HttpException
 import org.slf4j.LoggerFactory
 import spark.Request
 import spark.Response
