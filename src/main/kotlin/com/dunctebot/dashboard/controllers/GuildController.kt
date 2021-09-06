@@ -4,6 +4,7 @@ import com.dunctebot.dashboard.*
 import com.dunctebot.dashboard.rendering.WebVariables
 import com.github.benmanes.caffeine.cache.Caffeine
 import io.javalin.http.Context
+import io.javalin.http.NotFoundResponse
 import net.dv8tion.jda.api.entities.Member
 import net.dv8tion.jda.api.entities.Role
 import net.dv8tion.jda.api.exceptions.ErrorResponseException
@@ -90,14 +91,14 @@ object GuildController {
 
     fun showGuildRoles(ctx: Context) {
         val hash = ctx.pathParam("hash")
-        val guildId = guildHashes.getIfPresent(hash) ?: throw haltNotFound()
+        val guildId = guildHashes.getIfPresent(hash) ?: throw NotFoundResponse()
         val guild = try {
             // TODO: do we want to do this?
             // Maybe only cache for a short time as it will get outdated data
             restJDA.fakeJDA.getGuildById(guildId) ?: restJDA.retrieveGuildById(guildId.toString()).complete()
         } catch (e: ErrorResponseException) {
             e.printStackTrace()
-            throw haltNotFound()
+            throw NotFoundResponse()
         }
 
         val roles = guildRoleCache.get(guild.idLong) {

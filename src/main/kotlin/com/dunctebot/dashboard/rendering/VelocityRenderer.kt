@@ -5,12 +5,10 @@ import io.javalin.plugin.rendering.FileRenderer
 import org.apache.velocity.VelocityContext
 import org.apache.velocity.app.VelocityEngine
 import org.apache.velocity.runtime.RuntimeConstants
-import spark.ModelAndView
-import spark.TemplateEngine
 import java.io.StringWriter
 import java.util.*
 
-class VelocityRenderer : TemplateEngine(), FileRenderer {
+class VelocityRenderer : FileRenderer {
     private val velocityEngine: VelocityEngine
 
     init {
@@ -33,21 +31,6 @@ class VelocityRenderer : TemplateEngine(), FileRenderer {
         }
 
         this.velocityEngine = VelocityEngine(properties)
-    }
-
-    override fun render(modelAndView: ModelAndView): String {
-        if (modelAndView !is DbModelAndView) {
-            throw IllegalArgumentException("modelAndView is not a of correct type")
-        }
-
-        val modelMap = modelAndView.model
-        val template = velocityEngine.getTemplate("views/${modelAndView.viewName}")
-        val context = VelocityContext(modelMap)
-        val writer = StringWriter()
-
-        template.merge(context, writer)
-
-        return writer.toString()
     }
 
     override fun render(filePath: String, model: MutableMap<String, Any>, context: Context): String {

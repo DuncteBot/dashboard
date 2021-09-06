@@ -5,31 +5,37 @@ import com.dunctebot.dashboard.controllers.GuildController
 import com.dunctebot.dashboard.utils.HashUtils
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
+import io.javalin.http.Context
 import net.dv8tion.jda.api.entities.User
-import spark.Request
-import spark.Response
 import java.util.concurrent.CompletableFuture
 
 object GuildApiController {
-    fun findUserAndGuild(request: Request, response: Response): Any {
-        val data = request.jsonBody
+    fun findUserAndGuild(ctx: Context) {
+        // TODO: body validator
+        val data = ctx.jsonBody
 
         if (!(data.has("user_id") && data.has("guild_id") && data.has("captcha_response"))) {
-            response.status(406)
+            ctx.status(406)
+            ctx.json(
+                jsonMapper.createObjectNode()
+                    .put("success", false)
+                    .put("message", "missing_input")
+                    .put("code", ctx.status())
+            )
 
-            return jsonMapper.createObjectNode()
-                .put("success", false)
-                .put("message", "missing_input")
-                .put("code", response.status())
+            return
         }
 
         if (data["captcha_response"].isNull) {
-            response.status(406)
+            ctx.status(406)
+            ctx.json(
+                jsonMapper.createObjectNode()
+                    .put("success", false)
+                    .put("message", "Captcha missing")
+                    .put("code", ctx.status())
+            )
 
-            return jsonMapper.createObjectNode()
-                .put("success", false)
-                .put("message", "Captcha missing")
-                .put("code", response.status())
+            return
 
         }
 
@@ -37,12 +43,15 @@ object GuildApiController {
         val captchaResult = verifyCaptcha(captchaResponse)
 
         if (!captchaResult["success"].asBoolean()) {
-            response.status(403)
+            ctx.status(403)
+            ctx.json(
+                jsonMapper.createObjectNode()
+                    .put("success", false)
+                    .put("message", "Could not validate that you are a human")
+                    .put("code", ctx.status())
+            )
 
-            return jsonMapper.createObjectNode()
-                .put("success", false)
-                .put("message", "Could not validate that you are a human")
-                .put("code", response.status())
+            return
         }
 
         val user: User? = try {
@@ -53,12 +62,15 @@ object GuildApiController {
         }
 
         if (user == null) {
-            response.status(404)
+            ctx.status(404)
+            ctx.json(
+                jsonMapper.createObjectNode()
+                    .put("success", false)
+                    .put("message", "no_user")
+                    .put("code", ctx.status())
+            )
 
-            return jsonMapper.createObjectNode()
-                .put("success", false)
-                .put("message", "no_user")
-                .put("code", response.status())
+            return
         }
 
         val guild: JsonNode? = try {
@@ -88,12 +100,15 @@ object GuildApiController {
         }
 
         if (guild == null) {
-            response.status(404)
+            ctx.status(404)
+            ctx.json(
+                jsonMapper.createObjectNode()
+                    .put("success", false)
+                    .put("message", "no_guild")
+                    .put("code", ctx.status())
+            )
 
-            return jsonMapper.createObjectNode()
-                .put("success", false)
-                .put("message", "no_guild")
-                .put("code", response.status())
+            return
         }
 
         val guildId = guild["id"].asText()
@@ -114,11 +129,11 @@ object GuildApiController {
         val node = jsonMapper.createObjectNode()
             .put("success", true)
             .put("token", theHash)
-            .put("code", response.status())
+            .put("code", ctx.status())
 
         node.set<ObjectNode>("user", userJson)
         node.set<ObjectNode>("guild", guildJson)
 
-        return node
+        ctx.json(node)
     }
 }

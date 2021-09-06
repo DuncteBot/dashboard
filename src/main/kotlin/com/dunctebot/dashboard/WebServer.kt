@@ -8,6 +8,7 @@ import com.dunctebot.dashboard.controllers.api.CustomCommandController
 import com.dunctebot.dashboard.controllers.api.DataController
 import com.dunctebot.dashboard.controllers.api.GuildApiController
 import com.dunctebot.dashboard.controllers.api.OtherAPi
+import com.dunctebot.dashboard.rendering.VelocityRenderer
 import com.dunctebot.dashboard.rendering.WebVariables
 import com.dunctebot.dashboard.utils.fetchGuildPatronStatus
 import com.dunctebot.models.settings.GuildSetting
@@ -16,15 +17,16 @@ import com.dunctebot.models.settings.WarnAction
 import com.dunctebot.models.utils.Utils
 import com.jagrosh.jdautilities.oauth2.OAuth2Client
 import io.javalin.Javalin
+import io.javalin.apibuilder.ApiBuilder.*
 import io.javalin.core.compression.CompressionStrategy
 import io.javalin.http.staticfiles.Location
 import io.javalin.plugin.rendering.JavalinRenderer
 import net.dv8tion.jda.api.entities.TextChannel
-import spark.Spark.*
 
 // The socket server will be used to communicate with DuncteBot himself
 // NGINX can secure the websocket (hopefully it does this by default as we are using the same domain)
 class WebServer {
+    private val engine = VelocityRenderer()
     private val app: Javalin
     private val oAuth2Client = OAuth2Client.Builder()
         .setClientId(System.getenv("OAUTH_CLIENT_ID").toLong())
@@ -44,14 +46,12 @@ class WebServer {
                 val staticDir = "/src/main/resources/public"
                 config.addStaticFiles(projectDir + staticDir, Location.EXTERNAL)
                 config.enableDevLogging()
+                config.enableCorsForOrigin("localhost:2000")
             } else {
                 config.addStaticFiles("/public", Location.CLASSPATH)
+                config.enableCorsForOrigin("dashboard.duncte.bot")
             }
         }
-
-        port(1234)
-
-        defaultResponseTransformer { transformResponse(it) }
 
         /*get("/test") { request, response ->
             println(request.host())
@@ -103,117 +103,73 @@ class WebServer {
             )
         }
 
-        path("/server/$GUILD_ID") {
-            before("/*") { request, response ->
-                return@before DashboardController.before(request, response)
+        this.app.routes {
+            path("server/$GUILD_ID") {
+                before { ctx ->
+                    DashboardController.before(ctx)
+                }
+
+                getWithGuildData(
+                    "",
+                    WebVariables().put("title", "Dashboard")
+                        .put("filterValues", ProfanityFilterType.values())
+                        .put("warnActionTypes", WarnAction.Type.values())
+                        .put("loggingTypes", GuildSetting.LOGGING_TYPES)
+                        .put("patronMaxWarnActions", WarnAction.PATRON_MAX_ACTIONS)
+                        .put("using_tabs", true),
+                    "dashboard/serverSettings.vm"
+                )
+
+                post("") { ctx ->
+                    SettingsController.saveSettings(ctx)
+                }
+
+                // Custom command settings
+                getWithGuildData(
+                    "custom-commands",
+                    WebVariables().put("title", "Dashboard")
+                        .put("using_tabs", false),
+                    "dashboard/customCommandSettings.vm"
+                )
             }
-
-            before("") { request, response ->
-                return@before DashboardController.before(request, response)
-            }
-
-            getWithGuildData(
-                "",
-                WebVariables().put("title", "Dashboard")
-                    .put("filterValues", ProfanityFilterType.values())
-                    .put("warnActionTypes", WarnAction.Type.values())
-                    .put("loggingTypes", GuildSetting.LOGGING_TYPES)
-                    .put("patronMaxWarnActions", WarnAction.PATRON_MAX_ACTIONS)
-                    .put("using_tabs", true),
-                "dashboard/serverSettings.vm"
-            )
-
-            post("") { request, response ->
-                return@post SettingsController.saveSettings(request, response)
-            }
-
-            // Custom command settings
-            getWithGuildData(
-                "/custom-commands",
-                WebVariables().put("title", "Dashboard")
-                    .put("using_tabs", false),
-                "dashboard/customCommandSettings.vm"
-            )
         }
     }
 
     private fun addAPIRoutes() {
-        path("/api") {
-            before("/*") { _, response ->
-                response.type("application/json")
-                response.header("Access-Control-Allow-Origin", "*")
-                response.header("Access-Control-Allow-Credentials", "true")
-                response.header("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE, PATCH")
-                response.header("Access-Control-Allow-Headers", "Content-Type, Accept, X-Requested-With, Authorization")
-                response.header("Access-Control-Max-Age", "3600")
-            }
+        this.app.routes {
+            path("/api") {
+                get("/user-guilds") { ctx -> OtherAPi.fetchGuildsOfUser(ctx, oAuth2Client) }
 
-            options("/*") { _, _ ->
-                // Allow OPTIONS requests
-            }
+                // This is just used by uptime robot to check if the application is up
+                get("/uptimerobot") { ctx -> OtherAPi.uptimeRobot(ctx) }
 
-            get("/user-guilds") { request, response ->
-                return@get OtherAPi.fetchGuildsOfUser(request, response, oAuth2Client)
-            }
-
-            // This is just used by uptime robot to check if the application is up
-            get("/uptimerobot") { _, _ ->
-                return@get OtherAPi.uptimeRobot()
-            }
-
-            // keep?
-            get("/commands.json") { _, _ ->
-                "TODO: setup websocket to bot"
-            }
-
-            post("/update-data") { request, _ ->
-                return@post DataController.updateData(request)
-            }
-
-            get("/invalidate-tokens") { request, _ ->
-                return@get DataController.invalidateTokens(request)
-            }
-
-            path("/check") {
-                post("/user-guild") { request, response ->
-                    return@post GuildApiController.findUserAndGuild(request, response)
-                }
-            }
-
-            path("/custom-commands/$GUILD_ID") {
-                before("") { request, response ->
-                    return@before CustomCommandController.before(request, response)
+                // keep?
+                get("/commands.json") { ctx ->
+                    ctx.plainText()
+                        .result("TODO: setup websocket to bot")
                 }
 
-                get("") { request, response ->
-                    return@get CustomCommandController.show(request, response)
+                post("/update-data") { ctx -> DataController.updateData(ctx) }
+                get("/invalidate-tokens") { ctx -> DataController.invalidateTokens(ctx)  }
+
+                path("/check") {
+                    post("/user-guild") { ctx ->
+                        GuildApiController.findUserAndGuild(ctx)
+                    }
                 }
 
-                patch("") { request, response ->
-                    return@patch CustomCommandController.update(request, response)
-                }
-
-                post("") { request, response ->
-                    return@post CustomCommandController.create(request, response)
-                }
-
-                delete("") { request, response ->
-                    return@delete CustomCommandController.delete(request, response)
+                path("/custom-commands/$GUILD_ID") {
+                    before { ctx -> CustomCommandController.before(ctx) }
+                    get { ctx -> CustomCommandController.show(ctx) }
+                    patch { ctx -> CustomCommandController.update(ctx) }
+                    post { ctx -> CustomCommandController.create(ctx) }
+                    delete { ctx -> CustomCommandController.delete(ctx) }
                 }
             }
         }
     }
 
     private fun mapErrorRoutes() {
-        this.app.error(404, "json") { ctx ->
-            ctx.json(
-                jsonMapper.createObjectNode()
-                    .put("success", false)
-                    .put("message", "'${ctx.path()}' was not found")
-                    .put("code", ctx.status())
-            )
-        }
-
         this.app.error(404) { ctx ->
             ctx.render(
                 "errors/404.vm",
@@ -221,15 +177,6 @@ class WebServer {
                     .put("hide_menu", true)
                     .put("title", "404 - Page Not Found")
                     .toMap()
-            )
-        }
-
-        this.app.error(500, "json") { ctx ->
-            ctx.json(
-                jsonMapper.createObjectNode()
-                    .put("success", false)
-                    .put("message", "Internal server error")
-                    .put("code", ctx.status())
             )
         }
 
@@ -257,8 +204,8 @@ class WebServer {
     }
 
     private fun getWithGuildData(path: String, map: WebVariables, view: String) {
-        get(path) { request, _ ->
-            val guild = request.fetchGuild()
+        get(path) { ctx ->
+            val guild = ctx.fetchGuild()
 
             if (guild != null) {
                 val guildId = guild.idLong
@@ -277,14 +224,13 @@ class WebServer {
                 map.put("settings", settings)
                 map.put("guildColor", Utils.colorToHex(settings.embedColor))
 
-                map.put("guild_patron", fetchGuildPatronStatus(request.guildId!!))
+                map.put("guild_patron", fetchGuildPatronStatus(ctx.guildId))
             }
 
-            val session = request.session()
-            val message: String? = session.attribute(FLASH_MESSAGE)
+            val message: String? = ctx.sessionAttribute(FLASH_MESSAGE)
 
             if (!message.isNullOrEmpty()) {
-                session.attribute(FLASH_MESSAGE, null)
+                ctx.sessionAttribute(FLASH_MESSAGE, null)
                 map.put("message", message)
             } else {
                 map.put("message", false)
@@ -292,7 +238,7 @@ class WebServer {
 
             map.put("hide_menu", false)
 
-            map.toModelAndView(view)
+            ctx.render(view, map.toMap())
         }
 
     }

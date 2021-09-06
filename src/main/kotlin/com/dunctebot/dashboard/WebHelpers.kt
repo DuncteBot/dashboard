@@ -3,67 +3,45 @@ package com.dunctebot.dashboard
 import com.dunctebot.dashboard.WebServer.Companion.GUILD_ID
 import com.dunctebot.dashboard.WebServer.Companion.SESSION_ID
 import com.dunctebot.dashboard.WebServer.Companion.USER_ID
-import com.dunctebot.dashboard.rendering.VelocityRenderer
 import com.dunctebot.dashboard.rendering.WebVariables
 import com.fasterxml.jackson.databind.JsonNode
 import com.jagrosh.jdautilities.oauth2.OAuth2Client
 import com.jagrosh.jdautilities.oauth2.session.Session
 import io.javalin.http.Context
-import io.javalin.http.NotFoundResponse
+import io.javalin.http.ForbiddenResponse
+import io.javalin.http.UnauthorizedResponse
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.internal.utils.IOUtil
 import okhttp3.FormBody
-import spark.*
-import java.net.URLDecoder
-import java.nio.charset.StandardCharsets
 
-val engine = VelocityRenderer()
+fun Context.plainText(): Context = this.contentType("text/plain")
 
-private fun String.decodeUrl() = URLDecoder.decode(this, StandardCharsets.UTF_8)
-
-// TODO: Might just send a json body instead
-val Request.paramsMap: Map<String, String>
-    get () {
-        val body = this.body()
-        val map = hashMapOf<String, String>()
-
-        body.split("&").forEach {
-            val split = it.split("=")
-
-            map[split[0].decodeUrl()] = split[1].decodeUrl()
-        }
-
-        return map
-    }
-
-val Request.jsonBody: JsonNode
+val Context.jsonBody: JsonNode
     get() = jsonMapper.readTree(this.bodyAsBytes())
 
-val Request.userId: String
-    get() = this.session().attribute(USER_ID) as String
+val Context.userId: String
+    get() = this.sessionAttribute(USER_ID)!!
 
-val Request.guildId: String?
-    get() = this.params(GUILD_ID)
+val Context.guildId: String
+    get() = this.pathParam(GUILD_ID)
 
-fun Request.fetchGuild(): Guild? {
-    val guildId: String = this.guildId ?: return null
-
+fun Context.fetchGuild(): Guild? {
     return try {
-        restJDA.retrieveGuildById(guildId).complete()
+        restJDA.retrieveGuildById(this.guildId).complete()
     } catch (e: Exception) {
         e.printStackTrace()
         null
     }
 }
 
-fun Request.authOrFail() {
-    if (!(this.headers().contains("Authorization") && duncteApis.validateToken(this.headers("Authorization")))) {
-        Spark.halt(401)
+fun Context.authOrFail() {
+    if (!(this.header("Authorization") != null && duncteApis.validateToken(this.header("Authorization")!!))) {
+        throw UnauthorizedResponse()
     }
 }
 
-fun Request.getSession(oAuth2Client: OAuth2Client): Session? {
-    val session: String? = this.session().attribute(SESSION_ID)
+fun Context.getSession(oAuth2Client: OAuth2Client): Session? {
+    val session = this.sessionAttribute<String?>(SESSION_ID)
 
     if (session.isNullOrEmpty()) {
         return null
@@ -86,39 +64,17 @@ fun String?.toSafeLong(): Long {
     }
 }
 
-fun haltDiscordError(error: DiscordError, guildId: String = ""): HaltException {
-    throw Spark.halt(
-        403,
-        transformResponse(
-            WebVariables()
-                .put("hide_menu", true)
-                .put("title", error.title)
-                .put("guildId", guildId)
-                .toModelAndView(error.viewPath)
-        )
+fun haltDiscordError(ctx: Context, error: DiscordError, guildId: String = ""): ForbiddenResponse {
+    ctx.render(
+        error.viewPath,
+        WebVariables()
+            .put("hide_menu", true)
+            .put("title", error.title)
+            .put("guildId", guildId)
+            .toMap()
     )
-}
 
-fun haltNotFound(): NotFoundResponse {
-    throw NotFoundResponse()
-}
-
-fun haltNotFound(request: Request, response: Response): HaltException {
-    throw Spark.halt(404, CustomErrorPages.getFor(404, request, response) as String)
-}
-
-fun transformResponse(it: Any): String {
-    return when (it) {
-        is JsonNode -> {
-            jsonMapper.writeValueAsString(it)
-        }
-        is ModelAndView -> {
-            engine.render(it)
-        }
-        else -> {
-            it.toString()
-        }
-    }
+    throw ForbiddenResponse()
 }
 
 fun verifyCaptcha(response: String): JsonNode {

@@ -6,25 +6,26 @@ import com.dunctebot.dashboard.utils.fetchGuildPatronStatus
 import com.dunctebot.models.settings.GuildSetting
 import com.dunctebot.models.settings.WarnAction
 import com.dunctebot.models.utils.Utils.colorToInt
-import spark.Request
-import spark.Response
-import spark.Spark
+import io.javalin.http.BadRequestResponse
+import io.javalin.http.Context
+import io.javalin.http.RedirectResponse
 import kotlin.math.max
 import kotlin.math.min
 
 object SettingsController {
-    fun saveSettings(request: Request, response: Response): Any {
-        val params = request.paramsMap
+    fun saveSettings(ctx: Context) {
+        val params = ctx.formParamMap()
         val rateLimits = parseRateLimits(params)
 
         // rate limits are null when parsing failed
         if (rateLimits == null) {
-            request.session().attribute(FLASH_MESSAGE, "<h4>Rate limits are invalid</h4>")
+            ctx.sessionAttribute(FLASH_MESSAGE, "<h4>Rate limits are invalid</h4>")
+            ctx.redirect(ctx.url())
 
-            return response.redirect(request.url())
+            throw RedirectResponse()
         }
 
-        val settings = duncteApis.getGuildSetting(request.guildId!!.toLong())
+        val settings = duncteApis.getGuildSetting(ctx.guildId.toLong())
 
         setBasic(params, settings)
         setModeration(params, rateLimits, settings)
@@ -32,23 +33,22 @@ object SettingsController {
 
         sendSettingUpdate(settings)
 
-        request.session().attribute(FLASH_MESSAGE, "All settings updated!")
-
-        return response.redirect(request.url())
+        ctx.sessionAttribute(FLASH_MESSAGE, "All settings updated!")
+        ctx.redirect(ctx.url())
     }
 
-    private fun setBasic(params: Map<String, String>, settings: GuildSetting) {
-        var prefix = params["prefix"] ?: "db!"
+    private fun setBasic(params: Map<String, List<String>>, settings: GuildSetting) {
+        var prefix = params["prefix"]?.firstOrNull() ?: "db!"
 
         if (prefix.length > 10) {
             prefix = prefix.substring(0, 10)
         }
 
-        val autorole = params["autoRoleRole"].toSafeLong()
-        val announceTracks = params["announceTracks"].toCBBool()
-        val allowAllToStop = params["allowAllToStop"].toCBBool()
-        val color = colorToInt(params["embedColor"])
-        var leaveTimeout = params["leaveTimeout"].toSafeLong().toInt()
+        val autorole = params["autoRoleRole"]?.firstOrNull().toSafeLong()
+        val announceTracks = params["announceTracks"]?.firstOrNull().toCBBool()
+        val allowAllToStop = params["allowAllToStop"]?.firstOrNull().toCBBool()
+        val color = colorToInt(params["embedColor"]?.first())
+        var leaveTimeout = params["leaveTimeout"]?.firstOrNull().toSafeLong().toInt()
 
         if (leaveTimeout < 1 || leaveTimeout > 60) {
             leaveTimeout = 1
@@ -63,29 +63,29 @@ object SettingsController {
             .setEmbedColor(color)
     }
 
-    private fun setModeration(params: Map<String, String>, rateLimits: LongArray, settings: GuildSetting) {
-        val modLogChannel = params["modChannel"].toSafeLong()
-        val autoDeHoist = params["autoDeHoist"].toCBBool()
-        val filterInvites = params["filterInvites"].toCBBool()
-        val swearFilter = params["swearFilter"].toCBBool()
-        val muteRole = params["muteRole"].toSafeLong()
-        val spamFilter = params["spamFilter"].toCBBool()
-        val kickMode = params["kickMode"].toCBBool()
-        val spamThreshold = params["spamThreshold"]?.toIntOrNull() ?: 7
-        val filterType = params["filterType"]
+    private fun setModeration(params: Map<String, List<String>>, rateLimits: LongArray, settings: GuildSetting) {
+        val modLogChannel = params["modChannel"]?.firstOrNull().toSafeLong()
+        val autoDeHoist = params["autoDeHoist"]?.firstOrNull().toCBBool()
+        val filterInvites = params["filterInvites"]?.firstOrNull().toCBBool()
+        val swearFilter = params["swearFilter"]?.firstOrNull().toCBBool()
+        val muteRole = params["muteRole"]?.firstOrNull().toSafeLong()
+        val spamFilter = params["spamFilter"]?.firstOrNull().toCBBool()
+        val kickMode = params["kickMode"]?.firstOrNull().toCBBool()
+        val spamThreshold = params["spamThreshold"]?.firstOrNull()?.toIntOrNull() ?: 7
+        val filterType = params["filterType"]?.firstOrNull()
 
-        val logBan = params["logBan"].toCBBool()
-        val logUnban = params["logUnban"].toCBBool()
-        val logMute = params["logMute"].toCBBool()
-        val logKick = params["logKick"].toCBBool()
-        val logWarn = params["logWarn"].toCBBool()
-        val logInvite = params["logInvite"].toCBBool()
-        val logMember = params["logMember"].toCBBool()
+        val logBan = params["logBan"]?.firstOrNull().toCBBool()
+        val logUnban = params["logUnban"]?.firstOrNull().toCBBool()
+        val logMute = params["logMute"]?.firstOrNull().toCBBool()
+        val logKick = params["logKick"]?.firstOrNull().toCBBool()
+        val logWarn = params["logWarn"]?.firstOrNull().toCBBool()
+        val logInvite = params["logInvite"]?.firstOrNull().toCBBool()
+        val logMember = params["logMember"]?.firstOrNull().toCBBool()
 
-        val aiSensitivity = ((params["ai-sensitivity"] ?: "0.7").toFloatOrNull() ?: 0.7f).minMax(0f, 1f)
+        val aiSensitivity = ((params["ai-sensitivity"]?.firstOrNull() ?: "0.7").toFloatOrNull() ?: 0.7f).minMax(0f, 1f)
 
-        val youngAccountThreshold = params["young_account_threshold"]?.toIntOrNull() ?: 10
-        val youngAccountBanEnable = params["young_account_ban_enabled"].toCBBool()
+        val youngAccountThreshold = params["young_account_threshold"]?.firstOrNull()?.toIntOrNull() ?: 10
+        val youngAccountBanEnable = params["young_account_ban_enabled"]?.firstOrNull().toCBBool()
 
         val guildId = settings.guildId
         val warnActionsList = parseWarnActions(guildId, params)
@@ -114,13 +114,13 @@ object SettingsController {
             .setYoungAccountBanEnabled(youngAccountBanEnable)
     }
 
-    private fun setMessages(params: Map<String, String>, settings: GuildSetting) {
-        val welcomeEnabled = params["welcomeChannelCB"].toCBBool()
-        val leaveEnabled = params["leaveChannelCB"].toCBBool()
-        val welcomeMessage = params["welcomeMessage"]
-        val leaveMessage = params["leaveMessage"]
-        val serverDescription = params["serverDescription"]
-        val welcomeChannel = params["welcomeChannel"].toSafeLong()
+    private fun setMessages(params: Map<String, List<String>>, settings: GuildSetting) {
+        val welcomeEnabled = params["welcomeChannelCB"]?.firstOrNull().toCBBool()
+        val leaveEnabled = params["leaveChannelCB"]?.firstOrNull().toCBBool()
+        val welcomeMessage = params["welcomeMessage"]?.firstOrNull()
+        val leaveMessage = params["leaveMessage"]?.firstOrNull()
+        val serverDescription = params["serverDescription"]?.firstOrNull()
+        val welcomeChannel = params["welcomeChannel"]?.firstOrNull().toSafeLong()
 
         settings.setServerDesc(serverDescription)
             .setWelcomeLeaveChannel(welcomeChannel)
@@ -143,7 +143,7 @@ object SettingsController {
         duncteApis.saveGuildSetting(setting)
     }
 
-    private fun parseRateLimits(params: Map<String, String>): LongArray? {
+    private fun parseRateLimits(params: Map<String, List<String>>): LongArray? {
         val rateLimits = LongArray(6)
 
         for (i in 0..5) {
@@ -154,13 +154,13 @@ object SettingsController {
                 return null
             }
 
-            rateLimits[i] = value.toLong()
+            rateLimits[i] = value.first().toLong()
         }
 
         return rateLimits
     }
 
-    private fun parseWarnActions(guildId: Long, params: Map<String, String>): List<WarnAction> {
+    private fun parseWarnActions(guildId: Long, params: Map<String, List<String>>): List<WarnAction> {
         val warnActionsList = arrayListOf<WarnAction>()
         val isGuildPatron = fetchGuildPatronStatus(guildId.toString())
         val maxWarningActionCount = if(isGuildPatron) WarnAction.PATRON_MAX_ACTIONS else 1
@@ -174,7 +174,7 @@ object SettingsController {
             if (!params.containsKey("tempDays$i") ||
                 !params.containsKey("threshold$i")
             ) {
-                Spark.halt(400, "Invalid warn action detected")
+                throw BadRequestResponse("Invalid warn action detected")
             }
 
             if (
@@ -183,12 +183,12 @@ object SettingsController {
                 params["tempDays$i"].isNullOrEmpty() ||
                 params["threshold$i"].isNullOrEmpty()
             ) {
-                Spark.halt(400, "One or more warn actions has empty values")
+                throw BadRequestResponse("One or more warn actions has empty values")
             }
 
-            val action = WarnAction.Type.valueOf(params.getValue("warningAction$i"))
-            val duration = params.getValue("tempDays$i").toInt()
-            val threshold = params.getValue("threshold$i").toInt()
+            val action = WarnAction.Type.valueOf(params.getValue("warningAction$i").first())
+            val duration = params.getValue("tempDays$i").first().toInt()
+            val threshold = params.getValue("threshold$i").first().toInt()
 
             warnActionsList.add(WarnAction(action, threshold, duration))
         }
