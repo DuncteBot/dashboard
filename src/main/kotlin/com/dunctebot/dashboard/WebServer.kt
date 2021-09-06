@@ -105,9 +105,7 @@ class WebServer {
 
         this.app.routes {
             path("server/$GUILD_ID") {
-                before { ctx ->
-                    DashboardController.before(ctx)
-                }
+                before { ctx -> DashboardController.before(ctx) }
 
                 getWithGuildData(
                     "",
@@ -120,9 +118,7 @@ class WebServer {
                     "dashboard/serverSettings.vm"
                 )
 
-                post("") { ctx ->
-                    SettingsController.saveSettings(ctx)
-                }
+                post { ctx -> SettingsController.saveSettings(ctx) }
 
                 // Custom command settings
                 getWithGuildData(
