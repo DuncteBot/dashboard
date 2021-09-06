@@ -1,16 +1,13 @@
 package com.dunctebot.dashboard.controllers
 
 import com.dunctebot.dashboard.*
-import com.dunctebot.dashboard.rendering.DbModelAndView
 import com.dunctebot.dashboard.rendering.WebVariables
 import com.github.benmanes.caffeine.cache.Caffeine
+import io.javalin.http.Context
 import net.dv8tion.jda.api.entities.Member
 import net.dv8tion.jda.api.entities.Role
 import net.dv8tion.jda.api.exceptions.ErrorResponseException
-import spark.Request
-import spark.Response
 import java.util.concurrent.TimeUnit
-import kotlin.streams.toList
 
 object GuildController {
     // some hash -> "$userId-$guildId"
@@ -22,39 +19,42 @@ object GuildController {
         .expireAfterWrite(1, TimeUnit.HOURS)
         .build<Long, List<CustomRole>>()
 
-    fun handleOneGuildRegister(request: Request): Any {
-        val params = request.paramsMap
-        val token = params["token"]
+    fun handleOneGuildRegister(ctx: Context) {
+        val token = ctx.formParam("token")
 
         if (token.isNullOrBlank()) {
-            return renderPatronRegisterPage {
+            renderPatronRegisterPage(ctx) {
                 it.put("message", "Submitted token is not valid.")
             }
+            return
         }
 
         if (!securityKeys.containsKey(token)) {
-            return renderPatronRegisterPage {
+            renderPatronRegisterPage(ctx) {
                 it.put("message", "Submitted token is not valid.")
             }
+            return
         }
 
-        val userId = params["user_id"].toSafeLong()
-        val guildId = params["guild_id"].toSafeLong()
+        val userId = ctx.formParam("user_id").toSafeLong()
+        val guildId = ctx.formParam("guild_id").toSafeLong()
         val theFormat = "$userId-$guildId"
 
         if (securityKeys[token] != theFormat) {
-            return renderPatronRegisterPage {
+            renderPatronRegisterPage(ctx) {
                 it.put("message", "Submitted token is not valid.")
             }
+            return
         }
 
         // remove the token as it is used
         securityKeys.remove(token)
 
         if (duncteApis.isOneGuildPatron(userId.toString())) {
-            return renderPatronRegisterPage {
+            renderPatronRegisterPage(ctx) {
                 it.put("message", "This user is already registered, please contact a bot admin to have it changed.")
             }
+            return
         }
 
         val sendData = jsonMapper.createObjectNode()
@@ -67,13 +67,13 @@ object GuildController {
 
         webSocket.broadcast(sendData)
 
-        return renderPatronRegisterPage {
+        renderPatronRegisterPage(ctx) {
             it.put("message", "Server successfully registered.")
                 .put("hideForm", true)
         }
     }
 
-    private fun renderPatronRegisterPage(vars: (WebVariables) -> Unit = {}): DbModelAndView {
+    private fun renderPatronRegisterPage(ctx: Context, vars: (WebVariables) -> Unit = {}) {
         val map = WebVariables()
 
         vars(map)
@@ -82,19 +82,22 @@ object GuildController {
             .put("hide_menu", true)
             .put("captcha_sitekey", System.getenv("CAPTCHA_SITEKEY"))
 
-        return map.toModelAndView("oneGuildRegister.vm")
+        ctx.render(
+            "oneGuildRegister.vm",
+            map.toMap()
+        )
     }
 
-    fun showGuildRoles(request: Request, response: Response): Any {
-        val hash = request.params("hash")
-        val guildId = guildHashes.getIfPresent(hash) ?: return haltNotFound(request, response)
+    fun showGuildRoles(ctx: Context) {
+        val hash = ctx.pathParam("hash")
+        val guildId = guildHashes.getIfPresent(hash) ?: throw haltNotFound()
         val guild = try {
             // TODO: do we want to do this?
             // Maybe only cache for a short time as it will get outdated data
             restJDA.fakeJDA.getGuildById(guildId) ?: restJDA.retrieveGuildById(guildId.toString()).complete()
         } catch (e: ErrorResponseException) {
             e.printStackTrace()
-            return haltNotFound(request, response)
+            throw haltNotFound()
         }
 
         val roles = guildRoleCache.get(guild.idLong) {
@@ -103,12 +106,15 @@ object GuildController {
             guild.roles.map { CustomRole(it, members) }
         }!!
 
-        return WebVariables()
-            .put("hide_menu", true)
-            .put("title", "Roles for ${guild.name}")
-            .put("guild_name", guild.name)
-            .put("roles", roles)
-            .toModelAndView("guildRoles.vm")
+        ctx.render(
+            "guildRoles.vm",
+            WebVariables()
+                .put("hide_menu", true)
+                .put("title", "Roles for ${guild.name}")
+                .put("guild_name", guild.name)
+                .put("roles", roles)
+                .toMap()
+        )
     }
 
     class CustomRole(private val realRole: Role, allMembers: List<Member>) : Role by realRole {

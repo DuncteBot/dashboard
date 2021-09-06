@@ -8,58 +8,48 @@ import com.dunctebot.dashboard.controllers.api.CustomCommandController
 import com.dunctebot.dashboard.controllers.api.DataController
 import com.dunctebot.dashboard.controllers.api.GuildApiController
 import com.dunctebot.dashboard.controllers.api.OtherAPi
-import com.dunctebot.dashboard.controllers.errors.HttpErrorHandlers
-import com.dunctebot.dashboard.rendering.VelocityRenderer
 import com.dunctebot.dashboard.rendering.WebVariables
 import com.dunctebot.dashboard.utils.fetchGuildPatronStatus
 import com.dunctebot.models.settings.GuildSetting
 import com.dunctebot.models.settings.ProfanityFilterType
 import com.dunctebot.models.settings.WarnAction
 import com.dunctebot.models.utils.Utils
-import com.fasterxml.jackson.databind.JsonNode
 import com.jagrosh.jdautilities.oauth2.OAuth2Client
+import io.javalin.Javalin
+import io.javalin.core.compression.CompressionStrategy
+import io.javalin.http.staticfiles.Location
+import io.javalin.plugin.rendering.JavalinRenderer
 import net.dv8tion.jda.api.entities.TextChannel
-import spark.ModelAndView
 import spark.Spark.*
 
 // The socket server will be used to communicate with DuncteBot himself
 // NGINX can secure the websocket (hopefully it does this by default as we are using the same domain)
 class WebServer {
+    private val app: Javalin
     private val oAuth2Client = OAuth2Client.Builder()
         .setClientId(System.getenv("OAUTH_CLIENT_ID").toLong())
         .setClientSecret(System.getenv("OAUTH_CLIENT_SECRET"))
-        /*.setOkHttpClient(
-            OkHttpClient.Builder()
-                // hack until JDA-Utils fixes the domain
-                .addInterceptor {
-                    var request = it.request()
-                    val httpUrl = request.url()
-
-                    if (httpUrl.host().contains("discordapp")){
-                        val newHttpUrl = httpUrl.newBuilder()
-                            .host("discord.com")
-                            .build()
-
-                        request = request.newBuilder()
-                            .url(newHttpUrl)
-                            .build()
-                    }
-
-                    it.proceed(request)
-                }
-                .build()
-        )*/
         .build()
 
     init {
-        if (System.getenv("IS_LOCAL").toBoolean()) {
-            val projectDir = System.getProperty("user.dir")
-            val staticDir = "/src/main/resources/public"
-            staticFiles.externalLocation(projectDir + staticDir)
-            port(2000)
-        } else {
-            staticFiles.location("/public")
+        // Register the view renderer
+        JavalinRenderer.register(engine::render, ".vm")
+
+        this.app = Javalin.create { config ->
+            config.compressionStrategy(CompressionStrategy.GZIP)
+            config.autogenerateEtags = true
+
+            if (System.getenv("IS_LOCAL").toBoolean()) {
+                val projectDir = System.getProperty("user.dir")
+                val staticDir = "/src/main/resources/public"
+                config.addStaticFiles(projectDir + staticDir, Location.EXTERNAL)
+                config.enableDevLogging()
+            } else {
+                config.addStaticFiles("/public", Location.CLASSPATH)
+            }
         }
+
+        port(1234)
 
         defaultResponseTransformer { transformResponse(it) }
 
@@ -72,67 +62,45 @@ class WebServer {
         }*/
 
         // Non settings related routes
-        get("/roles/:hash") { request, response ->
-            return@get GuildController.showGuildRoles(request, response)
+        this.app.get("/roles/:hash") { ctx -> GuildController.showGuildRoles(ctx) }
+
+        this.app.get("/register-server") { ctx ->
+            ctx.render(
+                "oneGuildRegister.vm",
+                WebVariables()
+                    .put("hide_menu", true)
+                    .put("title", "Register your server for patron perks")
+                    .put("captcha_sitekey", System.getenv("CAPTCHA_SITEKEY"))
+                    .toMap()
+            )
         }
 
-        get("/register-server") { _, _ ->
-            WebVariables()
-                .put("hide_menu", true)
-                .put("title", "Register your server for patron perks")
-                .put("captcha_sitekey", System.getenv("CAPTCHA_SITEKEY"))
-                .toModelAndView("oneGuildRegister.vm")
-        }
-
-        post("/register-server") { request, _ ->
-            return@post GuildController.handleOneGuildRegister(request)
-        }
+        this.app.post("/register-server") { ctx -> GuildController.handleOneGuildRegister(ctx) }
 
         addDashboardRoutes()
         addAPIRoutes()
-
-        notFound { request, response ->
-            val result = HttpErrorHandlers.notFound(request, response)
-
-            return@notFound transformResponse(result)
-        }
-
-        internalServerError { request, response ->
-            val result = HttpErrorHandlers.internalServerError(request, response)
-
-            return@internalServerError transformResponse(result)
-        }
-
-        // I hate how they made it varargs
-        // now I have to add parentheses
-        after({ _, response ->
-            // enable gzip, this is done automagically by sending the header
-            response.header("Content-Encoding", "gzip")
-        })
+        mapErrorRoutes()
     }
 
     private fun addDashboardRoutes() {
-        get("/callback") { request, response ->
-            return@get RootController.callback(request, response, oAuth2Client)
+        this.app.get("/callback") { ctx -> RootController.callback(ctx, oAuth2Client) }
+
+        this.app.get("/logout") { ctx ->
+            // Dear Intellij, shut the fuck up this code compiles
+            ctx.req.session.invalidate()
+
+            ctx.redirect("$HOMEPAGE?logout=true")
         }
 
-        get("/logout") { request, response ->
-            request.session().invalidate()
-
-            return@get response.redirect(HOMEPAGE)
-        }
-
-        path("/") {
-            before("") { request, response ->
-                return@before RootController.beforeRoot(request, response, oAuth2Client)
-            }
-
-            get("") { _, _ ->
-                return@get WebVariables()
+        this.app.before("/") { ctx -> RootController.beforeRoot(ctx, oAuth2Client) }
+        this.app.get("/") { ctx ->
+            ctx.render(
+                "dashboard/index.vm",
+                WebVariables()
                     .put("title", "Dashboard")
                     .put("hide_menu", true)
-                    .toModelAndView("dashboard/index.vm")
-            }
+                    .toMap()
+            )
         }
 
         path("/server/$GUILD_ID") {
@@ -166,16 +134,7 @@ class WebServer {
                     .put("using_tabs", false),
                 "dashboard/customCommandSettings.vm"
             )
-
-
-            // Soon tm?
-            /*get("/music") { request, _ ->
-                val guild = WebHelpers.getGuildFromRequest(request, shardManager)
-                    ?: return@get """{"message": "No guild? WOT"}"""
-                val mng = variables.audioUtils.getMusicManager(guild)
-
-                EarthUtils.gMMtoJSON(mng, variables.jackson)
-            }*/        }
+        }
     }
 
     private fun addAPIRoutes() {
@@ -245,12 +204,56 @@ class WebServer {
         }
     }
 
+    private fun mapErrorRoutes() {
+        this.app.error(404, "json") { ctx ->
+            ctx.json(
+                jsonMapper.createObjectNode()
+                    .put("success", false)
+                    .put("message", "'${ctx.path()}' was not found")
+                    .put("code", ctx.status())
+            )
+        }
+
+        this.app.error(404) { ctx ->
+            ctx.render(
+                "errors/404.vm",
+                WebVariables()
+                    .put("hide_menu", true)
+                    .put("title", "404 - Page Not Found")
+                    .toMap()
+            )
+        }
+
+        this.app.error(500, "json") { ctx ->
+            ctx.json(
+                jsonMapper.createObjectNode()
+                    .put("success", false)
+                    .put("message", "Internal server error")
+                    .put("code", ctx.status())
+            )
+        }
+
+        this.app.error(500) { ctx ->
+            ctx.render(
+                "errors/500.vm",
+                WebVariables()
+                    .put("hide_menu", true)
+                    .put("title", "500 - Internal Server error")
+                    .toMap()
+            )
+        }
+    }
+
     fun start() {
-        // dummy method for class loading
+        if (System.getenv("IS_LOCAL").toBoolean()) {
+            this.app.start(2000)
+        } else {
+            this.app.start(4567)
+        }
     }
 
     fun shutdown() {
-        awaitStop()
+        this.app.stop()
     }
 
     private fun getWithGuildData(path: String, map: WebVariables, view: String) {

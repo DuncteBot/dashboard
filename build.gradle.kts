@@ -27,6 +27,7 @@ dependencies {
 
     implementation(group = "ch.qos.logback", name = "logback-classic", version = "1.2.3")
 
+    implementation(group = "io.javalin", name = "javalin", version = "3.13.11")
     implementation(group = "com.sparkjava", name = "spark-core", version = "2.9.2")
     implementation(group = "org.apache.velocity", name = "velocity-engine-core", version = "2.2")
 

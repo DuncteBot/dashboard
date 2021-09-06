@@ -8,6 +8,8 @@ import com.dunctebot.dashboard.rendering.WebVariables
 import com.fasterxml.jackson.databind.JsonNode
 import com.jagrosh.jdautilities.oauth2.OAuth2Client
 import com.jagrosh.jdautilities.oauth2.session.Session
+import io.javalin.http.Context
+import io.javalin.http.NotFoundResponse
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.internal.utils.IOUtil
 import okhttp3.FormBody
@@ -15,7 +17,7 @@ import spark.*
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 
-private val engine = VelocityRenderer()
+val engine = VelocityRenderer()
 
 private fun String.decodeUrl() = URLDecoder.decode(this, StandardCharsets.UTF_8)
 
@@ -95,6 +97,10 @@ fun haltDiscordError(error: DiscordError, guildId: String = ""): HaltException {
                 .toModelAndView(error.viewPath)
         )
     )
+}
+
+fun haltNotFound(): NotFoundResponse {
+    throw NotFoundResponse()
 }
 
 fun haltNotFound(request: Request, response: Response): HaltException {

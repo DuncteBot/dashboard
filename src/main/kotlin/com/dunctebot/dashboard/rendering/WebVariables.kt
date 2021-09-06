@@ -11,4 +11,8 @@ class WebVariables {
     fun toModelAndView(view: String): DbModelAndView {
         return DbModelAndView(map, view)
     }
+
+    fun toMap(): Map<String, Any> {
+        return map
+    }
 }
