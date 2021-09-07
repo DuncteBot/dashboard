@@ -13,6 +13,7 @@ import io.javalin.http.UnauthorizedResponse
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.internal.utils.IOUtil
 import okhttp3.FormBody
+import java.time.OffsetDateTime
 
 fun Context.plainText(): Context = this.contentType("text/plain")
 
@@ -41,13 +42,13 @@ fun Context.authOrFail() {
 }
 
 fun Context.getSession(oAuth2Client: OAuth2Client): Session? {
-    val session = this.sessionAttribute<String?>(SESSION_ID)
+    val sessionId = this.sessionAttribute<String?>(SESSION_ID)
 
-    if (session.isNullOrEmpty()) {
+    if (sessionId.isNullOrEmpty()) {
         return null
     }
 
-    return oAuth2Client.sessionController.getSession(session)
+    return oAuth2Client.sessionController.getSession(sessionId)
 }
 
 fun String?.toCBBool(): Boolean = if (this.isNullOrEmpty()) false else (this == "on")

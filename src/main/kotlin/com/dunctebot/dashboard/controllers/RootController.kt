@@ -44,12 +44,12 @@ object RootController {
             return ctx.redirect(HOMEPAGE)
         }
 
-        try {
-            // If the session is missing we will return the user to the homepage
-            if (ctx.sessionAttribute<String?>(SESSION_ID) == null){
-                return ctx.redirect(HOMEPAGE)
-            }
+        // If the session is missing we will return the user to the homepage
+        if (ctx.sessionAttribute<String?>(SESSION_ID) == null){
+            return ctx.redirect(HOMEPAGE)
+        }
 
+        try {
             // Get the session id for the user
             val sesid: String? = ctx.sessionAttribute(SESSION_ID)
             // Start a session to obtain the oauth2 access token

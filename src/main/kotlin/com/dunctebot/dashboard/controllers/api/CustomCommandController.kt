@@ -18,14 +18,7 @@ object CustomCommandController {
         if (!(attributes.contains(USER_ID) && attributes.contains(SESSION_ID))) {
             ctx.contentType(ContentType.JSON)
             
-            throw UnauthorizedResponse(
-                jsonMapper.writeValueAsString(
-                    jsonMapper.createObjectNode()
-                        .put("status", "error")
-                        .put("message", "Invalid session")
-                        .put("code", ctx.status())
-                )
-            )
+            throw UnauthorizedResponse("Invalid session")
         }
     }
 

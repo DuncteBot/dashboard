@@ -60,7 +60,7 @@
 
 #define ($scripts)
 <script src="https://hcaptcha.com/1/api.js" async defer></script>
-<script src="/js/patron-guild.js?v=2"></script>
+<script src="/js/patron-guild.js"></script>
 #end
 
 #parse('/views/templates/base.vm')

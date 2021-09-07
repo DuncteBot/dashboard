@@ -105,7 +105,11 @@ function deleteCommand(name) {
         toast("Deleted!");
         hideEditor();
         id("chars").innerHTML = 0;
-        setTimeout(() => window.location.reload(), 500);
+        setTimeout(() => {
+            hideEditor();
+            reset();
+            loadCommands();
+        }, 500);
     });
 }
 
@@ -196,9 +200,13 @@ function createNew() {
 
     doFetch('POST', command, () => {
         toast("Command added");
-        setTimeout(() => window.location.reload(), 500);
         // modal.close();
         id("chars").innerHTML = 0;
+        setTimeout(() => {
+            hideEditor();
+            reset();
+            loadCommands();
+        }, 500);
     });
 }
 
@@ -218,7 +226,7 @@ function doFetch(method, body, cb) {
                 return
             }
 
-            notSaveToast(json.message);
+            notSaveToast(json.message || json.title || 'Unknown error');
         })
         .catch((e) => {
             notSaveToast(e);

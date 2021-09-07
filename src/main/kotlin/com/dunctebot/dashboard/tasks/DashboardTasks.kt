@@ -2,6 +2,9 @@ package com.dunctebot.dashboard.tasks
 
 import com.dunctebot.dashboard.controllers.GuildController
 import com.dunctebot.dashboard.controllers.api.OtherAPi
+import com.dunctebot.dashboard.server
+import com.dunctebot.jda.oauth.OauthSessionController
+import java.time.OffsetDateTime
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
@@ -41,5 +44,13 @@ class DashboardTasks {
             1,
             TimeUnit.DAYS
         )
+        // clear the oauth sessions every day
+        threadPool.scheduleAtFixedRate({
+            val sessionController = server.oAuth2Client.sessionController as OauthSessionController
+            val sessions = sessionController.sessions
+            val now = OffsetDateTime.now()
+
+            sessions.filterValues { now >= it.expiration }.keys.forEach(sessions::remove)
+        }, 1, 1, TimeUnit.DAYS)
     }
 }

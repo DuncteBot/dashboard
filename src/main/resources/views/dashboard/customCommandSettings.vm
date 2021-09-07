@@ -16,14 +16,7 @@
     <br/>
 
     <ul class="collection" id="commands">
-        <p class="center flow-text">
-            Loading...
-            <br />
-            <br />
-        <div class="progress">
-            <div class="indeterminate"></div>
-        </div>
-        </p>
+
     </ul>
 </div>
 
@@ -74,10 +67,15 @@
 <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.52.0/mode/javascript/javascript.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.52.0/addon/mode/simple.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.52.0/addon/hint/show-hint.min.js"></script>
-<script src="/js/hinting.js?v=2"></script>
-<script src="/js/customCommands.js?v=2"></script>
+<script src="/js/hinting.js"></script>
+<script src="/js/customCommands.js"></script>
 <script src="/js/wordlist.js"></script>
 <script>
+    function reset() {
+        document.getElementById('commands').innerHTML = '<p class="center flow-text">Loading...<br /><br /><div class="progress"><div class="indeterminate"></div></div></p>';
+    }
+    reset();
+
     window.guildId = "$guild.getIdLong()";
     window.prefix = "$settings.getCustomPrefix()";
     initModal();

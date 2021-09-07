@@ -11,6 +11,7 @@ import com.dunctebot.dashboard.controllers.api.OtherAPi
 import com.dunctebot.dashboard.rendering.VelocityRenderer
 import com.dunctebot.dashboard.rendering.WebVariables
 import com.dunctebot.dashboard.utils.fetchGuildPatronStatus
+import com.dunctebot.jda.oauth.OauthSessionController
 import com.dunctebot.models.settings.GuildSetting
 import com.dunctebot.models.settings.ProfanityFilterType
 import com.dunctebot.models.settings.WarnAction
@@ -23,12 +24,11 @@ import io.javalin.http.staticfiles.Location
 import io.javalin.plugin.rendering.JavalinRenderer
 import net.dv8tion.jda.api.entities.TextChannel
 
-// The socket server will be used to communicate with DuncteBot himself
-// NGINX can secure the websocket (hopefully it does this by default as we are using the same domain)
 class WebServer {
     private val engine = VelocityRenderer()
     private val app: Javalin
-    private val oAuth2Client = OAuth2Client.Builder()
+    val oAuth2Client: OAuth2Client = OAuth2Client.Builder()
+        .setSessionController(OauthSessionController())
         .setClientId(System.getenv("OAUTH_CLIENT_ID").toLong())
         .setClientSecret(System.getenv("OAUTH_CLIENT_SECRET"))
         .build()
@@ -46,20 +46,10 @@ class WebServer {
                 val staticDir = "/src/main/resources/public"
                 config.addStaticFiles(projectDir + staticDir, Location.EXTERNAL)
                 config.enableDevLogging()
-                config.enableCorsForOrigin("localhost:2000")
             } else {
                 config.addStaticFiles("/public", Location.CLASSPATH)
-                config.enableCorsForOrigin("dashboard.duncte.bot")
             }
         }
-
-        /*get("/test") { request, response ->
-            println(request.host())
-            println(request.url()) // split on the last / and append callback
-            println(request.uri())
-
-            "check console"
-        }*/
 
         // Non settings related routes
         this.app.get("/roles/:hash") { ctx -> GuildController.showGuildRoles(ctx) }
@@ -106,6 +96,7 @@ class WebServer {
         this.app.routes {
             path("server/$GUILD_ID") {
                 before { ctx -> DashboardController.before(ctx) }
+                before("") { ctx -> DashboardController.before(ctx) }
 
                 getWithGuildData(
                     "",
@@ -155,7 +146,7 @@ class WebServer {
                 }
 
                 path("/custom-commands/$GUILD_ID") {
-                    before { ctx -> CustomCommandController.before(ctx) }
+                    before("") { ctx -> CustomCommandController.before(ctx) }
                     get { ctx -> CustomCommandController.show(ctx) }
                     patch { ctx -> CustomCommandController.update(ctx) }
                     post { ctx -> CustomCommandController.create(ctx) }

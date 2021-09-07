@@ -9,7 +9,6 @@ import io.javalin.http.RedirectResponse
 import net.dv8tion.jda.api.Permission
 
 object DashboardController {
-    // TODO: currently broken redirects
     fun before(ctx: Context) {
         if (ctx.sessionAttribute<String?>(USER_ID) == null || ctx.sessionAttribute<String?>(SESSION_ID) == null) {
             ctx.sessionAttribute(OLD_PAGE, ctx.path())
