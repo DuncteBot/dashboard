@@ -13,7 +13,7 @@ fun main() {
     // start tasks
     DashboardTasks()
 
-    logger.info("Dashboard ready")
-
     server.start()
+
+    logger.info("Dashboard ready")
 }
