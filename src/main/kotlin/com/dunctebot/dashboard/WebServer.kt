@@ -53,9 +53,9 @@ class WebServer {
         }
 
         // Non settings related routes
-        this.app.get("/roles/:hash") { ctx -> GuildController.showGuildRoles(ctx) }
+        this.app.get("roles/:hash") { ctx -> GuildController.showGuildRoles(ctx) }
 
-        this.app.get("/register-server") { ctx ->
+        this.app.get("register-server") { ctx ->
             ctx.render(
                 "oneGuildRegister.vm",
                 WebVariables()
@@ -66,7 +66,7 @@ class WebServer {
             )
         }
 
-        this.app.post("/register-server") { ctx -> GuildController.handleOneGuildRegister(ctx) }
+        this.app.post("register-server") { ctx -> GuildController.handleOneGuildRegister(ctx) }
 
         addDashboardRoutes()
         addAPIRoutes()
@@ -74,9 +74,9 @@ class WebServer {
     }
 
     private fun addDashboardRoutes() {
-        this.app.get("/callback") { ctx -> RootController.callback(ctx, oAuth2Client) }
+        this.app.get("callback") { ctx -> RootController.callback(ctx, oAuth2Client) }
 
-        this.app.get("/logout") { ctx ->
+        this.app.get("logout") { ctx ->
             // Dear Intellij, shut the fuck up this code compiles
             ctx.req.session.invalidate()
 
@@ -95,63 +95,58 @@ class WebServer {
         }
 
         this.app.routes {
-            path("server/$GUILD_ID") {
-                before { ctx -> DashboardController.before(ctx) }
-                before("") { ctx -> DashboardController.before(ctx) }
+            path("server") {
+                before("$GUILD_ID*") { ctx -> DashboardController.before(ctx) }
+                path(GUILD_ID) {
+                    getWithGuildData(
+                        "",
+                        WebVariables().put("title", "Dashboard")
+                            .put("filterValues", ProfanityFilterType.values())
+                            .put("warnActionTypes", WarnAction.Type.values())
+                            .put("loggingTypes", GuildSetting.LOGGING_TYPES)
+                            .put("patronMaxWarnActions", WarnAction.PATRON_MAX_ACTIONS)
+                            .put("using_tabs", true),
+                        "dashboard/serverSettings.vm"
+                    )
 
-                getWithGuildData(
-                    "",
-                    WebVariables().put("title", "Dashboard")
-                        .put("filterValues", ProfanityFilterType.values())
-                        .put("warnActionTypes", WarnAction.Type.values())
-                        .put("loggingTypes", GuildSetting.LOGGING_TYPES)
-                        .put("patronMaxWarnActions", WarnAction.PATRON_MAX_ACTIONS)
-                        .put("using_tabs", true),
-                    "dashboard/serverSettings.vm"
-                )
+                    post { ctx -> SettingsController.saveSettings(ctx) }
 
-                post { ctx -> SettingsController.saveSettings(ctx) }
-
-                // Custom command settings
-                getWithGuildData(
-                    "custom-commands",
-                    WebVariables().put("title", "Dashboard")
-                        .put("using_tabs", false),
-                    "dashboard/customCommandSettings.vm"
-                )
+                    // Custom command settings
+                    getWithGuildData(
+                        "custom-commands",
+                        WebVariables().put("title", "Dashboard")
+                            .put("using_tabs", false),
+                        "dashboard/customCommandSettings.vm"
+                    )
+                }
             }
         }
     }
 
     private fun addAPIRoutes() {
         this.app.routes {
-            path("/api") {
-                get("/user-guilds") { ctx -> OtherAPi.fetchGuildsOfUser(ctx, oAuth2Client) }
+            path("api") {
+                get("user-guilds") { ctx -> OtherAPi.fetchGuildsOfUser(ctx, oAuth2Client) }
 
                 // This is just used by uptime robot to check if the application is up
-                get("/uptimerobot") { ctx -> OtherAPi.uptimeRobot(ctx) }
+                get("uptimerobot") { ctx -> OtherAPi.uptimeRobot(ctx) }
+                post("update-data") { ctx -> DataController.updateData(ctx) }
+                get("invalidate-tokens") { ctx -> DataController.invalidateTokens(ctx)  }
 
-                // keep?
-                get("/commands.json") { ctx ->
-                    ctx.plainText()
-                        .result("TODO: setup websocket to bot")
-                }
-
-                post("/update-data") { ctx -> DataController.updateData(ctx) }
-                get("/invalidate-tokens") { ctx -> DataController.invalidateTokens(ctx)  }
-
-                path("/check") {
-                    post("/user-guild") { ctx ->
+                path("check") {
+                    post("user-guild") { ctx ->
                         GuildApiController.findUserAndGuild(ctx)
                     }
                 }
 
-                path("/custom-commands/$GUILD_ID") {
-                    before("") { ctx -> CustomCommandController.before(ctx) }
-                    get { ctx -> CustomCommandController.show(ctx) }
-                    patch { ctx -> CustomCommandController.update(ctx) }
-                    post { ctx -> CustomCommandController.create(ctx) }
-                    delete { ctx -> CustomCommandController.delete(ctx) }
+                path("custom-commands") {
+                    before("$GUILD_ID*") { ctx -> CustomCommandController.before(ctx) }
+                    path(GUILD_ID) {
+                        get { ctx -> CustomCommandController.show(ctx) }
+                        patch { ctx -> CustomCommandController.update(ctx) }
+                        post { ctx -> CustomCommandController.create(ctx) }
+                        delete { ctx -> CustomCommandController.delete(ctx) }
+                    }
                 }
             }
         }
@@ -228,7 +223,6 @@ class WebServer {
 
             ctx.render(view, map.toMap())
         }
-
     }
 
     companion object {
