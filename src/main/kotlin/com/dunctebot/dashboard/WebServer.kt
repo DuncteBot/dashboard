@@ -40,6 +40,7 @@ class WebServer {
         this.app = Javalin.create { config ->
             config.compressionStrategy(CompressionStrategy.GZIP)
             config.autogenerateEtags = true
+            config.showJavalinBanner = false
 
             if (System.getenv("IS_LOCAL").toBoolean()) {
                 val projectDir = System.getProperty("user.dir")
