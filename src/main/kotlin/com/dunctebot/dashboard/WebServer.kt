@@ -22,6 +22,8 @@ import io.javalin.apibuilder.ApiBuilder.*
 import io.javalin.core.compression.CompressionStrategy
 import io.javalin.http.staticfiles.Location
 import io.javalin.plugin.rendering.JavalinRenderer
+import io.javalin.plugin.rendering.vue.JavalinVue
+import io.javalin.plugin.rendering.vue.VueComponent
 import net.dv8tion.jda.api.entities.TextChannel
 
 class WebServer {
@@ -41,14 +43,17 @@ class WebServer {
             config.compressionStrategy(CompressionStrategy.GZIP)
             config.autogenerateEtags = true
             config.showJavalinBanner = false
+            config.enableWebjars()
 
             if (System.getenv("IS_LOCAL").toBoolean()) {
                 val projectDir = System.getProperty("user.dir")
                 val staticDir = "/src/main/resources/public"
                 config.addStaticFiles(projectDir + staticDir, Location.EXTERNAL)
                 config.enableDevLogging()
+                JavalinVue.optimizeDependencies = false
             } else {
                 config.addStaticFiles("/public", Location.CLASSPATH)
+                JavalinVue.optimizeDependencies = true
             }
         }
 
@@ -67,6 +72,15 @@ class WebServer {
         }
 
         this.app.post("register-server") { ctx -> GuildController.handleOneGuildRegister(ctx) }
+
+        this.app.get("vue/roles-test") { ctx ->
+            // TODO: do this with REST
+            val apidata = mapOf(
+                "guildName" to "Test Guild"
+            )
+
+            VueComponent("roles", apidata).handle(ctx)
+        }
 
         addDashboardRoutes()
         addAPIRoutes()

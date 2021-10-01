@@ -47,12 +47,8 @@ dependencies {
         exclude(module = "opus-java")
     }
 
-    // Yes, this is JDA
-    // We're running this PR https://github.com/DV8FromTheWorld/JDA/pull/1178
-    // but it is broken atm
-    /*implementation(group = "com.github.dv8fromtheworld", name = "JDA", version = "68f4c4b") {
-        exclude(module = "opus-java")
-    }*/
+    // webjars
+    implementation(group = "org.webjars.npm", name = "vue", version = "2.6.14")
 }
 
 configure<JavaPluginConvention> {
