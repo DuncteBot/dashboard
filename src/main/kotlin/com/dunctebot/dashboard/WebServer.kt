@@ -53,7 +53,7 @@ class WebServer {
         }
 
         // Non settings related routes
-        this.app.get("roles/:hash") { ctx -> GuildController.showGuildRoles(ctx) }
+        this.app.get("roles/{hash}") { ctx -> GuildController.showGuildRoles(ctx) }
 
         this.app.get("register-server") { ctx ->
             ctx.render(
@@ -230,7 +230,7 @@ class WebServer {
         const val OLD_PAGE = "OLD_PAGE"
         const val SESSION_ID = "sessionId"
         const val USER_ID = "USER_SESSION"
-        const val GUILD_ID = ":guildid"
+        const val GUILD_ID = "{guildid}"
         const val HOMEPAGE = "https://www.duncte.bot/"
     }
 }

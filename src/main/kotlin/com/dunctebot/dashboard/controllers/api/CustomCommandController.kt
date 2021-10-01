@@ -13,7 +13,7 @@ import io.javalin.http.UnauthorizedResponse
 
 object CustomCommandController {
     fun before(ctx: Context) {
-        val attributes = ctx.sessionAttributeMap<String>()
+        val attributes = ctx.sessionAttributeMap()
 
         if (!(attributes.contains(USER_ID) && attributes.contains(SESSION_ID))) {
             ctx.contentType(ContentType.JSON)

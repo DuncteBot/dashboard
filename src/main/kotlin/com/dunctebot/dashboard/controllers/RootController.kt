@@ -22,7 +22,7 @@ object RootController {
                 Scope.IDENTIFY, Scope.GUILDS
             )
 
-            val debug = ctx.queryParam("debug", null)
+            val debug = ctx.queryParam("debug")
 
             if (!debug.isNullOrBlank()) {
                 url = url.replace("discord.com", "$debug.discord.com")
