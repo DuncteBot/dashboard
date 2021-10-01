@@ -20,7 +20,7 @@ object OtherAPi {
         .build<String, List<OAuth2Guild>>()
 
     fun fetchGuildsOfUser(ctx: Context, oAuth2Client: OAuth2Client) {
-        val attributes = ctx.sessionAttributeMap<String?>()
+        val attributes = ctx.sessionAttributeMap()
 
         // We need to make sure that we are logged in and have a user id
         // If we don't have either of them we will return an error message
