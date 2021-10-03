@@ -73,15 +73,6 @@ class WebServer {
 
         this.app.post("register-server") { ctx -> GuildController.handleOneGuildRegister(ctx) }
 
-        this.app.get("vue/roles-test") { ctx ->
-            // TODO: do this with REST
-            val apidata = mapOf(
-                "guildName" to "Test Guild"
-            )
-
-            VueComponent("roles", apidata).handle(ctx)
-        }
-
         addDashboardRoutes()
         addAPIRoutes()
         mapErrorRoutes()

@@ -111,6 +111,8 @@ object GuildController {
             CustomRoleList(guild.name, guild.roles.map { CustomRole(it, members) })
         }!!
 
+        // terrible way of doing this, but it works well enough
+        // we're sending the decoded guild id into the state of javalin
         VueComponent("roles", mapOf("guildId" to guild.id)).handle(ctx)
     }
 
