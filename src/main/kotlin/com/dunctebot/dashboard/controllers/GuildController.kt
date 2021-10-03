@@ -2,9 +2,12 @@ package com.dunctebot.dashboard.controllers
 
 import com.dunctebot.dashboard.*
 import com.dunctebot.dashboard.rendering.WebVariables
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.annotation.JsonInclude
 import com.github.benmanes.caffeine.cache.Caffeine
 import io.javalin.http.Context
 import io.javalin.http.NotFoundResponse
+import io.javalin.plugin.rendering.vue.VueComponent
 import net.dv8tion.jda.api.entities.Member
 import net.dv8tion.jda.api.entities.Role
 import net.dv8tion.jda.api.exceptions.ErrorResponseException
@@ -18,7 +21,7 @@ object GuildController {
         .build<String, Long>()
     val guildRoleCache = Caffeine.newBuilder()
         .expireAfterWrite(1, TimeUnit.HOURS)
-        .build<Long, List<CustomRole>>()
+        .build<Long, CustomRoleList>()
 
     fun handleOneGuildRegister(ctx: Context) {
         val token = ctx.formParam("token")
@@ -101,26 +104,36 @@ object GuildController {
             throw NotFoundResponse()
         }
 
-        val roles = guildRoleCache.get(guild.idLong) {
+        // populate the cache if needed
+        guildRoleCache.get(guild.idLong) {
             val members = restJDA.retrieveAllMembers(guild).stream().toList()
 
-            guild.roles.map { CustomRole(it, members) }
+            CustomRoleList(guild.name, guild.roles.map { CustomRole(it, members) })
         }!!
 
-        ctx.render(
-            "guildRoles.vm",
-            WebVariables()
-                .put("hide_menu", true)
-                .put("title", "Roles for ${guild.name}")
-                .put("guild_name", guild.name)
-                .put("roles", roles)
-                .toMap()
-        )
+        // terrible way of doing this, but it works well enough
+        // we're sending the decoded guild id into the state of javalin
+        VueComponent("roles", mapOf("guildId" to guild.id)).handle(ctx)
     }
 
+    fun guildRolesApiHandler(ctx: Context) {
+        val guildId = ctx.pathParam("guildId").toLong()
+        // will ensure that the cache is validated and we can't randomly request guilds
+        val cache = guildRoleCache.getIfPresent(guildId) ?: throw NotFoundResponse()
+
+        ctx.json(cache)
+    }
+
+    @Suppress("unused")
+    class CustomRoleList(val guildName: String, val roles: List<CustomRole>)
+
+    // yikes
+    @JsonIgnoreProperties(value = ["jda", "color", "guild", "manager", "tags", "permissions", "permissionsExplicit", "permissionsRaw", "timeCreated", "idLong", "asMention", "managed", "hoisted", "mentionable", "publicRole", "positionRaw"])
     class CustomRole(private val realRole: Role, allMembers: List<Member>) : Role by realRole {
-        // Accessed by our templating engine
+        @JsonInclude
         @Suppress("unused")
-        val memberCount = allMembers.filter { it.roles.contains(realRole) }.size
+        val memberCount = allMembers.filter {
+            this.name == "@everyone" || it.roles.contains(realRole)
+        }.size
     }
 }

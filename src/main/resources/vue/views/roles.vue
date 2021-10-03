@@ -1,24 +1,30 @@
 <template id="roles">
     <div class="container">
-        <h1>Roles for {{ $javalin.state.guildName }}</h1>
-        <table class="striped centered">
-            <thead>
+        <p v-if="roleData.loading">Loading...</p>
+        <p v-if="roleData.loadError">Something went wrong! ({{ roleData.loadError.text }})</p>
+        <template v-if="roleData.loaded">
+            <h1>Roles for {{ roleData.data.guildName }}</h1>
+            <table class="striped centered">
+                <thead>
                 <tr>
                     <th>Id</th>
-                    <th>name</th>
+                    <th>Name</th>
                     <th>Members with this role</th>
                 </tr>
-            </thead>
-            <tbody>
-                <tr :style="{
-                    backgroundColor: parseColor('536870911'/*$role.getColorRaw()*/)
+                </thead>
+                <tbody>
+                <tr v-for="(role, i) in roleData.data.roles"
+                    :key="i"
+                    :style="{
+                    backgroundColor: parseColor(`${role.colorRaw}`) // ensure it is a sting
                 }">
-                    <td>$role.getIdLong()</td>
-                    <td>$role.getName()</td>
-                    <td>$role.getMemberCount() Members</td>
+                    <td>{{ role.id }}</td>
+                    <td>{{ role.name }}</td>
+                    <td>{{ role.memberCount }} Members</td>
                 </tr>
-            </tbody>
-        </table>
+                </tbody>
+            </table>
+        </template>
     </div>
 </template>
 
@@ -27,6 +33,11 @@
 
     Vue.component('roles', { // the component name is what we need to enter in VueComponent("...")
         template: '#roles',
+        data () {
+            return {
+                roleData: new LoadableData(`/api/roles/${this.$javalin.state.guildId}`),
+            };
+        },
         methods: {
             parseColor (col) {
                 if (col === defaultColor) {

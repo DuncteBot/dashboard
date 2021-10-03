@@ -73,15 +73,6 @@ class WebServer {
 
         this.app.post("register-server") { ctx -> GuildController.handleOneGuildRegister(ctx) }
 
-        this.app.get("vue/roles-test") { ctx ->
-            // TODO: do this with REST
-            val apidata = mapOf(
-                "guildName" to "Test Guild"
-            )
-
-            VueComponent("roles", apidata).handle(ctx)
-        }
-
         addDashboardRoutes()
         addAPIRoutes()
         mapErrorRoutes()
@@ -141,6 +132,7 @@ class WebServer {
         this.app.routes {
             path("api") {
                 get("user-guilds") { ctx -> OtherAPi.fetchGuildsOfUser(ctx, oAuth2Client) }
+                get("roles/{guildId}") { ctx -> GuildController.guildRolesApiHandler(ctx) }
 
                 // This is just used by uptime robot to check if the application is up
                 get("uptimerobot") { ctx -> OtherAPi.uptimeRobot(ctx) }
