@@ -8,7 +8,7 @@
                 <thead>
                 <tr>
                     <th>Id</th>
-                    <th>name</th>
+                    <th>Name</th>
                     <th>Members with this role</th>
                 </tr>
                 </thead>
