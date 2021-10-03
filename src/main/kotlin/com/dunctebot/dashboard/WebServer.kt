@@ -141,6 +141,7 @@ class WebServer {
         this.app.routes {
             path("api") {
                 get("user-guilds") { ctx -> OtherAPi.fetchGuildsOfUser(ctx, oAuth2Client) }
+                get("roles/{guildId}") { ctx -> GuildController.guildRolesApiHandler(ctx) }
 
                 // This is just used by uptime robot to check if the application is up
                 get("uptimerobot") { ctx -> OtherAPi.uptimeRobot(ctx) }
