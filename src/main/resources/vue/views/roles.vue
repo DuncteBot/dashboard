@@ -16,7 +16,7 @@
                 <tr v-for="(role, i) in roleData.data.roles"
                     :key="i"
                     :style="{
-                    backgroundColor: parseColor(`${role.colorRaw}`) // ensure it is a sting
+                    backgroundColor: parseColor(role.colorRaw) // ensure it is a sting
                 }">
                     <td>{{ role.id }}</td>
                     <td>{{ role.name }}</td>

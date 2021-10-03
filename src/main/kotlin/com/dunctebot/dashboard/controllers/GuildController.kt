@@ -127,13 +127,15 @@ object GuildController {
     @Suppress("unused")
     class CustomRoleList(val guildName: String, val roles: List<CustomRole>)
 
-    // yikes
-    @JsonIgnoreProperties(value = ["jda", "color", "guild", "manager", "tags", "permissions", "permissionsExplicit", "permissionsRaw", "timeCreated", "idLong", "asMention", "managed", "hoisted", "mentionable", "publicRole", "positionRaw"])
-    class CustomRole(private val realRole: Role, allMembers: List<Member>) : Role by realRole {
+    class CustomRole(role: Role, allMembers: List<Member>) {
         @JsonInclude
         @Suppress("unused")
         val memberCount = allMembers.filter {
-            this.name == "@everyone" || it.roles.contains(realRole)
+            role.name == "@everyone" || it.roles.contains(role)
         }.size
+
+        val id = role.id
+        val name = role.name
+        val colorRaw = role.colorRaw.toString()
     }
 }
