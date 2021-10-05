@@ -1,12 +1,11 @@
-<template id="menu">
-    <!-- TODO: somehow get this outside of the main tag -->
+<template id="app-menu">
     <header>
         <div class="navbar-fixed">
             <nav class="indigo">
                 <div class="nav-wrapper container">
                     <a href="#" data-target="server-setting-tabs" class="sidenav-trigger"><i class="material-icons">menu</i></a>
-                    <a href="/" class="brand-logo truncate">
-                        TODO
+                    <a v-if="guildName" href="/" class="brand-logo truncate">
+                        <i class="material-icons">arrow_back</i>  Editing {{ guildName }}
                     </a>
                 </div>
             </nav>
@@ -32,12 +31,19 @@
 
 <script>
     Vue.component('app-menu', {
-        template: '#menu',
+        template: '#app-menu',
+        props: {
+            sidenav: Boolean,
+            guildName: {
+                type: String,
+                default: null,
+            },
+        },
     });
 </script>
 
 <style>
-    header, main, footer {
+    main, footer {
         padding-left: 300px;
     }
 

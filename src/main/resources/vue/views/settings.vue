@@ -1,5 +1,7 @@
 <template id="base-settings">
     <div>
+        <app-menu :guild-name="settingData.loaded ? guild.name : null"></app-menu>
+
         <div class="container">
             Settings
             <div v-if="settingData.loaded">

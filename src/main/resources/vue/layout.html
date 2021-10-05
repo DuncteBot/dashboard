@@ -11,12 +11,6 @@
             * {
                 --color: #0751c6;
             }
-
-            #main-vue {
-                display: flex;
-                min-height: 100vh;
-                flex-direction: column;
-            }
         </style>
 
         <link rel="stylesheet" href="https://dunctebot.com/css/materialize.custom.css"/>
@@ -27,28 +21,23 @@
         @componentRegistration
     </head>
     <body class="discord dark-not-black">
-        <div id="main-vue" v-cloak>
-            <!-- TODO: not happy with this way -->
-            <app-menu v-if="window.location.pathname.startsWith('/vue/server/')"></app-menu>
+        <main id="main-vue" v-cloak>
+            @routeComponent
+        </main>
 
-            <main>
-                @routeComponent
-            </main>
+        <footer class="page-footer indigo" style="padding-top: 0;">
+            <div class="footer-copyright indigo darken-3">
+                <div class="container">
+                    &copy; 2017-<span id="year"></span> DuncteBot Team
 
-            <footer class="page-footer indigo" style="padding-top: 0;">
-                <div class="footer-copyright indigo darken-3">
-                    <div class="container">
-                        &copy; 2017-<span id="year"></span> DuncteBot Team
-
-                        <small class="right">
-                            This site is protected by hCaptcha and its
-                            <a href="https://hcaptcha.com/privacy" target="_blank">Privacy Policy</a> and
-                            <a href="https://hcaptcha.com/terms" target="_blank">Terms of Service</a> apply.
-                        </small>
-                    </div>
+                    <small class="right">
+                        This site is protected by hCaptcha and its
+                        <a href="https://hcaptcha.com/privacy" target="_blank">Privacy Policy</a> and
+                        <a href="https://hcaptcha.com/terms" target="_blank">Terms of Service</a> apply.
+                    </small>
                 </div>
-            </footer>
-        </div>
+            </div>
+        </footer>
 
         <script>
             new Vue({el: "#main-vue"});
