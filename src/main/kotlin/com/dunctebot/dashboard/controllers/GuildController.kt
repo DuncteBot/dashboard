@@ -1,6 +1,7 @@
 package com.dunctebot.dashboard.controllers
 
 import com.dunctebot.dashboard.*
+import com.dunctebot.dashboard.WebServer.Companion.GUILD_ID
 import com.dunctebot.dashboard.rendering.WebVariables
 import com.dunctebot.jda.json.JsonRole
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
@@ -118,7 +119,7 @@ object GuildController {
     }
 
     fun guildRolesApiHandler(ctx: Context) {
-        val guildId = ctx.pathParam("guildId").toLong()
+        val guildId = ctx.pathParam(GUILD_ID).toLong()
         // will ensure that the cache is validated and we can't randomly request guilds
         val cache = guildRoleCache.getIfPresent(guildId) ?: throw NotFoundResponse()
 

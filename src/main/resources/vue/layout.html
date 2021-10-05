@@ -7,6 +7,18 @@
         <meta http-equiv="X-UA-Compatible" content="ie=edge">
         <title>Document</title>
 
+        <style>
+            * {
+                --color: #0751c6;
+            }
+
+            #main-vue {
+                display: flex;
+                min-height: 100vh;
+                flex-direction: column;
+            }
+        </style>
+
         <link rel="stylesheet" href="https://dunctebot.com/css/materialize.custom.css"/>
         <link rel="stylesheet" href="https://dunctebot.com/css/style.css"/>
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
@@ -15,23 +27,27 @@
         @componentRegistration
     </head>
     <body class="discord dark-not-black">
-        <main id="main-vue" v-cloak>
-            @routeComponent
-        </main>
+        <div id="main-vue" v-cloak>
+            <app-menu></app-menu>
 
-        <footer class="page-footer indigo" style="padding-top: 0;">
-            <div class="footer-copyright indigo darken-3">
-                <div class="container">
-                    &copy; 2017-<span id="year"></span> DuncteBot Team
+            <main>
+                @routeComponent
+            </main>
 
-                    <small class="right">
-                        This site is protected by hCaptcha and its
-                        <a href="https://hcaptcha.com/privacy" target="_blank">Privacy Policy</a> and
-                        <a href="https://hcaptcha.com/terms" target="_blank">Terms of Service</a> apply.
-                    </small>
+            <footer class="page-footer indigo" style="padding-top: 0;">
+                <div class="footer-copyright indigo darken-3">
+                    <div class="container">
+                        &copy; 2017-<span id="year"></span> DuncteBot Team
+
+                        <small class="right">
+                            This site is protected by hCaptcha and its
+                            <a href="https://hcaptcha.com/privacy" target="_blank">Privacy Policy</a> and
+                            <a href="https://hcaptcha.com/terms" target="_blank">Terms of Service</a> apply.
+                        </small>
+                    </div>
                 </div>
-            </div>
-        </footer>
+            </footer>
+        </div>
 
         <script>
             new Vue({el: "#main-vue"});

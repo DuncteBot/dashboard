@@ -12,6 +12,7 @@ import io.javalin.http.Context
 import net.dv8tion.jda.api.entities.TextChannel
 
 object SettingsApiController {
+    // TODO: make this async
     fun get(ctx: Context) {
         val data = fetchData(ctx)
 
