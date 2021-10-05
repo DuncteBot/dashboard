@@ -28,7 +28,8 @@
     </head>
     <body class="discord dark-not-black">
         <div id="main-vue" v-cloak>
-            <app-menu></app-menu>
+            <!-- TODO: not happy with this way -->
+            <app-menu v-if="window.location.pathname.startsWith('/vue/server/')"></app-menu>
 
             <main>
                 @routeComponent
