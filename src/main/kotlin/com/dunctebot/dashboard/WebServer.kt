@@ -4,10 +4,7 @@ import com.dunctebot.dashboard.controllers.DashboardController
 import com.dunctebot.dashboard.controllers.GuildController
 import com.dunctebot.dashboard.controllers.RootController
 import com.dunctebot.dashboard.controllers.SettingsController
-import com.dunctebot.dashboard.controllers.api.CustomCommandController
-import com.dunctebot.dashboard.controllers.api.DataController
-import com.dunctebot.dashboard.controllers.api.GuildApiController
-import com.dunctebot.dashboard.controllers.api.OtherAPi
+import com.dunctebot.dashboard.controllers.api.*
 import com.dunctebot.dashboard.rendering.VelocityRenderer
 import com.dunctebot.dashboard.rendering.WebVariables
 import com.dunctebot.dashboard.utils.fetchGuildPatronStatus
@@ -82,7 +79,6 @@ class WebServer {
         this.app.get("callback") { ctx -> RootController.callback(ctx, oAuth2Client) }
 
         this.app.get("logout") { ctx ->
-            // Dear Intellij, shut the fuck up this code compiles
             ctx.req.session.invalidate()
 
             ctx.redirect("$HOMEPAGE?logout=true")
@@ -145,9 +141,16 @@ class WebServer {
                     }
                 }
 
-                path("custom-commands") {
-                    before("$GUILD_ID*") { ctx -> CustomCommandController.before(ctx) }
-                    path(GUILD_ID) {
+                // /api/guilds/{guild}/[settings|custom-commands]
+                path("guilds/$GUILD_ID") {
+                    // we will use the custom command controller for now since this method protects all the settings routes
+                    // before("*") { ctx -> CustomCommandController.before(ctx) }
+
+                    path("settings") {
+                        get { ctx -> SettingsApiController.get(ctx) }
+                    }
+
+                    path("custom-commands") {
                         get { ctx -> CustomCommandController.show(ctx) }
                         patch { ctx -> CustomCommandController.update(ctx) }
                         post { ctx -> CustomCommandController.create(ctx) }
