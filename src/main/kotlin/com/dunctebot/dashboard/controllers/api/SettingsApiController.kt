@@ -8,24 +8,40 @@ import com.dunctebot.dashboard.utils.fetchGuildPatronStatus
 import com.dunctebot.jda.json.JsonChannel
 import com.dunctebot.jda.json.JsonGuild
 import com.dunctebot.jda.json.JsonRole
+import com.dunctebot.models.settings.GuildSetting
 import io.javalin.http.Context
 import net.dv8tion.jda.api.entities.TextChannel
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.Executors
 
 object SettingsApiController {
-    // TODO: make this async
+    private val executor = Executors.newSingleThreadExecutor()
+
     fun get(ctx: Context) {
-        val data = fetchData(ctx)
+        val future = CompletableFuture.supplyAsync({
+            val data = fetchData(ctx)
 
-        val message: String? = ctx.sessionAttribute(WebServer.FLASH_MESSAGE)
+            val message: String? = ctx.sessionAttribute(WebServer.FLASH_MESSAGE)
 
-        if (!message.isNullOrEmpty()) {
-            ctx.sessionAttribute(WebServer.FLASH_MESSAGE, null)
-            data["message"] = message
-        } else {
-            data["message"] = null
-        }
+            if (!message.isNullOrEmpty()) {
+                ctx.sessionAttribute(WebServer.FLASH_MESSAGE, null)
+                data["message"] = message
+            } else {
+                data["message"] = null
+            }
 
-        ctx.json(data)
+            return@supplyAsync data
+        }, executor)
+
+        ctx.future(future)
+    }
+
+    fun post(ctx: Context) {
+        val body = ctx.bodyValidator<GuildSetting>()
+            // .check()
+            .get()
+
+        ctx.json(body)
     }
 
     private fun fetchData(ctx: Context): MutableMap<String, Any?> {

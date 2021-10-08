@@ -6,6 +6,9 @@
             Settings
             <div v-if="settingData.loaded">
                 {{ settings }}
+                <form action="#" class="row" onsubmit="return false;">
+                    <app-settings-basic :settings="settings" :roles="roles"/>
+                </form>
             </div>
         </div>
     </div>
@@ -20,6 +23,16 @@
             return {
                 settingData: new LoadableData(`/api/guilds/${guildId}/settings`, false),
             };
+        },
+        watch: {
+            // TODO: ugly
+            'settingData.loaded' () {
+                setTimeout(() => {
+                    M.FormSelect.init(document.querySelectorAll('select'));
+                    M.updateTextFields();
+                    M.Range.init(document.querySelector('input[name="ai-sensitivity"]'));
+                }, 0);
+            },
         },
         computed: {
             settings () {
@@ -37,3 +50,13 @@
         },
     });
 </script>
+
+<style>
+    .caret {
+        fill: #FFFFFF !important;
+    }
+
+    select {
+        display: none;
+    }
+</style>
