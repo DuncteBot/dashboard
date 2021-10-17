@@ -1,7 +1,9 @@
 package com.dunctebot.dashboard.controllers
 
 import com.dunctebot.dashboard.*
+import com.dunctebot.dashboard.WebServer.Companion.GUILD_ID
 import com.dunctebot.dashboard.rendering.WebVariables
+import com.dunctebot.jda.json.JsonRole
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.github.benmanes.caffeine.cache.Caffeine
@@ -117,7 +119,7 @@ object GuildController {
     }
 
     fun guildRolesApiHandler(ctx: Context) {
-        val guildId = ctx.pathParam("guildId").toLong()
+        val guildId = ctx.pathParam(GUILD_ID).toLong()
         // will ensure that the cache is validated and we can't randomly request guilds
         val cache = guildRoleCache.getIfPresent(guildId) ?: throw NotFoundResponse()
 
@@ -127,15 +129,13 @@ object GuildController {
     @Suppress("unused")
     class CustomRoleList(val guildName: String, val roles: List<CustomRole>)
 
-    class CustomRole(role: Role, allMembers: List<Member>) {
+    class CustomRole(role: Role, allMembers: List<Member>): JsonRole(role) {
         @JsonInclude
         @Suppress("unused")
         val memberCount = allMembers.filter {
             role.name == "@everyone" || it.roles.contains(role)
         }.size
 
-        val id = role.id
-        val name = role.name
         val colorRaw = role.colorRaw.toString()
     }
 }
