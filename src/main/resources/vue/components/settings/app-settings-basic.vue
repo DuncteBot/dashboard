@@ -1,26 +1,30 @@
 <template id="settings-basic">
     <div class="row">
+        <!-- TODO: split in components -->
         <div class="col s12">
             <section class="row section">
                 <div class="input-field col s12 m1">
-                    <input placeholder="db!" id="prefix" type="text" maxlength="10"
+                    <input placeholder="db!"
+                           id="prefix"
+                           type="text"
+                           maxlength="10"
                            v-model="settings.prefix" required>
                     <label for="prefix">Prefix</label>
                 </div>
 
                 <div class="input-field col s12 m4">
-                    <select id="autoRoleRole" v-model="settings.autorole">
+                    <select id="autoRole" v-model="settings.autorole">
                         <option value="" selected disabled>Select a role</option>
                         <option v-for="role in roles"
                                 :key="role.id"
                                 :value="role.id">@{{ role.name }}</option>
                         <option value="">Disable</option>
                     </select>
-                    <label for="autoRoleRole">AutoRole</label>
+                    <label for="autoRole">AutoRole</label>
                 </div>
             </section>
 
-            <section class="row">
+            <section class="row section">
                 <div class="input-field col s12 m5">
                     <div class="switch">
                         Announce tracks: <br/>
@@ -66,6 +70,23 @@
             <section class="row">
                 <div class="divider"></div>
             </section>
+
+            <section class="row section">
+                <h6>Leave timeout:</h6>
+                <p>The following value indicates the amount of seconds before the bot checks if the vc is empty and
+                    automatically leaves</p>
+
+                <div class="col s5">
+                    <div class="input-field inline">
+                        <input type="number"
+                               v-model="settings.leave_timeout"
+                               min="1"
+                               max="60"
+                               required/>
+                    </div>
+                    Seconds
+                </div>
+            </section>
         </div>
     </div>
 </template>
@@ -79,7 +100,7 @@
                 required: true
             },
             roles: {
-                type: Object,
+                type: [Array, Object],
                 required: true
             },
         },

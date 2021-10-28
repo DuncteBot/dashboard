@@ -1,5 +1,12 @@
 <template id="base-settings">
     <div>
+        <!-- Save button-->
+        <div class="fixed-action-btn">
+            <a class="btn-floating btn-large waves-effect waves-light waves-ripple blue accent-4 white">
+                <i class="large material-icons">save</i>
+            </a>
+        </div>
+
         <app-menu :guild-name="settingData.loaded ? guild.name : null"></app-menu>
 
         <div class="container">
@@ -22,6 +29,7 @@
 
             return {
                 settingData: new LoadableData(`/api/guilds/${guildId}/settings`, false),
+                show: window.location.hash || 'basic',
             };
         },
         watch: {
@@ -31,6 +39,15 @@
                     M.FormSelect.init(document.querySelectorAll('select'));
                     M.updateTextFields();
                     M.Range.init(document.querySelector('input[name="ai-sensitivity"]'));
+                }, 0);
+            },
+            show () {
+                setTimeout(() => {
+                    window.scrollTo(0, 0);
+
+                    document.querySelectorAll('textarea').forEach((it) => {
+                        M.textareaAutoResize(it);
+                    });
                 }, 0);
             },
         },
