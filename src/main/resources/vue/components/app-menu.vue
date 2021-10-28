@@ -11,18 +11,26 @@
             </nav>
 
             <ul id="server-setting-tabs" class="discord not-black sidenav sidenav-fixed">
-                <li class="bold active">
-                    <a class="white-text" href="#basic">Basic Settings</a>
+                <li class="bold" :class="getActiveClass('basic')">
+                    <a class="white-text"
+                       href="#basic"
+                       @click.prevent="$emit('change-menu', 'basic')">Basic Settings</a>
                 </li>
-                <li class="bold">
-                    <a class="white-text" href="#moderation">Moderation Settings</a>
+                <li class="bold" :class="getActiveClass('moderation')">
+                    <a class="white-text"
+                       href="#moderation"
+                       @click.prevent="$emit('change-menu', 'moderation')">Moderation Settings</a>
                 </li>
-                <li class="bold">
-                    <a class="white-text" href="#welcome-leave">Welcome/Leave message</a>
+                <li class="bold" :class="getActiveClass('welcome-leave')">
+                    <a class="white-text"
+                       href="#welcome-leave"
+                       @click.prevent="$emit('change-menu', 'welcome-leave')">Welcome/Leave message</a>
                 </li>
                 <li class="divider grey darken-2"></li>
-                <li class="bold">
-                    <a class="white-text" href="#custom-commands">Custom Commands</a>
+                <li class="bold" :class="getActiveClass('custom-commands')">
+                    <a class="white-text"
+                       href="#custom-commands"
+                       @click.prevent="$emit('change-menu', 'custom-commands')">Custom Commands</a>
                 </li>
             </ul>
         </div>
@@ -37,6 +45,17 @@
             guildName: {
                 type: String,
                 default: null,
+            },
+            showing: {
+                type: String,
+                default: null,
+            },
+        },
+        methods: {
+            getActiveClass (name) {
+                return {
+                    active: this.showing === name,
+                };
             },
         },
     });

@@ -2,19 +2,26 @@
     <div>
         <!-- Save button-->
         <div class="fixed-action-btn">
-            <a class="btn-floating btn-large waves-effect waves-light waves-ripple blue accent-4 white">
+            <a @click.prevent="saveSettings()"
+                class="btn-floating btn-large waves-effect waves-light waves-ripple blue accent-4 white">
                 <i class="large material-icons">save</i>
             </a>
         </div>
 
-        <app-menu :guild-name="settingData.loaded ? guild.name : null"></app-menu>
+        <app-menu :guild-name="settingData.loaded ? guild.name : null"
+                  :showing="showingItem"
+                  @change-menu="setShow($event)"
+        ></app-menu>
 
         <div class="container">
             Settings
             <div v-if="settingData.loaded">
                 {{ settings }}
                 <form action="#" class="row" onsubmit="return false;">
-                    <app-settings-basic :settings="settings" :roles="roles"/>
+                    <app-settings-basic
+                        v-show="showingItem === 'basic'"
+                        :settings="settings"
+                        :roles="roles"/>
                 </form>
             </div>
         </div>
@@ -29,7 +36,7 @@
 
             return {
                 settingData: new LoadableData(`/api/guilds/${guildId}/settings`, false),
-                show: window.location.hash || 'basic',
+                showingItem: (window.location.hash || 'basic').replace('#', ''),
             };
         },
         watch: {
@@ -63,6 +70,15 @@
             },
             guild () {
                 return this.settingData.data.guild;
+            },
+        },
+        methods: {
+            saveSettings () {
+                console.log('TODO: save!');
+            },
+            setShow (item) {
+                this.showingItem = item;
+                window.location.hash = item;
             },
         },
     });
