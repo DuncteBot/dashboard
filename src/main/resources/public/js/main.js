@@ -1,5 +1,11 @@
 window.eventBus = new EventEmitter();
 
+function toast(message) {
+    M.toast({
+        html: message,
+    });
+}
+
 // We had to rename this form _ to id because
 // the fucking patreon button has lodash
 function id(el) {

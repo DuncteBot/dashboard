@@ -38,7 +38,11 @@ object SettingsApiController {
 
     fun post(ctx: Context) {
         val body = ctx.bodyValidator<GuildSetting>()
-            // .check()
+            .check(
+                "leave_timeout",
+                { it.leaveTimeout in 1..60 },
+                "Leave timeout must be within range of 1 to 60 (inclusive)"
+            )
             .get()
 
         ctx.json(body)

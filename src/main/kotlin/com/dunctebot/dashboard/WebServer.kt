@@ -151,6 +151,7 @@ class WebServer {
 
                     path("settings") {
                         get { ctx -> SettingsApiController.get(ctx) }
+                        post { ctx -> SettingsApiController.post(ctx) }
                     }
 
                     path("custom-commands") {

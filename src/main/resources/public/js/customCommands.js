@@ -236,9 +236,3 @@ function doFetch(method, body, cb) {
 function notSaveToast(m) {
     toast(`Could not save: ${m}`);
 }
-
-function toast(message) {
-    M.toast({
-        html: message,
-    });
-}

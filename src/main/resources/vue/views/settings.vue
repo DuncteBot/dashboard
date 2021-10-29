@@ -16,6 +16,7 @@
         <div class="container">
             Settings
             <div v-if="settingData.loaded">
+                {{ originalSettings }}
                 {{ settings }}
                 <form action="#" class="row" onsubmit="return false;">
                     <app-settings-basic
@@ -33,9 +34,13 @@
         template: '#base-settings',
         data () {
             const guildId = this.$javalin.pathParams['guildId'];
+            const settingsURL = `/api/guilds/${guildId}/settings`;
 
             return {
-                settingData: new LoadableData(`/api/guilds/${guildId}/settings`, false),
+                originalSettings: {}, // unsaved changes checking
+                saving: false,
+                settingsURL,
+                settingData: new LoadableData(settingsURL, false),
                 showingItem: (window.location.hash || 'basic').replace('#', ''),
             };
         },
@@ -43,6 +48,7 @@
             // TODO: ugly
             'settingData.loaded' () {
                 setTimeout(() => {
+                    this.originalSettings = { ...this.settings };
                     M.FormSelect.init(document.querySelectorAll('select'));
                     M.updateTextFields();
                     M.Range.init(document.querySelector('input[name="ai-sensitivity"]'));
@@ -73,8 +79,25 @@
             },
         },
         methods: {
-            saveSettings () {
-                console.log('TODO: save!');
+            async saveSettings () {
+                if (this.saving) {
+                    return;
+                }
+
+                this.saving = true;
+
+                toast('Saving');
+
+                const res = await fetch(this.settingsURL, {
+                    method: 'POST',
+                    credentials: 'include',
+                    body: JSON.stringify(this.settings)
+                });
+                const data = await res.json();
+
+                console.log(data);
+
+                toast('Saved!');
             },
             setShow (item) {
                 this.showingItem = item;
