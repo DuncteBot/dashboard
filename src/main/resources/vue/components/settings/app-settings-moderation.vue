@@ -110,14 +110,28 @@
         </div>
 
         <div class="row">
-            <div class="col s12 l6">
+            <div class="col s12">
                 <h6>Ratelimits:</h6>
-                <p>The following values indicate the mutes duration in minutes for incrementing amount of
+                <p>The following values indicate the mute duration in minutes for incrementing amount of
                     violations
                 </p>
+                <p>The first time a member gets muted, they will be muted for {{ rateLimitArray[0] }} minutes.
+                    If they keep spamming and get muted again it will go to the next interval.
+                    This will keep incrementing until the last one.</p>
+                <p>The rate limits will only stick to these 7 numbers for duration.</p>
                 <br/>
+
+                <div class="input-field col s12 m2" v-for="(item, index) of rateLimitArray" :key="index">
+                    <input type="number" v-model="rateLimitArray[index]" min="1" max="1000000" required/>
+                </div>
             </div>
         </div>
+
+        <div class="row">
+            <hr>
+        </div>
+
+        <!-- TODO: warn actions -->
     </section>
 </template>
 
@@ -139,9 +153,15 @@
                 required: true
             },
         },
+        data () {
+            return {
+                rateLimitArray: this.settings.ratelimits.split('|'),
+            };
+        },
+        watch: {
+            rateLimitArray () {
+                this.settings.ratelimits = this.rateLimitArray.join('|');
+            },
+        },
     });
 </script>
-
-<style scoped>
-
-</style>
