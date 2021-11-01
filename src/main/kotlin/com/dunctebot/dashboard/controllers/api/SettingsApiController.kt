@@ -9,6 +9,7 @@ import com.dunctebot.jda.json.JsonChannel
 import com.dunctebot.jda.json.JsonGuild
 import com.dunctebot.jda.json.JsonRole
 import com.dunctebot.models.settings.GuildSetting
+import com.dunctebot.models.settings.WarnAction
 import io.javalin.http.Context
 import net.dv8tion.jda.api.entities.TextChannel
 import java.util.concurrent.CompletableFuture
@@ -37,20 +38,38 @@ object SettingsApiController {
     }
 
     fun post(ctx: Context) {
-        val body = ctx.bodyValidator<GuildSetting>()
-            .check(
-                "prefix",
-                { it.customPrefix.length in 1..10},
-                "Prefix must be at least 1 character and at most 10 characters"
-            )
-            .check(
-                "leave_timeout",
-                { it.leaveTimeout in 1..60 },
-                "Leave timeout must be within range of 1 to 60 (inclusive)"
-            )
-            .get()
+        val future = CompletableFuture.supplyAsync({
+            val isPatron = fetchGuildPatronStatus(ctx.guildId)
+            val body = ctx.bodyValidator<GuildSetting>()
+                .check(
+                    "prefix",
+                    { it.customPrefix.length in 1..10},
+                    "Prefix must be at least 1 character and at most 10 characters"
+                )
+                .check(
+                    "leave_timeout",
+                    { it.leaveTimeout in 1..60 },
+                    "Leave timeout must be within range of 1 to 60 (inclusive)"
+                )
+                .check(
+                    "warn_actions",
+                    {
+                        val size = it.warnActions.size
 
-        ctx.json(body)
+                        if (isPatron) {
+                            size > 0 && size <= WarnAction.PATRON_MAX_ACTIONS
+                        } else {
+                            size == 1
+                        }
+                    },
+                    "Non patreon supporters can only have one warn action configured"
+                )
+                .get()
+
+            return@supplyAsync body
+        }, executor)
+
+        ctx.future(future)
     }
 
     private fun fetchData(ctx: Context): MutableMap<String, Any?> {
