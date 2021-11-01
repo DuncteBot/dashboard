@@ -31,7 +31,8 @@ object RootController {
 
             ctx.sessionAttribute(SESSION_ID, "session_${System.currentTimeMillis()}")
 
-            ctx.redirect("$url&prompt=none")
+//            ctx.redirect("$url&prompt=none")
+            ctx.redirect(url)
         }
     }
 

@@ -95,7 +95,18 @@ class WebServer {
             )
         }
 
-        this.app.get("/vue/server/$GUILD_ID", VueComponent("settings"))
+        this.app.get("/vue/server/$GUILD_ID", VueComponent(
+            "settings",
+            // using the state here to provide items that are easily changed with package upates
+            mapOf(
+                // using id for type as that is what we will get back in the select
+                "filterValues" to ProfanityFilterType.values()
+                    .map { mapOf("id" to it.type, "name" to it.getName()) },
+                "warnActionTypes" to WarnAction.Type.values(),
+                "loggingTypes" to GuildSetting.LOGGING_TYPES,
+                "patronMaxWarnActions" to WarnAction.PATRON_MAX_ACTIONS
+            )
+        ))
 
         this.app.routes {
             path("server") {

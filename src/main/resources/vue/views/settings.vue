@@ -14,17 +14,25 @@
         ></app-menu>
 
         <div class="container">
-            Settings
             <div v-if="settingData.loaded">
-                {{ originalSettings }}
                 {{ settings }}
-                <form action="#" class="row" onsubmit="return false;">
+
+                <form action="#" ref="settingsForm" class="row" onsubmit="return false;">
                     <app-settings-basic
                         v-show="showingItem === 'basic'"
                         :settings="settings"
-                        :roles="roles"/>
+                        :roles="roles"
+                    ></app-settings-basic>
+                    <app-settings-moderation
+                        v-show="showingItem === 'moderation'"
+                        :settings="settings"
+                        :channels="channels"
+                        :roles="roles"
+                        :patreon="dataRw.patron"
+                    ></app-settings-moderation>
                 </form>
             </div>
+            <h1 v-else>Loading...</h1>
         </div>
     </div>
 </template>
@@ -51,7 +59,7 @@
                     this.originalSettings = { ...this.settings };
                     M.FormSelect.init(document.querySelectorAll('select'));
                     M.updateTextFields();
-                    M.Range.init(document.querySelector('input[name="ai-sensitivity"]'));
+                    M.Range.init(document.querySelector('input#ai-sensitivity'));
                 }, 0);
             },
             show () {
@@ -65,6 +73,9 @@
             },
         },
         computed: {
+            dataRw () {
+                return this.settingData.data;
+            },
             settings () {
                 return this.settingData.data.settings;
             },
@@ -80,6 +91,13 @@
         },
         methods: {
             async saveSettings () {
+                const valid = this.$refs.settingsForm.reportValidity();
+
+                if (!valid) {
+                    // TODO: switch to the proper tab?
+                    return;
+                }
+
                 if (this.saving) {
                     return;
                 }
@@ -88,16 +106,22 @@
 
                 toast('Saving');
 
-                const res = await fetch(this.settingsURL, {
-                    method: 'POST',
-                    credentials: 'include',
-                    body: JSON.stringify(this.settings)
-                });
-                const data = await res.json();
+                try {
+                    const res = await fetch(this.settingsURL, {
+                        method: 'POST',
+                        credentials: 'include',
+                        body: JSON.stringify(this.settings)
+                    });
+                    const data = await res.json();
 
-                console.log(data);
+                    console.log(data);
 
-                toast('Saved!');
+                    toast('Saved!');
+                } catch (e) {
+                    console.log(e);
+                } finally {
+                    this.saving = false;
+                }
             },
             setShow (item) {
                 this.showingItem = item;

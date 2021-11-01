@@ -1,94 +1,93 @@
 <template id="settings-basic">
-    <div class="row">
-        <!-- TODO: split in components -->
-        <div class="col s12">
-            <section class="row section">
-                <div class="input-field col s12 m1">
-                    <input placeholder="db!"
-                           id="prefix"
-                           type="text"
-                           maxlength="10"
-                           v-model="settings.prefix" required>
-                    <label for="prefix">Prefix</label>
-                </div>
-
-                <div class="input-field col s12 m4">
-                    <select id="autoRole" v-model="settings.autorole">
-                        <option value="" selected disabled>Select a role</option>
-                        <option v-for="role in roles"
-                                :key="role.id"
-                                :value="role.id">@{{ role.name }}</option>
-                        <option value="">Disable</option>
-                    </select>
-                    <label for="autoRole">AutoRole</label>
-                </div>
-            </section>
-
-            <section class="row section">
-                <div class="input-field col s12 m5">
-                    <div class="switch">
-                        Announce tracks: <br/>
-                        <label>
-                            Disabled
-                            <input type="checkbox" v-model="settings.announceNextTrack"/>
-                            <span class="lever"></span>
-                            Enabled
-                        </label>
+    <section class="section">
+        <div class="row">
+            <!-- TODO: split in components -->
+            <div class="col s12">
+                <section class="row section">
+                    <div class="input-field col s12 m1">
+                        <input placeholder="db!"
+                               id="prefix"
+                               type="text"
+                               maxlength="10"
+                               v-model="settings.prefix" required>
+                        <label for="prefix">Prefix</label>
                     </div>
 
-                    <br/>
+                    <select-list
+                        class="col s12 m4"
+                        v-model="settings.autorole"
+                        :options="roles"
+                        prefix="@"
+                        name="role"
+                        label="AutoRole"></select-list>
+                </section>
 
-                    <div class="switch">
-                        Stop command behavior:<br/>
-                        <label>
-                            Default behavior
-                            <input type="checkbox" v-model="settings.allowAllToStop">
-                            <span class="lever"></span>
-                            Allow all to stop
-                        </label>
+                <section class="row section">
+                    <div class="input-field col s12 m5">
+                        <div class="switch">
+                            Announce tracks: <br/>
+                            <label>
+                                Disabled
+                                <input type="checkbox" v-model="settings.announceNextTrack"/>
+                                <span class="lever"></span>
+                                Enabled
+                            </label>
+                        </div>
+
+                        <br/>
+
+                        <div class="switch">
+                            Stop command behavior:<br/>
+                            <label>
+                                Default behavior
+                                <input type="checkbox" v-model="settings.allowAllToStop">
+                                <span class="lever"></span>
+                                Allow all to stop
+                            </label>
+                        </div>
                     </div>
-                </div>
 
-                <div class="input-field col s12 m5">
-                    <button type="button" @click="showColorPicker()"
-                            :style="{
+                    <div class="input-field col s12 m5">
+                        <button type="button" @click="showColorPicker()"
+                                :style="{
                                 backgroundColor: embedColor,
                             }"
-                            :class="[
+                                :class="[
                                 clsName,
                             ]"
-                            class="btn-large waves-effect waves-light waves-ripple">
-                        Embed color
-                    </button>
+                                class="btn-large waves-effect waves-light waves-ripple">
+                            Embed color
+                        </button>
 
-                    <input type="color"
-                           ref="color"
-                           v-model="embedColor"/>
-                </div>
-            </section>
-
-            <section class="row">
-                <div class="divider"></div>
-            </section>
-
-            <section class="row section">
-                <h6>Leave timeout:</h6>
-                <p>The following value indicates the amount of seconds before the bot checks if the vc is empty and
-                    automatically leaves</p>
-
-                <div class="col s5">
-                    <div class="input-field inline">
-                        <input type="number"
-                               v-model="settings.leave_timeout"
-                               min="1"
-                               max="60"
-                               required/>
+                        <input type="color"
+                               ref="color"
+                               v-model="embedColor"/>
                     </div>
-                    Seconds
-                </div>
-            </section>
+                </section>
+
+                <section class="row">
+                    <div class="divider"></div>
+                </section>
+
+                <section class="row section">
+                    <h6>Leave timeout:</h6>
+                    <p>The following value indicates the amount of seconds before the bot checks if the vc is empty and
+                        automatically leaves</p>
+
+                    <div class="col s5">
+                        <div class="input-field inline">
+                            <input type="number"
+                                   v-model="settings.leave_timeout"
+                                   min="1"
+                                   max="60"
+                                   required/>
+                        </div>
+                        Seconds
+                    </div>
+                </section>
+            </div>
         </div>
-    </div>
+    </section>
 </template>
 
 <script>

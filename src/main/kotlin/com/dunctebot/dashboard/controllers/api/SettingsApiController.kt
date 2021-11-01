@@ -39,6 +39,11 @@ object SettingsApiController {
     fun post(ctx: Context) {
         val body = ctx.bodyValidator<GuildSetting>()
             .check(
+                "prefix",
+                { it.customPrefix.length in 1..10},
+                "Prefix must be at least 1 character and at most 10 characters"
+            )
+            .check(
                 "leave_timeout",
                 { it.leaveTimeout in 1..60 },
                 "Leave timeout must be within range of 1 to 60 (inclusive)"
