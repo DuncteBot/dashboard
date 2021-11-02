@@ -102,7 +102,8 @@ class WebServer {
                 // using id for type as that is what we will get back in the select
                 "filterValues" to ProfanityFilterType.values()
                     .map { mapOf("id" to it.type, "name" to it.getName()) },
-                "warnActionTypes" to WarnAction.Type.values(),
+                "warnActionTypes" to WarnAction.Type.values()
+                    .map { mapOf("id" to it.id, "name" to it.getName()) },
                 "loggingTypes" to GuildSetting.LOGGING_TYPES,
                 "patronMaxWarnActions" to WarnAction.PATRON_MAX_ACTIONS
             )

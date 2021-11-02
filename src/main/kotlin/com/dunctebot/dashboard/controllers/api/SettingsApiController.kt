@@ -40,6 +40,9 @@ object SettingsApiController {
     fun post(ctx: Context) {
         val future = CompletableFuture.supplyAsync({
             val isPatron = fetchGuildPatronStatus(ctx.guildId)
+
+            // What don't we need to check?
+            // - filterType: this will default to good setting
             val body = ctx.bodyValidator<GuildSetting>()
                 .check(
                     "prefix",

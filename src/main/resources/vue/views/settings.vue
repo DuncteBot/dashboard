@@ -55,21 +55,21 @@
         watch: {
             // TODO: ugly
             'settingData.loaded' () {
-                setTimeout(() => {
+                this.$nextTick(() => {
                     this.originalSettings = { ...this.settings };
-                    M.FormSelect.init(document.querySelectorAll('select'));
+                    // M.FormSelect.init(document.querySelectorAll('select'));
                     M.updateTextFields();
                     M.Range.init(document.querySelector('input#ai-sensitivity'));
-                }, 0);
+                });
             },
             show () {
-                setTimeout(() => {
+                this.$nextTick(() => {
                     window.scrollTo(0, 0);
 
                     document.querySelectorAll('textarea').forEach((it) => {
                         M.textareaAutoResize(it);
                     });
-                }, 0);
+                });
             },
         },
         computed: {

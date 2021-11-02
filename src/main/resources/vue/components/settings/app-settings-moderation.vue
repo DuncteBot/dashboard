@@ -131,7 +131,10 @@
             <hr>
         </div>
 
-        <!-- TODO: warn actions -->
+        <warnactions
+            v-model="settings.warn_actions"
+            :patreon="patreon"
+        ></warnactions>
     </section>
 </template>
 
