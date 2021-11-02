@@ -1,4 +1,10 @@
-window.eventBus = new EventEmitter();
+// TODO: remove this system
+window.eventBus = {
+    emit() {},
+    on() {},
+    once() {},
+    off() {},
+};
 
 function toast(message) {
     M.toast({
@@ -7,7 +13,7 @@ function toast(message) {
 }
 
 // We had to rename this form _ to id because
-// the fucking patreon button has lodash
+// the fucking patreon button has lodash set on the window
 function id(el) {
     return document.getElementById(el);
 }

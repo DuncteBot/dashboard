@@ -135,6 +135,36 @@
             v-model="settings.warn_actions"
             :patreon="patreon"
         ></warnactions>
+
+        <div class="row">
+            <hr>
+        </div>
+
+        <div class="row">
+            <div class="col s12">
+                <h5>Auto banning of new accounts</h5>
+                <p>These settings set the minimum days an account has to be exist before it may join your server,
+                    the account will be banned otherwise</p>
+
+                <settings-switch
+                    v-model="settings.young_account_ban_enabled"
+                    id="young_account_ban_enabled"
+                    name=""></settings-switch>
+
+                <br/>
+
+                <div class="input-field">
+                    <label for="young_account_threshold">Threshold</label>
+                    <input
+                        type="number"
+                        id="young_account_threshold"
+                        v-model="settings.young_account_threshold"
+                        min="-1"
+                        max="1000000"
+                        required/>
+                </div>
+            </div>
+        </div>
     </section>
 </template>
 

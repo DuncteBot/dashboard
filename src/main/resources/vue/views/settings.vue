@@ -1,7 +1,7 @@
 <template id="base-settings">
     <div>
         <!-- Save button-->
-        <div class="fixed-action-btn">
+        <div class="fixed-action-btn" v-show="showingItem !== 'custom-commands'">
             <a @click.prevent="saveSettings()"
                 class="btn-floating btn-large waves-effect waves-light waves-ripple blue accent-4 white">
                 <i class="large material-icons">save</i>

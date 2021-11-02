@@ -1,6 +1,8 @@
 <template id="settings-switch">
     <div class="switch">
-        {{ name }}:
+        <template v-if="name">
+            {{ name }}:
+        </template>
         <label>
             {{ customLabels[0] }}
             <input type="checkbox" :id="id"
