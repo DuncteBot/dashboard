@@ -14,23 +14,23 @@
                 <li class="bold" :class="getActiveClass('basic')">
                     <a class="white-text"
                        href="#basic"
-                       @click.prevent="$emit('change-menu', 'basic')">Basic Settings</a>
+                       @click.prevent="changePage('basic')">Basic Settings</a>
                 </li>
                 <li class="bold" :class="getActiveClass('moderation')">
                     <a class="white-text"
                        href="#moderation"
-                       @click.prevent="$emit('change-menu', 'moderation')">Moderation Settings</a>
+                       @click.prevent="changePage('moderation')">Moderation Settings</a>
                 </li>
                 <li class="bold" :class="getActiveClass('welcome-leave')">
                     <a class="white-text"
                        href="#welcome-leave"
-                       @click.prevent="$emit('change-menu', 'welcome-leave')">Welcome/Leave message</a>
+                       @click.prevent="changePage('welcome-leave')">Welcome/Leave message</a>
                 </li>
                 <li class="divider grey darken-2"></li>
                 <li class="bold" :class="getActiveClass('custom-commands')">
                     <a class="white-text"
                        href="#custom-commands"
-                       @click.prevent="$emit('change-menu', 'custom-commands')">Custom Commands</a>
+                       @click.prevent="changePage('custom-commands')">Custom Commands</a>
                 </li>
             </ul>
         </div>
@@ -38,27 +38,48 @@
 </template>
 
 <script>
-    Vue.component('app-menu', {
-        template: '#app-menu',
-        props: {
-            sidenav: Boolean,
-            guildName: {
-                type: String,
-                default: null,
-            },
-            showing: {
-                type: String,
-                default: null,
-            },
+  Vue.component('app-menu', {
+    template: '#app-menu',
+    props: {
+      sidenav: Boolean,
+      guildName: {
+        type: String,
+        default: null,
+      },
+      showing: {
+        type: String,
+        default: null,
+      },
+    },
+    data: () => ({
+      navOpen: false,
+    }),
+    mounted() {
+      this.nav = M.Sidenav.init(document.querySelector('.sidenav'), {
+        onOpenEnd: () => {
+          this.navOpen = true;
         },
-        methods: {
-            getActiveClass (name) {
-                return {
-                    active: this.showing === name,
-                };
-            },
+        onCloseEnd: () => {
+          this.navOpen = false;
         },
-    });
+      });
+    },
+    methods: {
+      getActiveClass(name) {
+        return {
+          active: this.showing === name,
+        };
+      },
+      changePage(page) {
+        // or this will happen: https://entered.space/kU9XoK5.png
+        if (this.navOpen) {
+          this.nav.close();
+        }
+
+        this.$emit('change-menu', page);
+      },
+    },
+  });
 </script>
 
 <style>
@@ -74,5 +95,9 @@
 
     .sidenav .sidenav-fixed {
         top: 20px;
+    }
+
+    .sidenav-overlay {
+      z-index: 2!important;
     }
 </style>

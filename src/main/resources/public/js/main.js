@@ -28,21 +28,7 @@ function unHide(itemId) {
 
 document.addEventListener('DOMContentLoaded', () => {
     id('year').innerHTML = `${(new Date()).getFullYear()}`;
-    M.Sidenav.init(document.querySelectorAll('.sidenav'), {
-        onOpenEnd: () => {
-            window.navOpen = true;
-        },
-        onCloseEnd: () => {
-            window.navOpen = false;
-        },
-    });
-
-    // M.AutoInit();
-
-    eventBus.emit('loaded');
 });
-
-document.addEventListener('click', (event) => eventBus.emit('click', event));
 
 function getMessage(m) {
     switch (m) {

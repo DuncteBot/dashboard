@@ -30,6 +30,8 @@
                         :roles="roles"
                         :patreon="dataRw.patron"
                     ></app-settings-moderation>
+
+                    <!-- Next up: join/leave messages -->
                 </form>
             </div>
             <h1 v-else>Loading...</h1>
