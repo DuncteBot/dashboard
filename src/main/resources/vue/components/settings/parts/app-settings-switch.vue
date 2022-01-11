@@ -2,6 +2,9 @@
     <div class="switch">
         <template v-if="name">
             {{ name }}:
+            <template v-if="breakLabel">
+                <br/>
+            </template>
         </template>
         <label>
             {{ customLabels[0] }}
@@ -34,6 +37,7 @@
                 type: Array,
                 default: () => ['Disabled', 'Enabled'],
             },
+            breakLabel: Boolean,
             disabled: Boolean,
         },
         computed: {

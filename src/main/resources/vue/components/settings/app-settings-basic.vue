@@ -24,27 +24,18 @@
 
                 <section class="row section">
                     <div class="input-field col s12 m5">
-                        <div class="switch">
-                            Announce tracks: <br/>
-                            <label>
-                                Disabled
-                                <input type="checkbox" v-model="settings.announceNextTrack"/>
-                                <span class="lever"></span>
-                                Enabled
-                            </label>
-                        </div>
-
+                        <settings-switch
+                            break-label
+                            v-model="settings.announceNextTrack"
+                            id="leaveChannelCB"
+                            name="Announce tracks"></settings-switch>
                         <br/>
-
-                        <div class="switch">
-                            Stop command behavior:<br/>
-                            <label>
-                                Default behavior
-                                <input type="checkbox" v-model="settings.allowAllToStop">
-                                <span class="lever"></span>
-                                Allow all to stop
-                            </label>
-                        </div>
+                        <settings-switch
+                            break-label
+                            v-model="settings.allowAllToStop"
+                            id="leaveChannelCB"
+                            name="Stop command behavior"
+                            :custom-labels="['Default behavior', 'Allow all to stop']"></settings-switch>
                     </div>
 
                     <div class="input-field col s12 m5">
@@ -157,5 +148,8 @@
     input[type="color"] {
         visibility: hidden;
         display: inline;
+        position: absolute;
+        bottom: 0;
+        left: 0;
     }
 </style>

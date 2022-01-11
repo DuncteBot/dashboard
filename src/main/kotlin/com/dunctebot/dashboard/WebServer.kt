@@ -35,6 +35,7 @@ class WebServer {
     init {
         // Register the view renderer
         JavalinRenderer.register(engine::render, ".vm")
+        JavalinVue.isDevFunction = { System.getenv("IS_LOCAL").toBoolean() }
 
         this.app = Javalin.create { config ->
             config.compressionStrategy(CompressionStrategy.GZIP)
@@ -95,34 +96,23 @@ class WebServer {
             )
         }
 
-        this.app.get("/vue/server/$GUILD_ID", VueComponent(
-            "settings",
-            // using the state here to provide items that are easily changed with package upates
-            mapOf(
-                // using id for type as that is what we will get back in the select
-                "filterValues" to ProfanityFilterType.values()
-                    .map { mapOf("id" to it.type, "name" to it.getName()) },
-                "warnActionTypes" to WarnAction.Type.values()
-                    .map { mapOf("id" to it.id, "name" to it.getName()) },
-                "loggingTypes" to GuildSetting.LOGGING_TYPES,
-                "patronMaxWarnActions" to WarnAction.PATRON_MAX_ACTIONS
-            )
-        ))
-
         this.app.routes {
             path("server") {
                 before("$GUILD_ID*") { ctx -> DashboardController.before(ctx) }
                 path(GUILD_ID) {
-                    getWithGuildData(
-                        "",
-                        WebVariables().put("title", "Dashboard")
-                            .put("filterValues", ProfanityFilterType.values())
-                            .put("warnActionTypes", WarnAction.Type.values())
-                            .put("loggingTypes", GuildSetting.LOGGING_TYPES)
-                            .put("patronMaxWarnActions", WarnAction.PATRON_MAX_ACTIONS)
-                            .put("using_tabs", true),
-                        "dashboard/serverSettings.vm"
-                    )
+                    get("", VueComponent(
+                        "settings",
+                        // using the state here to provide items that are easily changed with package upates
+                        mapOf(
+                            // using id for type as that is what we will get back in the select
+                            "filterValues" to ProfanityFilterType.values()
+                                .map { mapOf("id" to it.type, "name" to it.getName()) },
+                            "warnActionTypes" to WarnAction.Type.values()
+                                .map { mapOf("id" to it.id, "name" to it.getName()) },
+                            "loggingTypes" to GuildSetting.LOGGING_TYPES,
+                            "patronMaxWarnActions" to WarnAction.PATRON_MAX_ACTIONS
+                        )
+                    ))
 
                     post { ctx -> SettingsController.saveSettings(ctx) }
 
@@ -142,8 +132,6 @@ class WebServer {
         this.app.routes {
             path("api") {
                 get("user-guilds") { ctx -> OtherAPi.fetchGuildsOfUser(ctx, oAuth2Client) }
-                // TODO: move under /guilds?
-                get("roles/$GUILD_ID") { ctx -> GuildController.guildRolesApiHandler(ctx) }
 
                 // This is just used by uptime robot to check if the application is up
                 get("uptimerobot") { ctx -> OtherAPi.uptimeRobot(ctx) }
@@ -156,17 +144,21 @@ class WebServer {
                     }
                 }
 
-                // /api/guilds/{guild}/[settings|custom-commands]
+                // /api/guilds/{guild}/[settings|custom-commands|roles]
                 path("guilds/$GUILD_ID") {
                     // we will use the custom command controller for now since this method protects all the settings routes
                     // before("*") { ctx -> CustomCommandController.before(ctx) }
 
                     path("settings") {
+                        before("") { ctx -> CustomCommandController.before(ctx) }
                         get { ctx -> SettingsApiController.get(ctx) }
                         post { ctx -> SettingsApiController.post(ctx) }
                     }
 
+                    get("roles") { ctx -> GuildController.guildRolesApiHandler(ctx) }
+
                     path("custom-commands") {
+                        before("") { ctx -> CustomCommandController.before(ctx) }
                         get { ctx -> CustomCommandController.show(ctx) }
                         patch { ctx -> CustomCommandController.update(ctx) }
                         post { ctx -> CustomCommandController.create(ctx) }

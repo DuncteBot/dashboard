@@ -15,6 +15,8 @@ import net.dv8tion.jda.api.entities.TextChannel
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executors
 
+// TODO: do this the kotlin way (no object class)
+// TODO: finish validation
 object SettingsApiController {
     private val executor = Executors.newSingleThreadExecutor()
 

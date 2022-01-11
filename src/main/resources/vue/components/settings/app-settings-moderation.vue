@@ -2,7 +2,6 @@
     <section class="section">
         <div class="row">
             <div class="col s12">
-
                 <select-list
                     class="col s12 m5"
                     v-model="settings.logChannelId"

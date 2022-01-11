@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 
+// TODO: replace this with fetching over WS/database connection
 class DuncteApi(val apiKey: String) {
     private val logger = LoggerFactory.getLogger(DuncteApi::class.java)
     val validTokens = mutableListOf<String>()

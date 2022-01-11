@@ -15,7 +15,7 @@
 
         <div class="container">
             <div v-if="settingData.loaded">
-                {{ settings }}
+                <!-- {{ settings }} -->
 
                 <form action="#" ref="settingsForm" class="row" onsubmit="return false;">
                     <app-settings-basic
@@ -31,7 +31,11 @@
                         :patreon="dataRw.patron"
                     ></app-settings-moderation>
 
-                    <!-- Next up: join/leave messages -->
+                    <app-settings-join-leave
+                        v-show="showingItem === 'welcome-leave'"
+                        :settings="settings"
+                        :channels="channels"
+                    ></app-settings-join-leave>
                 </form>
             </div>
             <h1 v-else>Loading...</h1>
@@ -64,7 +68,7 @@
                     M.Range.init(document.querySelector('input#ai-sensitivity'));
                 });
             },
-            show () {
+            showingItem () {
                 this.$nextTick(() => {
                     window.scrollTo(0, 0);
 

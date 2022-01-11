@@ -35,7 +35,7 @@
         template: '#roles',
         data () {
             return {
-                roleData: new LoadableData(`/api/roles/${this.$javalin.state.guildId}`),
+                roleData: new LoadableData(`/api/guilds/${this.$javalin.state.guildId}/roles`),
             };
         },
         methods: {
