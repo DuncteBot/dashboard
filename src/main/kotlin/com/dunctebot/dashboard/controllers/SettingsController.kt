@@ -2,7 +2,7 @@ package com.dunctebot.dashboard.controllers
 
 import com.dunctebot.dashboard.*
 import com.dunctebot.dashboard.WebServer.Companion.FLASH_MESSAGE
-import com.dunctebot.dashboard.utils.fetchGuildPatronStatus
+import com.dunctebot.dashboard.utils.fetchGuildData
 import com.dunctebot.models.settings.GuildSetting
 import com.dunctebot.models.settings.WarnAction
 import com.dunctebot.models.utils.Utils.colorToInt
@@ -25,10 +25,10 @@ object SettingsController {
             throw RedirectResponse()
         }
 
-        val settings = duncteApis.getGuildSetting(ctx.guildId.toLong())
+        val (settings, patron) = fetchGuildData(ctx.guildId) // string
 
         setBasic(params, settings)
-        setModeration(params, rateLimits, settings)
+        setModeration(params, rateLimits, settings, patron)
         setMessages(params, settings)
 
         sendSettingUpdate(settings)
@@ -63,7 +63,7 @@ object SettingsController {
             .setEmbedColor(color)
     }
 
-    private fun setModeration(params: Map<String, List<String>>, rateLimits: LongArray, settings: GuildSetting) {
+    private fun setModeration(params: Map<String, List<String>>, rateLimits: LongArray, settings: GuildSetting, isGuildPatron: Boolean) {
         val modLogChannel = params["modChannel"]?.firstOrNull().toSafeLong()
         val autoDeHoist = params["autoDeHoist"]?.firstOrNull().toCBBool()
         val filterInvites = params["filterInvites"]?.firstOrNull().toCBBool()
@@ -88,7 +88,7 @@ object SettingsController {
         val youngAccountBanEnable = params["young_account_ban_enabled"]?.firstOrNull().toCBBool()
 
         val guildId = settings.guildId
-        val warnActionsList = parseWarnActions(guildId, params)
+        val warnActionsList = parseWarnActions(guildId, params, isGuildPatron)
 
         settings
             .setLogChannel(modLogChannel)
@@ -160,9 +160,8 @@ object SettingsController {
         return rateLimits
     }
 
-    private fun parseWarnActions(guildId: Long, params: Map<String, List<String>>): List<WarnAction> {
+    private fun parseWarnActions(guildId: Long, params: Map<String, List<String>>, isGuildPatron: Boolean): List<WarnAction> {
         val warnActionsList = arrayListOf<WarnAction>()
-        val isGuildPatron = fetchGuildPatronStatus(guildId.toString())
         val maxWarningActionCount = if(isGuildPatron) WarnAction.PATRON_MAX_ACTIONS else 1
 
 

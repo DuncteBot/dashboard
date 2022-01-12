@@ -7,7 +7,7 @@ import com.dunctebot.dashboard.controllers.SettingsController
 import com.dunctebot.dashboard.controllers.api.*
 import com.dunctebot.dashboard.rendering.VelocityRenderer
 import com.dunctebot.dashboard.rendering.WebVariables
-import com.dunctebot.dashboard.utils.fetchGuildPatronStatus
+import com.dunctebot.dashboard.utils.fetchGuildData
 import com.dunctebot.jda.oauth.OauthSessionController
 import com.dunctebot.models.settings.GuildSetting
 import com.dunctebot.models.settings.ProfanityFilterType
@@ -219,12 +219,12 @@ class WebServer {
                 map.put("goodRoles", goodRoles)
                 map.put("guild", guild)
 
-                val settings = duncteApis.getGuildSetting(guildId)
+                val (settings, patron) = fetchGuildData(ctx.guildId) // string
 
                 map.put("settings", settings)
                 map.put("guildColor", Utils.colorToHex(settings.embedColor))
 
-                map.put("guild_patron", fetchGuildPatronStatus(ctx.guildId))
+                map.put("guild_patron", patron)
             }
 
             val message: String? = ctx.sessionAttribute(FLASH_MESSAGE)

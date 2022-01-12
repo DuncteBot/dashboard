@@ -1,10 +1,9 @@
 package com.dunctebot.dashboard.controllers.api
 
 import com.dunctebot.dashboard.WebServer
-import com.dunctebot.dashboard.duncteApis
 import com.dunctebot.dashboard.fetchGuild
 import com.dunctebot.dashboard.guildId
-import com.dunctebot.dashboard.utils.fetchGuildPatronStatus
+import com.dunctebot.dashboard.utils.fetchGuildData
 import com.dunctebot.jda.json.JsonChannel
 import com.dunctebot.jda.json.JsonGuild
 import com.dunctebot.jda.json.JsonRole
@@ -41,7 +40,7 @@ object SettingsApiController {
 
     fun post(ctx: Context) {
         val future = CompletableFuture.supplyAsync({
-            val isPatron = fetchGuildPatronStatus(ctx.guildId)
+            val (settings, patron) = fetchGuildData(ctx.guildId) // string
 
             // What don't we need to check?
             // - filterType: this will default to good setting
@@ -61,7 +60,7 @@ object SettingsApiController {
                     {
                         val size = it.warnActions.size
 
-                        if (isPatron) {
+                        if (patron) {
                             size > 0 && size <= WarnAction.PATRON_MAX_ACTIONS
                         } else {
                             size == 1
@@ -95,10 +94,10 @@ object SettingsApiController {
             map["roles"] = roles
             map["guild"] = JsonGuild(guild)
 
-            val settings = duncteApis.getGuildSetting(guild.idLong) // long
+            val (settings, patron) = fetchGuildData(ctx.guildId) // string
 
             map["settings"] = settings
-            map["patron"] = fetchGuildPatronStatus(ctx.guildId) // string
+            map["patron"] = patron
         }
 
         return map
