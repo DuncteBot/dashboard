@@ -151,8 +151,8 @@ class WebServer {
 
                     path("settings") {
                         before("") { ctx -> CustomCommandController.before(ctx) }
-                        get { ctx -> SettingsApiController.get(ctx) }
-                        post { ctx -> SettingsApiController.post(ctx) }
+                        get(::getSettings)
+                        post(::postSettings)
                     }
 
                     get("roles") { ctx -> GuildController.guildRolesApiHandler(ctx) }
