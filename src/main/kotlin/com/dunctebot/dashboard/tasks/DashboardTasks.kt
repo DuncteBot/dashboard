@@ -1,7 +1,7 @@
 package com.dunctebot.dashboard.tasks
 
 import com.dunctebot.dashboard.controllers.GuildController
-import com.dunctebot.dashboard.controllers.api.OtherAPi
+import com.dunctebot.dashboard.controllers.api.guildsRequests
 import com.dunctebot.dashboard.server
 import com.dunctebot.jda.oauth.OauthSessionController
 import java.time.OffsetDateTime
@@ -32,7 +32,7 @@ class DashboardTasks {
         )
         // Clean the guilds pool every 30 minutes
         threadPool.scheduleAtFixedRate(
-            OtherAPi.guildsRequests::cleanUp,
+            guildsRequests::cleanUp,
             30,
             30,
             TimeUnit.MINUTES

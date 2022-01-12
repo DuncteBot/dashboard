@@ -86,15 +86,7 @@ class WebServer {
         }
 
         this.app.before("/") { ctx -> RootController.beforeRoot(ctx, oAuth2Client) }
-        this.app.get("/") { ctx ->
-            ctx.render(
-                "dashboard/index.vm",
-                WebVariables()
-                    .put("title", "Dashboard")
-                    .put("hide_menu", true)
-                    .toMap()
-            )
-        }
+        this.app.get("/", VueComponent("guilds"))
 
         this.app.routes {
             path("server") {
@@ -131,10 +123,12 @@ class WebServer {
     private fun addAPIRoutes() {
         this.app.routes {
             path("api") {
-                get("user-guilds") { ctx -> OtherAPi.fetchGuildsOfUser(ctx, oAuth2Client) }
-
                 // This is just used by uptime robot to check if the application is up
-                get("uptimerobot") { ctx -> OtherAPi.uptimeRobot(ctx) }
+                get("uptimerobot") { ctx ->
+                    ctx.plainText()
+                        .result("This is just used by uptime robot to check if the application is up")
+                }
+
                 post("update-data") { ctx -> DataController.updateData(ctx) }
                 get("invalidate-tokens") { ctx -> DataController.invalidateTokens(ctx)  }
 
@@ -143,6 +137,8 @@ class WebServer {
                         GuildApiController.findUserAndGuild(ctx)
                     }
                 }
+
+                get("guilds") { ctx -> fetchGuildsOfUser(ctx, oAuth2Client) }
 
                 // /api/guilds/{guild}/[settings|custom-commands|roles]
                 path("guilds/$GUILD_ID") {

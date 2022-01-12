@@ -1,7 +1,7 @@
 plugins {
 //    java
     application
-    kotlin("jvm") version "1.5.21"
+    kotlin("jvm") version "1.6.0"
     id("com.github.johnrengelman.shadow") version "7.0.0"
 }
 
@@ -25,9 +25,9 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation(group = "com.dunctebot", name = "dunctebot-models", version = "0.1.21")
 
-    implementation(group = "ch.qos.logback", name = "logback-classic", version = "1.2.3")
+    implementation(group = "ch.qos.logback", name = "logback-classic", version = "1.2.10")
 
-    implementation(group = "io.javalin", name = "javalin", version = "4.1.0")
+    implementation(group = "io.javalin", name = "javalin", version = "4.2.0")
     implementation(group = "org.apache.velocity", name = "velocity-engine-core", version = "2.2")
 
     implementation(group = "com.github.ben-manes.caffeine", name = "caffeine", version = "2.8.5")
