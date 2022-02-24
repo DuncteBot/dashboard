@@ -95,7 +95,7 @@ class WebServer {
             )
         }
 
-        this.app.get("/vue/server/$GUILD_ID", VueComponent("settings"))
+        // this.app.get("/vue/server/$GUILD_ID", VueComponent("settings"))
 
         this.app.routes {
             path("server") {
@@ -150,10 +150,12 @@ class WebServer {
                     // before("*") { ctx -> CustomCommandController.before(ctx) }
 
                     path("settings") {
+                        before("") { ctx -> CustomCommandController.before(ctx) }
                         get { ctx -> SettingsApiController.get(ctx) }
                     }
 
                     path("custom-commands") {
+                        before("") { ctx -> CustomCommandController.before(ctx) }
                         get { ctx -> CustomCommandController.show(ctx) }
                         patch { ctx -> CustomCommandController.update(ctx) }
                         post { ctx -> CustomCommandController.create(ctx) }
