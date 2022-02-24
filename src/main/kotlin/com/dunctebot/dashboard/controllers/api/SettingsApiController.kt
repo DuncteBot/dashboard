@@ -11,6 +11,7 @@ import com.dunctebot.models.settings.GuildSetting
 import com.dunctebot.models.settings.WarnAction
 import io.javalin.http.Context
 import net.dv8tion.jda.api.entities.TextChannel
+import net.dv8tion.jda.api.utils.TimeUtil.DISCORD_EPOCH
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executors
 
@@ -49,6 +50,11 @@ fun postSettings(ctx: Context) {
                 "Prefix must be at least 1 character and at most 10 characters"
             )
             .check(
+                "autorole",
+                { it.autoroleRole == 0L || it.autoroleRole > DISCORD_EPOCH },
+                "Autorole is not conform to discord timestamp"
+            )
+            .check(
                 "leave_timeout",
                 { it.leaveTimeout in 1..60 },
                 "Leave timeout must be within range of 1 to 60 (inclusive)"
@@ -77,6 +83,16 @@ fun postSettings(ctx: Context) {
                 "aiSensitivity",
                 { it.aiSensitivity > 0.0 && it.aiSensitivity < 1.0 },
                 "The ai sensitivity must be between 0.0 and 1.0"
+            )
+            .check(
+                "logChannelId",
+                { it.logChannel == 0L || it.logChannel > DISCORD_EPOCH },
+                "logChannelId is not conform to discord timestamp"
+            )
+            .check(
+                "rateLimits",
+                { it.ratelimits.size == 7 && it.ratelimits.all { r -> r in 1..1000000 } },
+                "Rate limits are not valid"
             )
             .get()
 
