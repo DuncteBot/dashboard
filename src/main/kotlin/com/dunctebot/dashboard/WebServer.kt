@@ -35,6 +35,7 @@ class WebServer {
     init {
         // Register the view renderer
         JavalinRenderer.register(engine::render, ".vm")
+        val local = System.getenv("IS_LOCAL").toBoolean()
 
         this.app = Javalin.create { config ->
             config.compressionStrategy(CompressionStrategy.GZIP)
@@ -42,7 +43,7 @@ class WebServer {
             config.showJavalinBanner = false
             config.enableWebjars()
 
-            if (System.getenv("IS_LOCAL").toBoolean()) {
+            if (local) {
                 val projectDir = System.getProperty("user.dir")
                 val staticDir = "/src/main/resources/public"
                 config.addStaticFiles(projectDir + staticDir, Location.EXTERNAL)
@@ -51,6 +52,11 @@ class WebServer {
             } else {
                 config.addStaticFiles("/public", Location.CLASSPATH)
                 JavalinVue.optimizeDependencies = true
+            }
+
+            // HACK: use a better solution.
+            config.contextResolvers { resolvers ->
+                resolvers.scheme = { _ -> if (local) "http" else "https" }
             }
         }
 
