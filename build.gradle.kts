@@ -27,7 +27,7 @@ dependencies {
 
     implementation(group = "ch.qos.logback", name = "logback-classic", version = "1.2.10")
 
-    implementation(group = "io.javalin", name = "javalin", version = "4.2.0")
+    implementation(group = "io.javalin", name = "javalin", version = "4.4.0")
     implementation(group = "org.apache.velocity", name = "velocity-engine-core", version = "2.2")
 
     implementation(group = "com.github.ben-manes.caffeine", name = "caffeine", version = "2.8.5")
