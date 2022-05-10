@@ -36,6 +36,12 @@
                         :settings="settings"
                         :channels="channels"
                     ></app-settings-join-leave>
+
+                    <app-settings-custom-commands
+                        v-if="showingItem === 'custom-commands'"
+                        :prefix="settings.prefix"
+                        :guild-id="guild.id"
+                    ></app-settings-custom-commands>
                 </form>
             </div>
             <h1 v-else>Loading...</h1>
@@ -55,7 +61,8 @@
                 saving: false,
                 settingsURL,
                 settingData: new LoadableData(settingsURL, false),
-                showingItem: (window.location.hash || 'basic').replace('#', ''),
+                // showingItem: (window.location.hash || 'basic').replace('#', ''),
+                showingItem: (window.location.hash || 'custom-commands').replace('#', ''),
             };
         },
         watch: {
