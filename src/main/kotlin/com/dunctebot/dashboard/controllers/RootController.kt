@@ -69,7 +69,7 @@ object RootController {
             // Fetch the user from discord
             val userId = oAuth2Client.getUser(oauthses).complete().id
 
-            println("User id ${}")
+            println("User id $userId")
 
             // Store the user id in the session
             ctx.sessionAttribute(USER_ID, userId)
