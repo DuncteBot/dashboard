@@ -1,5 +1,6 @@
 package com.dunctebot.dashboard.utils
 
+import com.dunctebot.dashboard.duncteApis
 import com.dunctebot.dashboard.jsonMapper
 import com.dunctebot.dashboard.webSocket
 import com.dunctebot.models.settings.GuildSetting
@@ -18,10 +19,13 @@ fun fetchGuildData(guildId: String): Pair<GuildSetting, Boolean> {
     webSocket.requestData(json, future::complete)
 
     val result = future.get()
+    var guildSetting = result["guild_settings"][guildId]
 
-    println(result)
+    // fallback in case the bots don't have it
+    if (guildSetting == null || guildSetting.isNull) {
+        guildSetting = duncteApis.fetchGuildSetting(guildId.toLong())
+    }
 
-    val guildSetting = result["guild_settings"][guildId]
     val settingParsed = jsonMapper.readValue(guildSetting.traverse(), GuildSetting::class.java)
     val patreonStatus = result["guild_patron_status"][guildId].asBoolean()
 

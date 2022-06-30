@@ -24,9 +24,9 @@
             <small>({{ commands.loadError.text }})</small>
         </div>
         <template v-if="commands.loaded">
-            <ul v-if="commands.data.length" class="collection">
-                <li class="collection-item" v-for="command in commands.data" :key="command.id">
-                    <h6 class="left">${command.invoke}</h6>
+            <ul v-if="commandsList.length" class="collection">
+                <li class="collection-item" v-for="command in commandsList" :key="command.id">
+                    <h6 class="left">{{ command.invoke }}</h6>
 
                     <div class="right">
                         <a href="#" @click.prevent="showCommand(command.invoke)"
@@ -73,7 +73,7 @@
                                                                 target="_blank">Click here!</a></p>
                         <a href="#" @click.prevent="saveInternally"
                            class="waves-effect waves-green btn green white-text">Save</a>
-                        <a href="#" @click.prevent="clearEditor"
+                        <a href="#" @click.prevent="hideEditor"
                            class="waves-effect waves-red btn red white-text">Discard</a>
                     </div>
                 </div>
@@ -141,19 +141,22 @@ Vue.component('app-settings-custom-commands', {
         charCount () {
             return this.editor?.getValue()?.length ?? '0';
         },
+        commandsList () {
+            return this.commands.data.commands;
+        },
     },
     methods: {
         reloadCommands () {
             this.commands.refresh(false);
         },
         showCommand (name) {
-            const cmdIndex = this.commands.data.findIndex(cmd => cmd.invoke === name);
+            const cmdIndex = this.commandsList.findIndex(cmd => cmd.invoke === name);
 
             if (cmdIndex === -1) {
                 return;
             }
 
-            const command = this.commands.data[cmdIndex];
+            const command = this.commandsList[cmdIndex];
 
             this.showModal(command.invoke, command.message, false, command.autoresponse);
         },
@@ -166,6 +169,7 @@ Vue.component('app-settings-custom-commands', {
             this.editor.setValue(message);
             this.editor.save();
             this.$refs.commandName.value = name;
+            this.curCmdName = name;
             this.$refs.autoresponse.checked = autoResponse;
             this.createNewCommand = createNew;
 
@@ -194,13 +198,13 @@ Vue.component('app-settings-custom-commands', {
 
             toast("Saving...");
 
-            const cmdIndex = this.commands.data.findIndex(cmd => cmd.invoke === name);
+            const cmdIndex = this.commandsList.findIndex(cmd => cmd.invoke === name);
 
             if (cmdIndex === -1) {
                 return;
             }
 
-            const command = this.commands.data[cmdIndex];
+            const command = this.commandsList[cmdIndex];
             command.message = this.editor.getValue();
             command.autoresponse = this.$refs.autoresponse.checked;
 
