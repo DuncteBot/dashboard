@@ -106,15 +106,7 @@ class WebServer {
                         )
                     ))
 
-                    post { ctx -> SettingsController.saveSettings(ctx) }
-
-                    // Custom command settings
-                    getWithGuildData(
-                        "custom-commands",
-                        WebVariables().put("title", "Dashboard")
-                            .put("using_tabs", false),
-                        "dashboard/customCommandSettings.vm"
-                    )
+                    // post { ctx -> SettingsController.saveSettings(ctx) }
                 }
             }
         }
@@ -197,45 +189,6 @@ class WebServer {
 
     fun shutdown() {
         this.app.stop()
-    }
-
-    private fun getWithGuildData(path: String, map: WebVariables, view: String) {
-        get(path) { ctx ->
-            val guild = ctx.fetchGuild()
-
-            if (guild != null) {
-                val guildId = guild.idLong
-
-                val tcs = guild.textChannelCache.filter(TextChannel::canTalk).toList()
-                val goodRoles = guild.roleCache.filter {
-                    guild.selfMember.canInteract(it) && it.name != "@everyone" && it.name != "@here"
-                }.filter { !it.isManaged }.toList()
-
-                map.put("goodChannels", tcs)
-                map.put("goodRoles", goodRoles)
-                map.put("guild", guild)
-
-                val (settings, patron) = fetchGuildData(ctx.guildId) // string
-
-                map.put("settings", settings)
-                map.put("guildColor", Utils.colorToHex(settings.embedColor))
-
-                map.put("guild_patron", patron)
-            }
-
-            val message: String? = ctx.sessionAttribute(FLASH_MESSAGE)
-
-            if (!message.isNullOrEmpty()) {
-                ctx.sessionAttribute(FLASH_MESSAGE, null)
-                map.put("message", message)
-            } else {
-                map.put("message", false)
-            }
-
-            map.put("hide_menu", false)
-
-            ctx.render(view, map.toMap())
-        }
     }
 
     companion object {
