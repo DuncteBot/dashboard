@@ -46,7 +46,13 @@
         <!-- load main before vue -->
         <script src="/js/main.js"></script>
         <script>
-            new Vue({el: "#main-vue"});
+            new Vue({el: '#main-vue'});
+
+            if (Vue.prototype.$javalin.state.title) {
+                document.title = Vue.prototype.$javalin.state.title;
+            } else {
+                document.title = 'DuncteBot Dashboard';
+            }
         </script>
 
         <!-- Cloudflare Web Analytics -->

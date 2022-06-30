@@ -3,17 +3,16 @@ package com.dunctebot.dashboard
 import com.dunctebot.dashboard.WebServer.Companion.GUILD_ID
 import com.dunctebot.dashboard.WebServer.Companion.SESSION_ID
 import com.dunctebot.dashboard.WebServer.Companion.USER_ID
-import com.dunctebot.dashboard.rendering.WebVariables
 import com.fasterxml.jackson.databind.JsonNode
 import com.jagrosh.jdautilities.oauth2.OAuth2Client
 import com.jagrosh.jdautilities.oauth2.session.Session
 import io.javalin.http.Context
 import io.javalin.http.ForbiddenResponse
 import io.javalin.http.UnauthorizedResponse
+import io.javalin.plugin.rendering.vue.VueComponent
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.internal.utils.IOUtil
 import okhttp3.FormBody
-import java.time.OffsetDateTime
 
 fun Context.plainText(): Context = this.contentType("text/plain")
 
@@ -66,14 +65,10 @@ fun String?.toSafeLong(): Long {
 }
 
 fun haltDiscordError(ctx: Context, error: DiscordError, guildId: String = ""): ForbiddenResponse {
-    ctx.render(
-        error.viewPath,
-        WebVariables()
-            .put("hide_menu", true)
-            .put("title", error.title)
-            .put("guildId", guildId)
-            .toMap()
-    )
+    VueComponent(error.component, mapOf(
+        "title" to error.title,
+        "guildId" to guildId,
+    )).handle(ctx)
 
     throw ForbiddenResponse()
 }

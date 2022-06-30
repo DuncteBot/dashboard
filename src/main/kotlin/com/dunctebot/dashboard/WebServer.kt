@@ -17,6 +17,7 @@ import com.jagrosh.jdautilities.oauth2.OAuth2Client
 import io.javalin.Javalin
 import io.javalin.apibuilder.ApiBuilder.*
 import io.javalin.core.compression.CompressionStrategy
+import io.javalin.http.ForbiddenResponse
 import io.javalin.http.staticfiles.Location
 import io.javalin.plugin.rendering.JavalinRenderer
 import io.javalin.plugin.rendering.vue.JavalinVue
@@ -58,6 +59,7 @@ class WebServer {
         // Non settings related routes
         this.app.get("roles/{hash}") { ctx -> GuildController.showGuildRoles(ctx) }
 
+        // TODO: turn into vue component
         this.app.get("register-server") { ctx ->
             ctx.render(
                 "oneGuildRegister.vm",
@@ -87,6 +89,13 @@ class WebServer {
 
         this.app.before("/") { ctx -> RootController.beforeRoot(ctx, oAuth2Client) }
         this.app.get("/", VueComponent("guilds"))
+        // TODO: remove
+        this.app.get("/test-component/{component}/$GUILD_ID") { ctx ->
+            VueComponent(ctx.pathParam("component"), mapOf(
+                "guildId" to "123",
+                "title" to "testing a component"
+            )).handle(ctx)
+        }
 
         this.app.routes {
             path("server") {
@@ -159,23 +168,16 @@ class WebServer {
 
     private fun mapErrorRoutes() {
         this.app.error(404) { ctx ->
-            ctx.render(
-                "errors/404.vm",
-                WebVariables()
-                    .put("hide_menu", true)
-                    .put("title", "404 - Page Not Found")
-                    .toMap()
-            )
+            VueComponent("error-404").handle(ctx)
         }
 
         this.app.error(500) { ctx ->
-            ctx.render(
-                "errors/500.vm",
-                WebVariables()
-                    .put("hide_menu", true)
-                    .put("title", "500 - Internal Server error")
-                    .toMap()
-            )
+            VueComponent("error-500").handle(ctx)
+        }
+
+        // TODO: find a better solution, this is ugly (probably same thing with custom ex)
+        this.app.exception(ForbiddenResponse::class.java) { ex, ctx ->
+            //
         }
     }
 
