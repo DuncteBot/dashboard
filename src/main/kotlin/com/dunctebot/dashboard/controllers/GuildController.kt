@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.github.benmanes.caffeine.cache.Caffeine
 import io.javalin.http.Context
+import io.javalin.http.HttpCode
 import io.javalin.http.NotFoundResponse
 import io.javalin.plugin.rendering.vue.VueComponent
 import net.dv8tion.jda.api.entities.Member
@@ -29,9 +30,12 @@ object GuildController {
         val token = ctx.formParam("token")
 
         if (token.isNullOrBlank()) {
-            renderPatronRegisterPage(ctx) {
-                it.put("message", "Submitted token is not valid.")
-            }
+            ctx.status(HttpCode.BAD_REQUEST)
+
+            val obj = jsonMapper.createObjectNode()
+                .put("message", "Submitted token is not valid.")
+
+            ctx.json(obj)
             return
         }
 

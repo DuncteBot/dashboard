@@ -61,17 +61,11 @@ class WebServer {
 
         // TODO: turn into vue component
         this.app.get("register-server") { ctx ->
-            ctx.render(
-                "oneGuildRegister.vm",
-                WebVariables()
-                    .put("hide_menu", true)
-                    .put("title", "Register your server for patron perks")
-                    .put("captcha_sitekey", System.getenv("CAPTCHA_SITEKEY"))
-                    .toMap()
-            )
+            VueComponent("one-guild-register", mapOf(
+                "title" to "Register your server for patron perks",
+                "captchaSitekey" to System.getenv("CAPTCHA_SITEKEY")
+            )).handle(ctx)
         }
-
-        this.app.post("register-server") { ctx -> GuildController.handleOneGuildRegister(ctx) }
 
         addDashboardRoutes()
         addAPIRoutes()
@@ -114,8 +108,6 @@ class WebServer {
                             "patronMaxWarnActions" to WarnAction.PATRON_MAX_ACTIONS
                         )
                     ))
-
-                    // post { ctx -> SettingsController.saveSettings(ctx) }
                 }
             }
         }
@@ -145,6 +137,7 @@ class WebServer {
                 path("guilds/$GUILD_ID") {
                     // we will use the custom command controller for now since this method protects all the settings routes
                     // before("*") { ctx -> CustomCommandController.before(ctx) }
+                    post("patreon-settings") { ctx -> GuildController.handleOneGuildRegister(ctx) }
 
                     path("settings") {
                         before("") { ctx -> CustomCommandController.before(ctx) }
