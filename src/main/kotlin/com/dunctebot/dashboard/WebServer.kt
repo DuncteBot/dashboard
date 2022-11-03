@@ -3,16 +3,12 @@ package com.dunctebot.dashboard
 import com.dunctebot.dashboard.controllers.DashboardController
 import com.dunctebot.dashboard.controllers.GuildController
 import com.dunctebot.dashboard.controllers.RootController
-import com.dunctebot.dashboard.controllers.SettingsController
 import com.dunctebot.dashboard.controllers.api.*
 import com.dunctebot.dashboard.rendering.VelocityRenderer
-import com.dunctebot.dashboard.rendering.WebVariables
-import com.dunctebot.dashboard.utils.fetchGuildData
 import com.dunctebot.jda.oauth.OauthSessionController
 import com.dunctebot.models.settings.GuildSetting
 import com.dunctebot.models.settings.ProfanityFilterType
 import com.dunctebot.models.settings.WarnAction
-import com.dunctebot.models.utils.Utils
 import com.jagrosh.jdautilities.oauth2.OAuth2Client
 import io.javalin.Javalin
 import io.javalin.apibuilder.ApiBuilder.*
@@ -22,7 +18,6 @@ import io.javalin.http.staticfiles.Location
 import io.javalin.plugin.rendering.JavalinRenderer
 import io.javalin.plugin.rendering.vue.JavalinVue
 import io.javalin.plugin.rendering.vue.VueComponent
-import net.dv8tion.jda.api.entities.TextChannel
 
 class WebServer {
     private val engine = VelocityRenderer()
@@ -59,7 +54,7 @@ class WebServer {
         // Non settings related routes
         this.app.get("roles/{hash}") { ctx -> GuildController.showGuildRoles(ctx) }
 
-        // TODO: turn into vue component
+        // TODO: TEST THIS
         this.app.get("register-server") { ctx ->
             VueComponent("one-guild-register", mapOf(
                 "title" to "Register your server for patron perks",
@@ -83,13 +78,6 @@ class WebServer {
 
         this.app.before("/") { ctx -> RootController.beforeRoot(ctx, oAuth2Client) }
         this.app.get("/", VueComponent("guilds"))
-        // TODO: remove
-        this.app.get("/test-component/{component}/$GUILD_ID") { ctx ->
-            VueComponent(ctx.pathParam("component"), mapOf(
-                "guildId" to "123",
-                "title" to "testing a component"
-            )).handle(ctx)
-        }
 
         this.app.routes {
             path("server") {
