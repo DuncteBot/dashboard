@@ -4,7 +4,6 @@ import com.dunctebot.dashboard.controllers.DashboardController
 import com.dunctebot.dashboard.controllers.GuildController
 import com.dunctebot.dashboard.controllers.RootController
 import com.dunctebot.dashboard.controllers.api.*
-import com.dunctebot.dashboard.rendering.VelocityRenderer
 import com.dunctebot.jda.oauth.OauthSessionController
 import com.dunctebot.models.settings.GuildSetting
 import com.dunctebot.models.settings.ProfanityFilterType
@@ -15,12 +14,10 @@ import io.javalin.apibuilder.ApiBuilder.*
 import io.javalin.core.compression.CompressionStrategy
 import io.javalin.http.ForbiddenResponse
 import io.javalin.http.staticfiles.Location
-import io.javalin.plugin.rendering.JavalinRenderer
 import io.javalin.plugin.rendering.vue.JavalinVue
 import io.javalin.plugin.rendering.vue.VueComponent
 
 class WebServer {
-    private val engine = VelocityRenderer()
     private val app: Javalin
     val oAuth2Client: OAuth2Client = OAuth2Client.Builder()
         .setSessionController(OauthSessionController())
@@ -29,7 +26,7 @@ class WebServer {
         .build()
 
     init {
-        JavalinVue.isDevFunction = { System.getenv("IS_LOCAL").toBoolean() }
+        val local = System.getenv("IS_LOCAL").toBoolean()
 
         this.app = Javalin.create { config ->
             config.compressionStrategy(CompressionStrategy.GZIP)
@@ -37,7 +34,7 @@ class WebServer {
             config.showJavalinBanner = false
             config.enableWebjars()
 
-            if (System.getenv("IS_LOCAL").toBoolean()) {
+            if (local) {
                 val projectDir = System.getProperty("user.dir")
                 val staticDir = "/src/main/resources/public"
                 config.addStaticFiles(projectDir + staticDir, Location.EXTERNAL)
@@ -47,12 +44,16 @@ class WebServer {
                 config.addStaticFiles("/public", Location.CLASSPATH)
                 JavalinVue.optimizeDependencies = true
             }
+
+            // HACK: use a better solution.
+            config.contextResolvers { resolvers ->
+                resolvers.scheme = { _ -> if (local) "http" else "https" }
+            }
         }
 
         // Non settings related routes
         this.app.get("roles/{hash}") { ctx -> GuildController.showGuildRoles(ctx) }
 
-        // TODO: TEST THIS
         this.app.get("register-server") { ctx ->
             VueComponent("one-guild-register", mapOf(
                 "title" to "Register your server for patron perks",
