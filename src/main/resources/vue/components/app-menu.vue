@@ -63,6 +63,15 @@
           this.navOpen = false;
         },
       });
+
+      const main = document.querySelector('main');
+      const foot = document.querySelector('footer');
+
+      [main, foot].forEach((el) => {
+          if (!el.classList.contains('pad')) {
+              el.classList.add('pad');
+          }
+      });
     },
     methods: {
       getActiveClass(name) {
@@ -83,7 +92,7 @@
 </script>
 
 <style>
-    main, footer {
+    main.pad, footer.pad {
         padding-left: 300px;
     }
 
