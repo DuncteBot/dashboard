@@ -34,6 +34,7 @@
                         <div class="card-action ">
                             <a href="#" class="btn green white-text text-lighten-4" @click.prevent="submitForm">This is correct</a>
                         </div>
+                        <span>{{ statusMsg }}</span>
                     </div>
                 </div>
             </div>
@@ -73,7 +74,7 @@
     </div>
 </template>
 
-<script src="https://hcaptcha.com/1/api.js"></script>
+<script src="https://hcaptcha.com/1/api.js?render=explicit"></script>
 <script>
     Vue.component('one-guild-register', {
         template: '#one-guild-register',
@@ -131,7 +132,9 @@
 
                         this.resultData = {
                             user: json.user.formatted,
+                            userId: json.user.id,
                             guild: json.guild.name,
+                            guildId: json.guild.id,
                             token: json.token,
                         };
                     })
@@ -157,6 +160,35 @@
                     // what?
                     return false;
                 }
+
+                this.statusMsg = 'Submitting.....';
+
+                fetch('/api/guilds/patreon-settings', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(this.resultData)
+                })
+                    .then((blob) => blob.json())
+                    .then((json) => {
+                        this.reset('');
+
+                        if (json.code !== 200) {
+                            this.errorMsg = `ERROR: <b>${getMessage(json.message)}</b>`;
+                            return;
+                        }
+
+                        this.showForm = false;
+                        this.errorMsg = getMessage(json.message);
+                        window.scrollTo(0, 0);
+                    })
+                    .catch((e) => {
+                        reset(e.message);
+                        console.log(e);
+                        console.error(e)
+                    });
 
                 // TODO: send http response
 

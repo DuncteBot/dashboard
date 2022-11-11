@@ -120,12 +120,12 @@ class WebServer {
                 }
 
                 get("guilds") { ctx -> fetchGuildsOfUser(ctx, oAuth2Client) }
+                post("guilds/patreon-settings") { ctx -> GuildController.handleOneGuildRegister(ctx) }
 
                 // /api/guilds/{guild}/[settings|custom-commands|roles]
                 path("guilds/$GUILD_ID") {
                     // we will use the custom command controller for now since this method protects all the settings routes
                     // before("*") { ctx -> CustomCommandController.before(ctx) }
-                    post("patreon-settings") { ctx -> GuildController.handleOneGuildRegister(ctx) }
 
                     path("settings") {
                         before("") { ctx -> CustomCommandController.before(ctx) }
