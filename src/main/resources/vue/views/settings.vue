@@ -61,8 +61,7 @@
                 saving: false,
                 settingsURL,
                 settingData: new LoadableData(settingsURL, false),
-                // showingItem: (window.location.hash || 'basic').replace('#', ''),
-                showingItem: (window.location.hash || 'custom-commands').replace('#', ''),
+                showingItem: (window.location.hash || 'basic').replace('#', ''),
             };
         },
         watch: {
@@ -107,7 +106,7 @@
                 const valid = this.$refs.settingsForm.reportValidity();
 
                 if (!valid) {
-                    // TODO: switch to the proper tab?
+                    toast('There are some errors, please check all fields', 6000);
                     return;
                 }
 

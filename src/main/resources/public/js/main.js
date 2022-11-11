@@ -6,9 +6,10 @@ window.eventBus = {
     off() {},
 };
 
-function toast(message) {
+function toast(message, displayLength = 4000) {
     M.toast({
         html: message,
+        displayLength,
     });
 }
 

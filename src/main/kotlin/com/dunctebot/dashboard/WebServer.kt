@@ -29,8 +29,6 @@ class WebServer {
         .build()
 
     init {
-        // Register the view renderer
-        JavalinRenderer.register(engine::render, ".vm")
         JavalinVue.isDevFunction = { System.getenv("IS_LOCAL").toBoolean() }
 
         this.app = Javalin.create { config ->
