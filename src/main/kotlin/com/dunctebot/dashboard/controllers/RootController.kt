@@ -31,15 +31,13 @@ object RootController {
 
             ctx.sessionAttribute(SESSION_ID, "session_${System.currentTimeMillis()}")
 
-//            ctx.redirect("$url&prompt=none")
-            ctx.redirect(url)
+            ctx.redirect("$url&prompt=none")
+//            ctx.redirect(url)
         }
     }
 
     fun callback(ctx: Context, oAuth2Client: OAuth2Client) {
         val query = ctx.queryParamMap()
-
-        println(query)
 
         // If we don't have a code from discord
         // and we don't have a state we will return the user to the homepage
@@ -48,14 +46,9 @@ object RootController {
         }
 
         // Get the session id for the user
-        val sesId = ctx.sessionAttribute<String?>(SESSION_ID)
-
-        println("Session id $sesId")
+        val sesId = ctx.sessionAttribute<String?>(SESSION_ID) ?: return ctx.redirect(HOMEPAGE)
 
         // If the session is missing we will return the user to the homepage
-        if (sesId == null){
-            return ctx.redirect(HOMEPAGE)
-        }
 
         try {
             // Start a session to obtain the oauth2 access token
@@ -68,8 +61,6 @@ object RootController {
 
             // Fetch the user from discord
             val userId = oAuth2Client.getUser(oauthses).complete().id
-
-            println("User id $userId")
 
             // Store the user id in the session
             ctx.sessionAttribute(USER_ID, userId)

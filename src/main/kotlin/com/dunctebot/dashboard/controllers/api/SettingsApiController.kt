@@ -15,7 +15,6 @@ import net.dv8tion.jda.api.utils.TimeUtil.DISCORD_EPOCH
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executors
 
-// TODO: finish validation
 private val executor = Executors.newSingleThreadExecutor()
 
 fun getSettings(ctx: Context) {
