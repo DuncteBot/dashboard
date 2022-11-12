@@ -40,6 +40,9 @@ class WebServer {
                 config.addStaticFiles(projectDir + staticDir, Location.EXTERNAL)
                 config.enableDevLogging()
                 JavalinVue.optimizeDependencies = false
+                JavalinVue.rootDirectory {
+                    it.externalPath("$projectDir/src/main/resources/vue") // live reloading :)
+                }
             } else {
                 config.addStaticFiles("/public", Location.CLASSPATH)
                 JavalinVue.optimizeDependencies = true
