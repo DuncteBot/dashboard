@@ -204,8 +204,6 @@
                         console.error(e)
                     });
 
-                // TODO: send http response
-
                 return false;
             },
         },
