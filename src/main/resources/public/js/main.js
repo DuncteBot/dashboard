@@ -1,11 +1,3 @@
-// TODO: remove this system
-window.eventBus = {
-    emit() {},
-    on() {},
-    once() {},
-    off() {},
-};
-
 function toast(message, displayLength = 4000) {
     M.toast({
         html: message,
