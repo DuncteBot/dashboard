@@ -31,7 +31,8 @@ dependencies {
 
     implementation(group = "com.github.ben-manes.caffeine", name = "caffeine", version = "2.8.5")
 
-    implementation(group = "com.fasterxml.jackson.core", name = "jackson-databind", version = "2.12.6.1")
+    implementation(group = "com.fasterxml.jackson.core", name = "jackson-databind", version = "2.13.3")
+    implementation(group = "com.fasterxml.jackson.module", name = "jackson-module-kotlin", version = "2.13.3")
 
     implementation(group = "net.sf.trove4j", name = "trove4j", version = "3.0.3")
    // implementation(group = "com.jagrosh", name = "jda-utilities-oauth2", version = "3.0.5")

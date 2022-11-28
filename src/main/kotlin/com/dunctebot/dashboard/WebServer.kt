@@ -47,6 +47,8 @@ class WebServer {
                 config.addStaticFiles("/public", Location.CLASSPATH)
                 JavalinVue.optimizeDependencies = true
             }
+            // 191231307290771456
+            // 191245668617158656
 
             // HACK: use a better solution.
             config.contextResolvers { resolvers ->

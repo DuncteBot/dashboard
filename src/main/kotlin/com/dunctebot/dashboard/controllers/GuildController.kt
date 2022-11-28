@@ -86,6 +86,7 @@ object GuildController {
 
         val obj = jsonMapper.createObjectNode()
             .put("message", "Server successfully registered.")
+            .put("code", 200)
 
         ctx.json(obj)
     }

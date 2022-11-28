@@ -112,8 +112,6 @@
                 console.error(err);
             },
             captchaVerify (token, eKey) {
-                console.log(token);
-                console.log(eKey);
                 this.captchaResponse = token;
             },
             handleForm () {
