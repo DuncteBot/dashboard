@@ -7,19 +7,14 @@ import com.dunctebot.models.settings.GuildSetting
 import com.dunctebot.models.settings.WarnAction
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
-import com.github.benmanes.caffeine.cache.Caffeine
 import okhttp3.*
 import org.slf4j.LoggerFactory
 import java.io.IOException
-import java.util.concurrent.TimeUnit
 
+// TODO: replace this with database connection
 class DuncteApi(val apiKey: String) {
     private val logger = LoggerFactory.getLogger(DuncteApi::class.java)
     val validTokens = mutableListOf<String>()
-    // caching makes it a bit faster
-    private val settingCache = Caffeine.newBuilder()
-        .expireAfterAccess(30, TimeUnit.MINUTES)
-        .build<Long, GuildSetting>()
 
     fun validateToken(token: String): Boolean {
         if (validTokens.contains(token)) {
@@ -41,14 +36,6 @@ class DuncteApi(val apiKey: String) {
         val json = executeRequest(defaultRequest("patrons/oneguild/$userId"))
 
         return !json["data"].isEmpty
-    }
-
-    fun getGuildSetting(guildId: Long): GuildSetting {
-        return settingCache.get(guildId) {
-            val json = executeRequest(defaultRequest("guildsettings/$guildId"))
-
-            return@get jsonMapper.readValue(json["data"].traverse(), GuildSetting::class.java)
-        }!!
     }
 
     fun saveGuildSetting(setting: GuildSetting) {
@@ -74,6 +61,10 @@ class DuncteApi(val apiKey: String) {
             logger.error("Failed to set warn actions for $guildId\n" +
                 "Response: {}", response["error"].toString())
         }
+    }
+
+    fun fetchGuildSetting(guildId: Long): JsonNode {
+        return executeRequest(defaultRequest("guildsettings/$guildId"))["data"]
     }
 
     fun fetchCustomCommands(guildId: Long): JsonNode {

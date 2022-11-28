@@ -2,12 +2,12 @@ package com.dunctebot.dashboard.controllers
 
 import com.dunctebot.dashboard.*
 import com.dunctebot.dashboard.WebServer.Companion.GUILD_ID
-import com.dunctebot.dashboard.rendering.WebVariables
+import com.dunctebot.dashboard.bodies.PatronBody
 import com.dunctebot.jda.json.JsonRole
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.github.benmanes.caffeine.cache.Caffeine
 import io.javalin.http.Context
+import io.javalin.http.HttpCode
 import io.javalin.http.NotFoundResponse
 import io.javalin.plugin.rendering.vue.VueComponent
 import net.dv8tion.jda.api.entities.Member
@@ -26,40 +26,49 @@ object GuildController {
         .build<Long, CustomRoleList>()
 
     fun handleOneGuildRegister(ctx: Context) {
-        val token = ctx.formParam("token")
+        val body = ctx.bodyValidator<PatronBody>()
+            .check(
+                "token",
+                { !it.token.isNullOrBlank() && securityKeys.containsKey(it.token) },
+                "Submitted token is not valid."
+            )
+            .check(
+                "userId",
+                { it.userId.toSafeLong() > 0L },
+                "User id is not valid."
+            )
+            .check(
+                "guildId",
+                { it.guildId.toSafeLong() > 0L },
+                "Guild id is not valid."
+            )
+            .get()
 
-        if (token.isNullOrBlank()) {
-            renderPatronRegisterPage(ctx) {
-                it.put("message", "Submitted token is not valid.")
-            }
-            return
-        }
-
-        if (!securityKeys.containsKey(token)) {
-            renderPatronRegisterPage(ctx) {
-                it.put("message", "Submitted token is not valid.")
-            }
-            return
-        }
-
-        val userId = ctx.formParam("user_id").toSafeLong()
-        val guildId = ctx.formParam("guild_id").toSafeLong()
+        val token = body.token!!
+        val userId = body.userId!!
+        val guildId = body.guildId!!
         val theFormat = "$userId-$guildId"
 
         if (securityKeys[token] != theFormat) {
-            renderPatronRegisterPage(ctx) {
-                it.put("message", "Submitted token is not valid.")
-            }
+            ctx.status(HttpCode.BAD_REQUEST)
+
+            val obj = jsonMapper.createObjectNode()
+                .put("message", "Submitted token is not valid.")
+
+            ctx.json(obj)
             return
         }
 
         // remove the token as it is used
         securityKeys.remove(token)
 
-        if (duncteApis.isOneGuildPatron(userId.toString())) {
-            renderPatronRegisterPage(ctx) {
-                it.put("message", "This user is already registered, please contact a bot admin to have it changed.")
-            }
+        if (duncteApis.isOneGuildPatron(userId)) {
+            ctx.status(HttpCode.BAD_REQUEST)
+
+            val obj = jsonMapper.createObjectNode()
+                .put("message", "You already registered yourself for these perks, please contact a bot admin to have it changed.")
+
+            ctx.json(obj)
             return
         }
 
@@ -73,25 +82,13 @@ object GuildController {
 
         webSocket.broadcast(sendData)
 
-        renderPatronRegisterPage(ctx) {
-            it.put("message", "Server successfully registered.")
-                .put("hideForm", true)
-        }
-    }
+        ctx.status(HttpCode.OK)
 
-    private fun renderPatronRegisterPage(ctx: Context, vars: (WebVariables) -> Unit = {}) {
-        val map = WebVariables()
+        val obj = jsonMapper.createObjectNode()
+            .put("message", "Server successfully registered.")
+            .put("code", 200)
 
-        vars(map)
-
-        map.put("title", "Register your server for patron perks")
-            .put("hide_menu", true)
-            .put("captcha_sitekey", System.getenv("CAPTCHA_SITEKEY"))
-
-        ctx.render(
-            "oneGuildRegister.vm",
-            map.toMap()
-        )
+        ctx.json(obj)
     }
 
     fun showGuildRoles(ctx: Context) {

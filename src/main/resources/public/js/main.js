@@ -1,7 +1,12 @@
-window.eventBus = new EventEmitter();
+function toast(message, displayLength = 4000) {
+    M.toast({
+        html: message,
+        displayLength,
+    });
+}
 
 // We had to rename this form _ to id because
-// the fucking patreon button has lodash
+// the fucking patreon button has lodash set on the window
 function id(el) {
     return document.getElementById(el);
 }
@@ -16,21 +21,7 @@ function unHide(itemId) {
 
 document.addEventListener('DOMContentLoaded', () => {
     id('year').innerHTML = `${(new Date()).getFullYear()}`;
-    M.Sidenav.init(document.querySelectorAll('.sidenav'), {
-        onOpenEnd: () => {
-            window.navOpen = true;
-        },
-        onCloseEnd: () => {
-            window.navOpen = false;
-        },
-    });
-
-    // M.AutoInit();
-
-    eventBus.emit('loaded');
 });
-
-document.addEventListener('click', (event) => eventBus.emit('click', event));
 
 function getMessage(m) {
     switch (m) {

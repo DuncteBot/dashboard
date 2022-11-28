@@ -1,73 +1,84 @@
 <template id="settings-basic">
-    <div class="row">
-        <div class="col s12">
-            <section class="row section">
-                <div class="input-field col s12 m1">
-                    <input placeholder="db!" id="prefix" type="text" maxlength="10"
-                           v-model="settings.prefix" required>
-                    <label for="prefix">Prefix</label>
-                </div>
-
-                <div class="input-field col s12 m4">
-                    <select id="autoRoleRole" v-model="settings.autorole">
-                        <option value="" selected disabled>Select a role</option>
-                        <option v-for="role in roles"
-                                :key="role.id"
-                                :value="role.id">@{{ role.name }}</option>
-                        <option value="">Disable</option>
-                    </select>
-                    <label for="autoRoleRole">AutoRole</label>
-                </div>
-            </section>
-
-            <section class="row">
-                <div class="input-field col s12 m5">
-                    <div class="switch">
-                        Announce tracks: <br/>
-                        <label>
-                            Disabled
-                            <input type="checkbox" v-model="settings.announceNextTrack"/>
-                            <span class="lever"></span>
-                            Enabled
-                        </label>
+    <section class="section">
+        <div class="row">
+            <!-- TODO: split in components -->
+            <div class="col s12">
+                <section class="row section">
+                    <div class="input-field col s12 m1">
+                        <input placeholder="db!"
+                               id="prefix"
+                               type="text"
+                               maxlength="10"
+                               v-model="settings.prefix" required>
+                        <label for="prefix">Prefix</label>
                     </div>
 
-                    <br/>
+                    <select-list
+                        class="col s12 m4"
+                        v-model="settings.autorole"
+                        :options="roles"
+                        prefix="@"
+                        name="role"
+                        label="AutoRole"></select-list>
+                </section>
 
-                    <div class="switch">
-                        Stop command behavior:<br/>
-                        <label>
-                            Default behavior
-                            <input type="checkbox" v-model="settings.allowAllToStop">
-                            <span class="lever"></span>
-                            Allow all to stop
-                        </label>
+                <section class="row section">
+                    <div class="input-field col s12 m5">
+                        <settings-switch
+                            break-label
+                            v-model="settings.announceNextTrack"
+                            id="leaveChannelCB"
+                            name="Announce tracks"></settings-switch>
+                        <br/>
+                        <settings-switch
+                            break-label
+                            v-model="settings.allowAllToStop"
+                            id="leaveChannelCB"
+                            name="Stop command behavior"
+                            :custom-labels="['Default behavior', 'Allow all to stop']"></settings-switch>
                     </div>
-                </div>
 
-                <div class="input-field col s12 m5">
-                    <button type="button" @click="showColorPicker()"
-                            :style="{
+                    <div class="input-field col s12 m5">
+                        <button type="button" @click="showColorPicker()"
+                                :style="{
                                 backgroundColor: embedColor,
                             }"
-                            :class="[
+                                :class="[
                                 clsName,
                             ]"
-                            class="btn-large waves-effect waves-light waves-ripple">
-                        Embed color
-                    </button>
+                                class="btn-large waves-effect waves-light waves-ripple">
+                            Embed color
+                        </button>
 
-                    <input type="color"
-                           ref="color"
-                           v-model="embedColor"/>
-                </div>
-            </section>
+                        <input type="color"
+                               ref="color"
+                               v-model="embedColor"/>
+                    </div>
+                </section>
 
-            <section class="row">
-                <div class="divider"></div>
-            </section>
+                <section class="row">
+                    <div class="divider"></div>
+                </section>
+
+                <section class="row section">
+                    <h6>Leave timeout:</h6>
+                    <p>The following value indicates the amount of seconds before the bot checks if the vc is empty and
+                        automatically leaves</p>
+
+                    <div class="col s5">
+                        <div class="input-field inline">
+                            <input type="number"
+                                   v-model="settings.leave_timeout"
+                                   min="1"
+                                   max="60"
+                                   required/>
+                        </div>
+                        Seconds
+                    </div>
+                </section>
+            </div>
         </div>
-    </div>
+    </section>
 </template>
 
 <script>
@@ -79,7 +90,7 @@
                 required: true
             },
             roles: {
-                type: Object,
+                type: [Array, Object],
                 required: true
             },
         },
@@ -137,5 +148,8 @@
     input[type="color"] {
         visibility: hidden;
         display: inline;
+        position: absolute;
+        bottom: 0;
+        left: 0;
     }
 </style>

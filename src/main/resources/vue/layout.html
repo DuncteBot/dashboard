@@ -17,8 +17,8 @@
                 integrity="sha256-U/cHDMTIHCeMcvehBv1xQ052bPSbJtbuiw4QA9cTKz0=" crossorigin="anonymous"
                 async></script>
 
-        <link rel="stylesheet" href="https://dunctebot.com/css/materialize.custom.css"/>
-        <link rel="stylesheet" href="https://dunctebot.com/css/style.css"/>
+        <link rel="stylesheet" href="/css/materialize.custom.css"/>
+        <link rel="stylesheet" href="/css/style.css"/>
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
 
         <script src="/webjars/vue/2.6.14/dist/vue.min.js"></script>
@@ -43,8 +43,16 @@
             </div>
         </footer>
 
+        <!-- load main before vue -->
+        <script src="/js/main.js"></script>
         <script>
-            new Vue({el: "#main-vue"});
+            new Vue({el: '#main-vue'});
+
+            if (Vue.prototype.$javalin.state.title) {
+                document.title = Vue.prototype.$javalin.state.title;
+            } else {
+                document.title = 'DuncteBot Dashboard';
+            }
         </script>
 
         <!-- Cloudflare Web Analytics -->

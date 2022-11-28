@@ -1,7 +1,7 @@
 plugins {
 //    java
     application
-    kotlin("jvm") version "1.5.21"
+    kotlin("jvm") version "1.6.0"
     id("com.github.johnrengelman.shadow") version "7.0.0"
 }
 
@@ -25,17 +25,18 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation(group = "com.dunctebot", name = "dunctebot-models", version = "0.1.21")
 
-    implementation(group = "ch.qos.logback", name = "logback-classic", version = "1.2.3")
+    implementation(group = "ch.qos.logback", name = "logback-classic", version = "1.2.10")
 
-    implementation(group = "io.javalin", name = "javalin", version = "4.3.0")
-    implementation(group = "org.apache.velocity", name = "velocity-engine-core", version = "2.2")
+    implementation(group = "io.javalin", name = "javalin", version = "4.6.1")
 
     implementation(group = "com.github.ben-manes.caffeine", name = "caffeine", version = "2.8.5")
 
-    implementation(group = "com.fasterxml.jackson.core", name = "jackson-databind", version = "2.10.1")
+    implementation(group = "com.fasterxml.jackson.core", name = "jackson-databind", version = "2.13.3")
+    implementation(group = "com.fasterxml.jackson.module", name = "jackson-module-kotlin", version = "2.13.3")
 
     implementation(group = "net.sf.trove4j", name = "trove4j", version = "3.0.3")
    // implementation(group = "com.jagrosh", name = "jda-utilities-oauth2", version = "3.0.5")
+    // TODO: remove jda-utils and just pull in oauth impl
     implementation(group = "com.github.JDA-Applications", name = "JDA-Utilities", version = "804d58a") {
         // This is fine
         exclude(module = "jda-utilities-examples")

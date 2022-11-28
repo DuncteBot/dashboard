@@ -32,6 +32,7 @@ object RootController {
             ctx.sessionAttribute(SESSION_ID, "session_${System.currentTimeMillis()}")
 
             ctx.redirect("$url&prompt=none")
+//            ctx.redirect(url)
         }
     }
 
@@ -44,19 +45,17 @@ object RootController {
             return ctx.redirect(HOMEPAGE)
         }
 
+        // Get the session id for the user
+        val sesId = ctx.sessionAttribute<String?>(SESSION_ID) ?: return ctx.redirect(HOMEPAGE)
+
         // If the session is missing we will return the user to the homepage
-        if (ctx.sessionAttribute<String?>(SESSION_ID) == null){
-            return ctx.redirect(HOMEPAGE)
-        }
 
         try {
-            // Get the session id for the user
-            val sesid: String? = ctx.sessionAttribute(SESSION_ID)
             // Start a session to obtain the oauth2 access token
             val oauthses = oAuth2Client.startSession(
                 ctx.queryParam("code"),
                 ctx.queryParam("state"),
-                sesid,
+                sesId,
                 Scope.IDENTIFY, Scope.GUILDS
             ).complete()
 
